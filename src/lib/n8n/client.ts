@@ -17,7 +17,8 @@ export class N8NClient {
   }
 
   // TODO: Implement n8n API methods
-  async executeWorkflow(workflowId: string, data: Record<string, any>) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async executeWorkflow(_workflowId: string, _data: Record<string, unknown>) {
     // Implementation coming in future phase
     throw new Error("Not implemented yet");
   }
