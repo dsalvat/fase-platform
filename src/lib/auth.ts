@@ -135,3 +135,98 @@ export async function canModifyBigRock(
 
   return false;
 }
+
+/**
+ * Check if user can access a specific TAR
+ * @param tarId - ID of the TAR to check
+ * @param userId - ID of the user requesting access
+ * @param userRole - Role of the user
+ * @returns true if user can access, false otherwise
+ */
+export async function canAccessTAR(
+  tarId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const tar = await prisma.tAR.findUnique({
+    where: { id: tarId },
+    include: {
+      bigRock: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              supervisorId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tar) {
+    return false;
+  }
+
+  // Owner can always access
+  if (tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  // Admin can access all
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  // Supervisor can access if they supervise the owner
+  if (userRole === "SUPERVISOR" && tar.bigRock.user.supervisorId === userId) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can modify a TAR (not read-only month and has permission)
+ * @param tarId - ID of the TAR
+ * @param userId - ID of the user
+ * @param userRole - Role of the user
+ * @returns true if can modify, false otherwise
+ */
+export async function canModifyTAR(
+  tarId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const tar = await prisma.tAR.findUnique({
+    where: { id: tarId },
+    include: {
+      bigRock: {
+        select: {
+          userId: true,
+          month: true,
+        },
+      },
+    },
+  });
+
+  if (!tar) {
+    return false;
+  }
+
+  // Check if month is read-only
+  if (isMonthReadOnly(tar.bigRock.month)) {
+    return false;
+  }
+
+  // Only owner or admin can modify
+  if (tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  return false;
+}

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BigRockStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAuth, canAccessBigRock } from "@/lib/auth";
 import { CategoryBadge } from "@/components/big-rocks/category-badge";
 import { BigRockDeleteButton } from "@/components/big-rocks/big-rock-delete-button";
+import { TARList } from "@/components/tars/tar-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, CheckCircle2, Circle, Clock } from "lucide-react";
+import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -15,7 +17,11 @@ interface PageProps {
   }>;
 }
 
-const statusConfig = {
+const statusConfig: Record<BigRockStatus, {
+  label: string;
+  icon: typeof Circle;
+  color: string;
+}> = {
   PLANIFICADO: {
     label: "Planificado",
     icon: Circle,
@@ -61,6 +67,14 @@ export default async function BigRockDetailPage({ params }: PageProps) {
         },
       },
       tars: {
+        include: {
+          _count: {
+            select: {
+              activities: true,
+              keyPeople: true,
+            },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       keyMeetings: {
@@ -207,37 +221,36 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       </Card>
 
       {/* TARs section */}
-      {bigRock.tars.length > 0 && (
-        <Card>
-          <CardHeader>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <CardTitle>
-              TARs ({bigRock.tars.length})
+              TARs ({bigRock.tars.length}/{bigRock.numTars})
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {bigRock.tars.map((tar) => (
-                <div
-                  key={tar.id}
-                  className="flex items-center gap-3 p-3 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{tar.description}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-500">{tar.status}</span>
-                      {tar.progress > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {tar.progress}% completado
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            {canEdit && (
+              <Link href={`/big-rocks/${id}/tars/new`}>
+                <Button size="sm" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Anadir TAR
+                </Button>
+              </Link>
+            )}
+          </div>
+          {bigRock.tars.length < bigRock.numTars && (
+            <p className="text-sm text-muted-foreground">
+              {bigRock.numTars - bigRock.tars.length} TARs pendientes de crear
+            </p>
+          )}
+        </CardHeader>
+        <CardContent>
+          <TARList
+            tars={bigRock.tars}
+            bigRockId={id}
+            isReadOnly={isReadOnly}
+            canEdit={canEdit}
+          />
+        </CardContent>
+      </Card>
 
       {/* Key Meetings section */}
       {bigRock.keyMeetings.length > 0 && (
