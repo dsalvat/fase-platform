@@ -1,0 +1,250 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Roles de usuario: USER, SUPERVISOR, ADMIN
+enum UserRole {
+  USER
+  SUPERVISOR
+  ADMIN
+}
+
+// Categorías FASE: Focus, Atención, Sistemas, Energía
+enum FaseCategory {
+  FOCUS
+  ATENCION
+  SISTEMAS
+  ENERGIA
+}
+
+// Estados de Big Rock
+enum BigRockStatus {
+  PLANIFICADO
+  EN_PROGRESO
+  FINALIZADO
+}
+
+// Estados de TAR
+enum TarStatus {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADA
+}
+
+// Tipos de actividad
+enum ActivityType {
+  SEMANAL
+  DIARIA
+}
+
+// Tipos de medallas
+enum MedalType {
+  CONSTANCIA
+  CLARIDAD
+  EJECUCION
+  MEJORA_CONTINUA
+}
+
+// Niveles de medallas
+enum MedalLevel {
+  BRONCE
+  PLATA
+  ORO
+  DIAMANTE
+}
+
+// Modelo User
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  name          String?
+  image         String?
+  role          UserRole    @default(USER)
+
+  // Relación supervisor (1:1)
+  supervisorId  String?
+  supervisor    User?       @relation("UserSupervisor", fields: [supervisorId], references: [id])
+  supervisees   User[]      @relation("UserSupervisor")
+
+  // Relaciones
+  bigRocks      BigRock[]
+  keyPeople     KeyPerson[]
+  gamification  Gamification?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([email])
+  @@index([supervisorId])
+}
+
+// Modelo Big Rock (Objetivos Mensuales)
+model BigRock {
+  id              String         @id @default(uuid())
+  title           String
+  description     String
+  category        FaseCategory
+  indicator       String         // Métrica para medir el éxito
+  numTars         Int            // Número de TAR planificadas
+  status          BigRockStatus  @default(PLANIFICADO)
+
+  // Mes al que pertenece (formato: YYYY-MM)
+  month           String
+
+  // Evaluación de IA
+  aiScore         Int?           // Score de calidad (0-100)
+  aiObservations  String?        // Observaciones de la IA
+  aiRecommendations String?      // Recomendaciones de mejora
+  aiRisks         String?        // Alertas de riesgo
+
+  // Relaciones
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tars            TAR[]
+  keyMeetings     KeyMeeting[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([month])
+  @@index([category])
+}
+
+// Modelo TAR (Tareas de Alto Rendimiento)
+model TAR {
+  id              String         @id @default(uuid())
+  description     String
+  status          TarStatus      @default(PENDIENTE)
+  progress        Int            @default(0) // Porcentaje de completitud (0-100)
+
+  // Relaciones
+  bigRockId       String
+  bigRock         BigRock        @relation(fields: [bigRockId], references: [id], onDelete: Cascade)
+  activities      Activity[]
+  keyPeople       KeyPerson[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([bigRockId])
+}
+
+// Modelo Activity (Actividades Semanales/Diarias)
+model Activity {
+  id              String         @id @default(uuid())
+  title           String
+  description     String?
+  type            ActivityType
+
+  // Fecha asociada
+  date            DateTime
+  week            String?        // Formato: YYYY-WW (número de semana)
+
+  completed       Boolean        @default(false)
+  notes           String?        // Notas o aprendizajes
+
+  // Relación
+  tarId           String
+  tar             TAR            @relation(fields: [tarId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([tarId])
+  @@index([date])
+  @@index([week])
+}
+
+// Modelo KeyPerson (Personas Clave)
+model KeyPerson {
+  id              String         @id @default(uuid())
+  firstName       String
+  lastName        String
+  role            String?        // Rol de la persona
+  contact         String?        // Email o teléfono
+
+  // Relaciones
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tars            TAR[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+// Modelo KeyMeeting (Reuniones Clave)
+model KeyMeeting {
+  id              String         @id @default(uuid())
+  title           String
+  description     String?
+  date            DateTime
+  completed       Boolean        @default(false)
+  outcome         String?        // Resultado de la reunión
+
+  // Relación
+  bigRockId       String
+  bigRock         BigRock        @relation(fields: [bigRockId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([bigRockId])
+  @@index([date])
+}
+
+// Modelo Gamification (Puntos y Medallas)
+model Gamification {
+  id              String         @id @default(uuid())
+  points          Int            @default(0)
+  level           Int            @default(1)
+
+  // Rachas
+  currentStreak   Int            @default(0) // Días consecutivos
+  longestStreak   Int            @default(0)
+
+  // Contadores para medallas
+  bigRocksCreated     Int        @default(0)
+  tarsCompleted       Int        @default(0)
+  weeklyReviews       Int        @default(0)
+  dailyLogs           Int        @default(0)
+
+  // Relación (1:1 con User)
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  medals          Medal[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([points])
+}
+
+// Modelo Medal (Medallas Obtenidas)
+model Medal {
+  id              String         @id @default(uuid())
+  type            MedalType
+  level           MedalLevel
+
+  // Relación
+  gamificationId  String
+  gamification    Gamification   @relation(fields: [gamificationId], references: [id], onDelete: Cascade)
+
+  earnedAt        DateTime       @default(now())
+
+  @@index([gamificationId])
+  @@index([type])
+  @@index([level])
+}
