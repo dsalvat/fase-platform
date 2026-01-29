@@ -2,63 +2,70 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createTAR, updateTAR } from "@/app/actions/tars";
-import { TARFormFields } from "./tar-form-fields";
+import { createActivity, updateActivity } from "@/app/actions/activities";
+import { ActivityFormFields } from "./activity-form-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TAR } from "@prisma/client";
+import { Activity } from "@prisma/client";
 
-interface TARFormProps {
-  tar?: TAR;
+interface ActivityFormProps {
+  activity?: Activity;
+  tarId: string;
+  tarDescription?: string;
   bigRockId: string;
-  bigRockTitle?: string;
   mode: "create" | "edit";
 }
 
 /**
- * Form component for creating/editing TARs
+ * Form component for creating/editing Activities
  * Client Component - uses useActionState for progressive enhancement
  */
-export function TARForm({ tar, bigRockId, bigRockTitle, mode }: TARFormProps) {
+export function ActivityForm({
+  activity,
+  tarId,
+  tarDescription,
+  bigRockId,
+  mode,
+}: ActivityFormProps) {
   const router = useRouter();
 
   // Use appropriate action based on mode
-  const action = mode === "create" ? createTAR : updateTAR.bind(null, tar!.id);
+  const action = mode === "create" ? createActivity : updateActivity.bind(null, activity!.id);
 
   const [state, formAction, isPending] = useActionState(action, null);
 
-  // Handle successful creation - redirect to the Big Rock detail page (TAR list)
+  // Handle successful creation - redirect back to TAR detail
   useEffect(() => {
     if (state?.success && mode === "create") {
-      router.push(`/big-rocks/${bigRockId}`);
+      router.push(`/big-rocks/${bigRockId}/tars/${tarId}`);
     }
-  }, [state, mode, bigRockId, router]);
+  }, [state, mode, bigRockId, tarId, router]);
 
-  // Handle successful update - redirect to detail page
+  // Handle successful update - redirect back to TAR detail
   useEffect(() => {
-    if (state?.success && mode === "edit" && tar?.id) {
-      router.push(`/big-rocks/${bigRockId}/tars/${tar.id}`);
+    if (state?.success && mode === "edit") {
+      router.push(`/big-rocks/${bigRockId}/tars/${tarId}`);
     }
-  }, [state, mode, tar, bigRockId, router]);
+  }, [state, mode, bigRockId, tarId, router]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          {mode === "create" ? "Crear TAR" : "Editar TAR"}
+          {mode === "create" ? "Crear Actividad" : "Editar Actividad"}
         </CardTitle>
-        {bigRockTitle && (
-          <p className="text-sm text-muted-foreground">
-            Big Rock: {bigRockTitle}
+        {tarDescription && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            TAR: {tarDescription}
           </p>
         )}
       </CardHeader>
 
       <CardContent>
         <form action={formAction} className="space-y-6">
-          <TARFormFields
-            defaultValues={tar}
-            bigRockId={bigRockId}
+          <ActivityFormFields
+            defaultValues={activity}
+            tarId={tarId}
             isPending={isPending}
             mode={mode}
           />
@@ -77,8 +84,8 @@ export function TARForm({ tar, bigRockId, bigRockTitle, mode }: TARFormProps) {
               <p className="text-sm font-medium">¡Éxito!</p>
               <p className="text-sm">
                 {mode === "create"
-                  ? `TAR "${state.description?.substring(0, 50)}${(state.description?.length || 0) > 50 ? '...' : ''}" creada correctamente. Redirigiendo...`
-                  : "TAR actualizada correctamente. Redirigiendo..."}
+                  ? `Actividad "${state.title}" creada correctamente. Redirigiendo...`
+                  : "Actividad actualizada correctamente. Redirigiendo..."}
               </p>
             </div>
           )}
@@ -91,7 +98,7 @@ export function TARForm({ tar, bigRockId, bigRockTitle, mode }: TARFormProps) {
                   ? "Creando..."
                   : "Guardando..."
                 : mode === "create"
-                ? "Crear TAR"
+                ? "Crear Actividad"
                 : "Guardar Cambios"}
             </Button>
 

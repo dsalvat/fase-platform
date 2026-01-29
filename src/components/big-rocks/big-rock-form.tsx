@@ -26,10 +26,10 @@ export function BigRockForm({ bigRock, mode, defaultMonth }: BigRockFormProps) {
 
   const [state, formAction, isPending] = useActionState(action, null);
 
-  // Handle successful creation - redirect to the Big Rock detail page
+  // Handle successful creation - redirect to the Big Rocks list
   useEffect(() => {
-    if (state?.success && mode === "create" && "id" in state && state.id) {
-      router.push(`/big-rocks/${state.id}`);
+    if (state?.success && mode === "create") {
+      router.push("/big-rocks");
     }
   }, [state, mode, router]);
 
@@ -71,7 +71,7 @@ export function BigRockForm({ bigRock, mode, defaultMonth }: BigRockFormProps) {
               <p className="text-sm font-medium">¡Éxito!</p>
               <p className="text-sm">
                 {mode === "create"
-                  ? "Big Rock creado correctamente. Redirigiendo..."
+                  ? `Big Rock "${state.title}" creado correctamente. Redirigiendo...`
                   : "Big Rock actualizado correctamente. Redirigiendo..."}
               </p>
             </div>

@@ -6,9 +6,10 @@ import { TARStatusBadge } from "@/components/tars/tar-status-badge";
 import { TARDeleteButton } from "@/components/tars/tar-delete-button";
 import { TARProgressSlider } from "@/components/tars/tar-progress-slider";
 import { TARStatusToggle } from "@/components/tars/tar-status-toggle";
+import { ActivityList } from "@/components/activities/activity-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit } from "lucide-react";
+import { ArrowLeft, Edit, Plus } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -177,38 +178,35 @@ export default async function TARDetailPage({ params }: PageProps) {
       </Card>
 
       {/* Activities section */}
-      {tar.activities.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Actividades ({tar.activities.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {tar.activities.map((activity) => (
-                <div key={activity.id} className="p-3 border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        activity.completed
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {activity.completed ? "Completada" : "Pendiente"}
-                    </span>
-                  </div>
-                  {activity.description && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {activity.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Actividades ({tar.activities.length})
+            </CardTitle>
+            {canModify && !isReadOnly && (
+              <Link href={`/big-rocks/${bigRockId}/tars/${tarId}/activities/new`}>
+                <Button size="sm" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Anadir Actividad
+                </Button>
+              </Link>
+            )}
+          </div>
+          {tar.activities.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {tar.activities.filter(a => a.completed).length} de {tar.activities.length} completadas
+            </p>
+          )}
+        </CardHeader>
+        <CardContent>
+          <ActivityList
+            activities={tar.activities}
+            isReadOnly={isReadOnly}
+            canEdit={canModify}
+          />
+        </CardContent>
+      </Card>
 
       {/* Key People section */}
       {tar.keyPeople.length > 0 && (

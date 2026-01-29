@@ -19,7 +19,7 @@ export async function createBigRock(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prevState: any,
   formData: FormData
-): Promise<{ success: boolean; id?: string; error?: string }> {
+): Promise<{ success: boolean; id?: string; title?: string; error?: string }> {
   try {
     const user = await requireAuth();
 
@@ -60,6 +60,7 @@ export async function createBigRock(
     return {
       success: true,
       id: bigRock.id,
+      title: bigRock.title,
     };
   } catch (error) {
     console.error("Error creating Big Rock:", error);

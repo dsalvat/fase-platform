@@ -3,7 +3,7 @@ import { BigRockWithCounts } from "@/types/big-rock";
 import { CategoryBadge } from "./category-badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Clock } from "lucide-react";
+import { CheckCircle2, Circle, Clock, User } from "lucide-react";
 
 interface BigRockCardProps {
   bigRock: BigRockWithCounts;
@@ -112,18 +112,26 @@ export function BigRockCard({
         </CardContent>
 
         <CardFooter className="pt-3 border-t">
-          <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-            <span>
-              Indicador: <span className="font-medium">{bigRock.indicator}</span>
-            </span>
-            {bigRock.aiScore !== null && (
+          <div className="flex flex-col gap-2 w-full text-xs text-muted-foreground">
+            {/* Owner info */}
+            <div className="flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5" />
+              <span className="font-medium">{bigRock.user.name || 'Sin nombre'}</span>
+            </div>
+
+            <div className="flex items-center justify-between w-full">
               <span>
-                IA Score: <span className={cn(
-                  "font-medium",
-                  bigRock.aiScore >= 70 ? "text-green-600" : bigRock.aiScore >= 40 ? "text-yellow-600" : "text-red-600"
-                )}>{bigRock.aiScore}/100</span>
+                Indicador: <span className="font-medium">{bigRock.indicator}</span>
               </span>
-            )}
+              {bigRock.aiScore !== null && (
+                <span>
+                  IA Score: <span className={cn(
+                    "font-medium",
+                    bigRock.aiScore >= 70 ? "text-green-600" : bigRock.aiScore >= 40 ? "text-yellow-600" : "text-red-600"
+                  )}>{bigRock.aiScore}/100</span>
+                </span>
+              )}
+            </div>
           </div>
         </CardFooter>
 

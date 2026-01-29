@@ -45,6 +45,12 @@ export async function BigRockList({ month, userId }: BigRockListProps) {
       ...(month && { month }),
     },
     include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       tars: {
         select: {
           id: true,

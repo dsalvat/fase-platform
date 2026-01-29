@@ -230,3 +230,106 @@ export async function canModifyTAR(
 
   return false;
 }
+
+/**
+ * Check if user can access a specific Activity
+ * @param activityId - ID of the Activity to check
+ * @param userId - ID of the user requesting access
+ * @param userRole - Role of the user
+ * @returns true if user can access, false otherwise
+ */
+export async function canAccessActivity(
+  activityId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const activity = await prisma.activity.findUnique({
+    where: { id: activityId },
+    include: {
+      tar: {
+        include: {
+          bigRock: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  supervisorId: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!activity) {
+    return false;
+  }
+
+  // Owner can always access
+  if (activity.tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  // Admin can access all
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  // Supervisor can access if they supervise the owner
+  if (userRole === "SUPERVISOR" && activity.tar.bigRock.user.supervisorId === userId) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can modify an Activity (not read-only month and has permission)
+ * @param activityId - ID of the Activity
+ * @param userId - ID of the user
+ * @param userRole - Role of the user
+ * @returns true if can modify, false otherwise
+ */
+export async function canModifyActivity(
+  activityId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const activity = await prisma.activity.findUnique({
+    where: { id: activityId },
+    include: {
+      tar: {
+        include: {
+          bigRock: {
+            select: {
+              userId: true,
+              month: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!activity) {
+    return false;
+  }
+
+  // Check if month is read-only
+  if (isMonthReadOnly(activity.tar.bigRock.month)) {
+    return false;
+  }
+
+  // Only owner or admin can modify
+  if (activity.tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  return false;
+}

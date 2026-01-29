@@ -20,7 +20,7 @@ export async function createTAR(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prevState: any,
   formData: FormData
-): Promise<{ success: boolean; id?: string; error?: string }> {
+): Promise<{ success: boolean; id?: string; description?: string; error?: string }> {
   try {
     const user = await requireAuth();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +65,7 @@ export async function createTAR(
     return {
       success: true,
       id: tar.id,
+      description: tar.description,
     };
   } catch (error) {
     console.error("Error creating TAR:", error);
