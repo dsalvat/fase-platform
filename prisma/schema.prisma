@@ -78,12 +78,26 @@ model User {
   bigRocks      BigRock[]
   keyPeople     KeyPerson[]
   gamification  Gamification?
+  openMonths    OpenMonth[]
 
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@index([email])
   @@index([supervisorId])
+}
+
+// Modelo OpenMonth (Meses futuros abiertos para planificación)
+model OpenMonth {
+  id        String   @id @default(uuid())
+  month     String   // Formato: YYYY-MM
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  openedAt  DateTime @default(now())
+
+  @@unique([month, userId])
+  @@index([userId])
+  @@index([month])
 }
 
 // Modelo Big Rock (Objetivos Mensuales)
