@@ -37,11 +37,14 @@ export default async function DashboardLayout({
                 <Link href="/big-rocks">
                   <Button variant="ghost">Big Rocks</Button>
                 </Link>
+                <Link href="/key-people">
+                  <Button variant="ghost">Personas Clave</Button>
+                </Link>
                 <Link href="/calendario">
                   <Button variant="ghost">Calendario</Button>
                 </Link>
                 <Link href="/gamificacion">
-                  <Button variant="ghost">Gamificación</Button>
+                  <Button variant="ghost">Gamificacion</Button>
                 </Link>
               </div>
             </div>

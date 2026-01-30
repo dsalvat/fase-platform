@@ -1,0 +1,370 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
+import { requireAuth, canModifyKeyPerson, canModifyTAR } from "@/lib/auth";
+import {
+  createKeyPersonSchema,
+  updateKeyPersonSchema,
+} from "@/lib/validations/key-person";
+
+/**
+ * Server action to create a new Key Person
+ * @param formData - Form data from the create form
+ * @returns Success response with the created Key Person ID
+ */
+export async function createKeyPerson(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prevState: any,
+  formData: FormData
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    const user = await requireAuth();
+
+    // Extract form data
+    const rawData = {
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      role: formData.get("role") as string | null,
+      contact: formData.get("contact") as string | null,
+    };
+
+    // Validate with Zod
+    const validated = createKeyPersonSchema.parse(rawData);
+
+    // Create Key Person in database
+    const keyPerson = await prisma.keyPerson.create({
+      data: {
+        firstName: validated.firstName,
+        lastName: validated.lastName,
+        role: validated.role || null,
+        contact: validated.contact || null,
+        userId: user.id,
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+
+    return {
+      success: true,
+      id: keyPerson.id,
+    };
+  } catch (error) {
+    console.error("Error creating Key Person:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al crear la persona clave",
+    };
+  }
+}
+
+/**
+ * Server action to update an existing Key Person
+ * @param id - ID of the Key Person to update
+ * @param formData - Form data from the edit form
+ * @returns Success response
+ */
+export async function updateKeyPerson(
+  id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prevState: any,
+  formData: FormData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check if user can modify this Key Person
+    const canModify = await canModifyKeyPerson(id, user.id, userRole);
+    if (!canModify) {
+      return {
+        success: false,
+        error: "No tienes permiso para editar esta persona clave",
+      };
+    }
+
+    // Extract form data
+    const rawData = {
+      id,
+      firstName: formData.get("firstName") as string | undefined,
+      lastName: formData.get("lastName") as string | undefined,
+      role: formData.get("role") as string | null,
+      contact: formData.get("contact") as string | null,
+    };
+
+    // Validate with Zod
+    const validated = updateKeyPersonSchema.parse(rawData);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, ...updateData } = validated;
+
+    // Build update object
+    const dataToUpdate: Record<string, unknown> = {};
+    if (updateData.firstName !== undefined) dataToUpdate.firstName = updateData.firstName;
+    if (updateData.lastName !== undefined) dataToUpdate.lastName = updateData.lastName;
+    if (updateData.role !== undefined) dataToUpdate.role = updateData.role;
+    if (updateData.contact !== undefined) dataToUpdate.contact = updateData.contact;
+
+    // Update Key Person in database
+    await prisma.keyPerson.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+    revalidatePath(`/key-people/${id}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error updating Key Person:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al actualizar la persona clave",
+    };
+  }
+}
+
+/**
+ * Server action to delete a Key Person
+ * @param id - ID of the Key Person to delete
+ * @returns Success response
+ */
+export async function deleteKeyPerson(id: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check if user can modify this Key Person
+    const canModify = await canModifyKeyPerson(id, user.id, userRole);
+    if (!canModify) {
+      return {
+        success: false,
+        error: "No tienes permiso para eliminar esta persona clave",
+      };
+    }
+
+    // Delete Key Person (cascade will handle TAR relations)
+    await prisma.keyPerson.delete({
+      where: { id },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error deleting Key Person:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al eliminar la persona clave",
+    };
+  }
+}
+
+/**
+ * Server action to link a Key Person to a TAR
+ * @param keyPersonId - ID of the Key Person
+ * @param tarId - ID of the TAR
+ * @returns Success response
+ */
+export async function linkKeyPersonToTAR(
+  keyPersonId: string,
+  tarId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check modification permissions for Key Person
+    const canModifyPerson = await canModifyKeyPerson(keyPersonId, user.id, userRole);
+    if (!canModifyPerson) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar esta persona clave",
+      };
+    }
+
+    // Check modification permissions for TAR
+    const canModifyTar = await canModifyTAR(tarId, user.id, userRole);
+    if (!canModifyTar) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar esta TAR o el mes es de solo lectura",
+      };
+    }
+
+    // Verify TAR belongs to same user as KeyPerson
+    const [keyPerson, tar] = await Promise.all([
+      prisma.keyPerson.findUnique({
+        where: { id: keyPersonId },
+        select: { userId: true },
+      }),
+      prisma.tAR.findUnique({
+        where: { id: tarId },
+        include: {
+          bigRock: {
+            select: { userId: true, id: true },
+          },
+        },
+      }),
+    ]);
+
+    if (!keyPerson || !tar) {
+      return {
+        success: false,
+        error: "Persona clave o TAR no encontrada",
+      };
+    }
+
+    if (keyPerson.userId !== tar.bigRock.userId) {
+      return {
+        success: false,
+        error: "La persona clave y la TAR deben pertenecer al mismo usuario",
+      };
+    }
+
+    // Link Key Person to TAR
+    await prisma.tAR.update({
+      where: { id: tarId },
+      data: {
+        keyPeople: {
+          connect: { id: keyPersonId },
+        },
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+    revalidatePath(`/key-people/${keyPersonId}`);
+    revalidatePath(`/big-rocks/${tar.bigRock.id}/tars/${tarId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error linking Key Person to TAR:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al vincular la persona clave a la TAR",
+    };
+  }
+}
+
+/**
+ * Server action to unlink a Key Person from a TAR
+ * @param keyPersonId - ID of the Key Person
+ * @param tarId - ID of the TAR
+ * @returns Success response
+ */
+export async function unlinkKeyPersonFromTAR(
+  keyPersonId: string,
+  tarId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check modification permissions for TAR
+    const canModifyTar = await canModifyTAR(tarId, user.id, userRole);
+    if (!canModifyTar) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar esta TAR o el mes es de solo lectura",
+      };
+    }
+
+    // Get TAR for revalidation path
+    const tar = await prisma.tAR.findUnique({
+      where: { id: tarId },
+      include: {
+        bigRock: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!tar) {
+      return {
+        success: false,
+        error: "TAR no encontrada",
+      };
+    }
+
+    // Unlink Key Person from TAR
+    await prisma.tAR.update({
+      where: { id: tarId },
+      data: {
+        keyPeople: {
+          disconnect: { id: keyPersonId },
+        },
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+    revalidatePath(`/key-people/${keyPersonId}`);
+    revalidatePath(`/big-rocks/${tar.bigRock.id}/tars/${tarId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error unlinking Key Person from TAR:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al desvincular la persona clave de la TAR",
+    };
+  }
+}

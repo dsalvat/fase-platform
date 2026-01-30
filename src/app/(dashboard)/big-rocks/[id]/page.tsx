@@ -6,9 +6,10 @@ import { requireAuth, canAccessBigRock } from "@/lib/auth";
 import { CategoryBadge } from "@/components/big-rocks/category-badge";
 import { BigRockDeleteButton } from "@/components/big-rocks/big-rock-delete-button";
 import { TARList } from "@/components/tars/tar-list";
+import { KeyMeetingList } from "@/components/key-meetings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus } from "lucide-react";
+import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -253,32 +254,53 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       </Card>
 
       {/* Key Meetings section */}
-      {bigRock.keyMeetings.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
               Reuniones Clave ({bigRock.keyMeetings.length})
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {bigRock.keyMeetings.map((meeting) => (
-                <div
-                  key={meeting.id}
-                  className="p-3 border rounded-lg"
-                >
-                  <p className="text-sm font-medium">{meeting.title}</p>
-                  {meeting.description && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {meeting.description}
-                    </p>
-                  )}
-                </div>
-              ))}
+            <div className="flex items-center gap-2">
+              {canEdit && (
+                <Link href={`/big-rocks/${id}/meetings/new`}>
+                  <Button size="sm" variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Anadir Reunion
+                  </Button>
+                </Link>
+              )}
+              <Link href={`/big-rocks/${id}/meetings`}>
+                <Button size="sm" variant="ghost">
+                  Ver todas
+                </Button>
+              </Link>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          {bigRock.keyMeetings.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {bigRock.keyMeetings.filter(m => m.completed).length} de {bigRock.keyMeetings.length} completadas
+            </p>
+          )}
+        </CardHeader>
+        <CardContent>
+          <KeyMeetingList
+            keyMeetings={bigRock.keyMeetings.slice(0, 5)}
+            bigRockId={id}
+            isReadOnly={isReadOnly}
+            canEdit={canEdit}
+          />
+          {bigRock.keyMeetings.length > 5 && (
+            <div className="mt-4 text-center">
+              <Link href={`/big-rocks/${id}/meetings`}>
+                <Button variant="outline" size="sm">
+                  Ver {bigRock.keyMeetings.length - 5} reuniones mas
+                </Button>
+              </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

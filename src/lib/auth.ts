@@ -333,3 +333,165 @@ export async function canModifyActivity(
 
   return false;
 }
+
+/**
+ * Check if user can access a specific KeyPerson
+ * @param keyPersonId - ID of the KeyPerson to check
+ * @param userId - ID of the user requesting access
+ * @param userRole - Role of the user
+ * @returns true if user can access, false otherwise
+ */
+export async function canAccessKeyPerson(
+  keyPersonId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const keyPerson = await prisma.keyPerson.findUnique({
+    where: { id: keyPersonId },
+    select: { userId: true },
+  });
+
+  if (!keyPerson) {
+    return false;
+  }
+
+  // Owner can always access
+  if (keyPerson.userId === userId) {
+    return true;
+  }
+
+  // Admin can access all
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can modify a KeyPerson
+ * @param keyPersonId - ID of the KeyPerson
+ * @param userId - ID of the user
+ * @param userRole - Role of the user
+ * @returns true if can modify, false otherwise
+ */
+export async function canModifyKeyPerson(
+  keyPersonId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const keyPerson = await prisma.keyPerson.findUnique({
+    where: { id: keyPersonId },
+    select: { userId: true },
+  });
+
+  if (!keyPerson) {
+    return false;
+  }
+
+  // Only owner or admin can modify
+  if (keyPerson.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can access a specific KeyMeeting
+ * @param keyMeetingId - ID of the KeyMeeting to check
+ * @param userId - ID of the user requesting access
+ * @param userRole - Role of the user
+ * @returns true if user can access, false otherwise
+ */
+export async function canAccessKeyMeeting(
+  keyMeetingId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const keyMeeting = await prisma.keyMeeting.findUnique({
+    where: { id: keyMeetingId },
+    include: {
+      bigRock: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              supervisorId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!keyMeeting) {
+    return false;
+  }
+
+  // Owner can always access
+  if (keyMeeting.bigRock.userId === userId) {
+    return true;
+  }
+
+  // Admin can access all
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  // Supervisor can access if they supervise the owner
+  if (userRole === "SUPERVISOR" && keyMeeting.bigRock.user.supervisorId === userId) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can modify a KeyMeeting (not read-only month and has permission)
+ * @param keyMeetingId - ID of the KeyMeeting
+ * @param userId - ID of the user
+ * @param userRole - Role of the user
+ * @returns true if can modify, false otherwise
+ */
+export async function canModifyKeyMeeting(
+  keyMeetingId: string,
+  userId: string,
+  userRole: UserRole
+): Promise<boolean> {
+  const keyMeeting = await prisma.keyMeeting.findUnique({
+    where: { id: keyMeetingId },
+    include: {
+      bigRock: {
+        select: {
+          userId: true,
+          month: true,
+        },
+      },
+    },
+  });
+
+  if (!keyMeeting) {
+    return false;
+  }
+
+  // Check if month is read-only
+  if (isMonthReadOnly(keyMeeting.bigRock.month)) {
+    return false;
+  }
+
+  // Only owner or admin can modify
+  if (keyMeeting.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "ADMIN") {
+    return true;
+  }
+
+  return false;
+}
