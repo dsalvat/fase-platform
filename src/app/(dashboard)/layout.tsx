@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/language-selector";
 import { authOptions } from "@/lib/auth-options";
 import { UserRole } from "@prisma/client";
+import { locales, Locale, defaultLocale } from "@/i18n/config";
 
 export default async function DashboardLayout({
   children,
@@ -22,6 +26,16 @@ export default async function DashboardLayout({
   const userRole = ((user as any)?.role as UserRole) || "USER";
   const isAdmin = userRole === "ADMIN";
 
+  // Get current locale from cookie
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  const currentLocale: Locale = (localeCookie && locales.includes(localeCookie as Locale))
+    ? localeCookie as Locale
+    : defaultLocale;
+
+  // Get translations
+  const t = await getTranslations("nav");
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -39,24 +53,24 @@ export default async function DashboardLayout({
 
               <div className="hidden md:flex items-center gap-1">
                 <Link href="/big-rocks">
-                  <Button variant="ghost">Big Rocks</Button>
+                  <Button variant="ghost">{t("bigRocks")}</Button>
                 </Link>
                 <Link href="/key-people">
-                  <Button variant="ghost">Personas Clave</Button>
+                  <Button variant="ghost">{t("keyPeople")}</Button>
                 </Link>
                 <Link href="/calendario">
-                  <Button variant="ghost">Calendario</Button>
+                  <Button variant="ghost">{t("calendar")}</Button>
                 </Link>
                 <Link href="/gamificacion">
-                  <Button variant="ghost">Gamificacion</Button>
+                  <Button variant="ghost">{t("gamification")}</Button>
                 </Link>
                 <Link href="/actividad">
-                  <Button variant="ghost">Actividad</Button>
+                  <Button variant="ghost">{t("activity")}</Button>
                 </Link>
                 {isAdmin && (
                   <Link href="/admin/usuarios">
                     <Button variant="ghost" className="text-purple-600">
-                      Admin
+                      {t("admin")}
                     </Button>
                   </Link>
                 )}
@@ -65,13 +79,14 @@ export default async function DashboardLayout({
 
             {/* User menu */}
             <div className="flex items-center gap-4">
+              <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
               <div className="text-sm text-gray-600 hidden sm:block">
                 <p className="font-medium">{user?.name}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
-              <Link href="/api/auth/signout">
+              <Link href="/auth/signout">
                 <Button variant="outline" size="sm">
-                  Salir
+                  {t("exit")}
                 </Button>
               </Link>
             </div>

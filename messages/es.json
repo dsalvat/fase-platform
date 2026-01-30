@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clearFilters": "Limpiar filtros",
+    "noResults": "No se encontraron resultados",
+    "error": "Error",
+    "success": "Exito",
+    "confirm": "Confirmar",
+    "close": "Cerrar"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesion",
+    "signOut": "Cerrar Sesion",
+    "signOutConfirm": "¿Estas seguro de que quieres salir de tu cuenta?",
+    "signOutButton": "Si, cerrar sesion",
+    "signingOut": "Cerrando sesion...",
+    "backToApp": "Volver a la aplicacion",
+    "continueWith": "Continuar con {provider}",
+    "connecting": "Conectando...",
+    "accessAccount": "Accede a tu cuenta para gestionar tus objetivos",
+    "errorOAuth": "Este email ya esta asociado a otra cuenta.",
+    "errorGeneric": "Ocurrio un error al iniciar sesion. Intentalo de nuevo."
+  },
+  "nav": {
+    "bigRocks": "Big Rocks",
+    "keyPeople": "Personas Clave",
+    "calendar": "Calendario",
+    "gamification": "Gamificacion",
+    "activity": "Actividad",
+    "admin": "Admin",
+    "exit": "Salir"
+  },
+  "bigRocks": {
+    "title": "Big Rocks",
+    "subtitle": "Objetivos mensuales",
+    "new": "Nuevo Big Rock",
+    "edit": "Editar Big Rock",
+    "delete": "Eliminar Big Rock",
+    "deleteConfirm": "¿Estas seguro de que quieres eliminar este Big Rock?",
+    "titleField": "Titulo",
+    "description": "Descripcion",
+    "category": "Categoria",
+    "indicator": "Indicador",
+    "numTars": "Numero de TARs",
+    "month": "Mes",
+    "status": "Estado",
+    "planned": "Planificado",
+    "inProgress": "En Progreso",
+    "completed": "Finalizado",
+    "tars": "TARs",
+    "meetings": "Reuniones"
+  },
+  "tars": {
+    "title": "TARs",
+    "subtitle": "Tareas de Alto Rendimiento",
+    "new": "Nueva TAR",
+    "edit": "Editar TAR",
+    "delete": "Eliminar TAR",
+    "description": "Descripcion",
+    "status": "Estado",
+    "progress": "Progreso",
+    "pending": "Pendiente",
+    "inProgress": "En Progreso",
+    "completed": "Completada"
+  },
+  "activities": {
+    "title": "Actividades",
+    "new": "Nueva Actividad",
+    "edit": "Editar Actividad",
+    "delete": "Eliminar Actividad",
+    "daily": "Diaria",
+    "weekly": "Semanal",
+    "completed": "Completada",
+    "notes": "Notas"
+  },
+  "keyPeople": {
+    "title": "Personas Clave",
+    "subtitle": "Personas importantes para tus objetivos",
+    "new": "Nueva Persona Clave",
+    "edit": "Editar Persona Clave",
+    "delete": "Eliminar Persona Clave",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "role": "Rol",
+    "contact": "Contacto"
+  },
+  "keyMeetings": {
+    "title": "Reuniones Clave",
+    "new": "Nueva Reunion Clave",
+    "edit": "Editar Reunion Clave",
+    "delete": "Eliminar Reunion Clave",
+    "date": "Fecha",
+    "outcome": "Resultado"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "monthly": "Mensual",
+    "weekly": "Semanal",
+    "daily": "Diario",
+    "today": "Hoy",
+    "openMonth": "Abrir Mes"
+  },
+  "gamification": {
+    "title": "Gamificacion",
+    "subtitle": "Tu progreso y logros en la plataforma FASE",
+    "points": "Puntos",
+    "level": "Nivel",
+    "streak": "Racha",
+    "currentStreak": "Racha Actual",
+    "longestStreak": "Mejor Racha",
+    "days": "dias",
+    "medals": "Medallas",
+    "leaderboard": "Clasificacion"
+  },
+  "activityLog": {
+    "title": "Registro de Actividades",
+    "subtitle": "Historial de todas las acciones realizadas en la plataforma",
+    "created": "creo",
+    "updated": "actualizo",
+    "deleted": "elimino",
+    "allEntities": "Todas las entidades",
+    "allActions": "Todas las acciones",
+    "allUsers": "Todos los usuarios",
+    "noMore": "No hay mas registros"
+  },
+  "admin": {
+    "title": "Gestion de Usuarios",
+    "subtitle": "Administra roles y supervisores",
+    "total": "Total",
+    "admins": "Administradores",
+    "supervisors": "Supervisores",
+    "users": "Usuarios",
+    "role": "Rol",
+    "supervisor": "Supervisor",
+    "noSupervisor": "Sin supervisor",
+    "you": "Tu",
+    "cannotChangeOwnRole": "No puedes cambiar tu propio rol",
+    "registeredOn": "Registrado el"
+  },
+  "roles": {
+    "user": "Usuario",
+    "supervisor": "Supervisor",
+    "admin": "Administrador"
+  },
+  "categories": {
+    "focus": "Focus",
+    "atencion": "Atencion",
+    "sistemas": "Sistemas",
+    "energia": "Energia"
+  },
+  "settings": {
+    "title": "Configuracion",
+    "language": "Idioma",
+    "spanish": "Castellano",
+    "catalan": "Catalan",
+    "english": "Ingles"
+  },
+  "footer": {
+    "methodology": "Metodologia FASE por Agustin Peralt"
+  },
+  "platform": {
+    "title": "Plataforma FASE",
+    "subtitle": "Metodologia de gestion de objetivos"
+  }
+}

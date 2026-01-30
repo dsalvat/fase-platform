@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Carregant...",
+    "save": "Desar",
+    "cancel": "Cancel·lar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Tornar",
+    "next": "Seguent",
+    "previous": "Anterior",
+    "search": "Cercar",
+    "filter": "Filtrar",
+    "clearFilters": "Netejar filtres",
+    "noResults": "No s'han trobat resultats",
+    "error": "Error",
+    "success": "Exit",
+    "confirm": "Confirmar",
+    "close": "Tancar"
+  },
+  "auth": {
+    "signIn": "Iniciar Sessio",
+    "signOut": "Tancar Sessio",
+    "signOutConfirm": "Estas segur que vols sortir del teu compte?",
+    "signOutButton": "Si, tancar sessio",
+    "signingOut": "Tancant sessio...",
+    "backToApp": "Tornar a l'aplicacio",
+    "continueWith": "Continuar amb {provider}",
+    "connecting": "Connectant...",
+    "accessAccount": "Accedeix al teu compte per gestionar els teus objectius",
+    "errorOAuth": "Aquest email ja esta associat a un altre compte.",
+    "errorGeneric": "S'ha produit un error en iniciar sessio. Torna-ho a provar."
+  },
+  "nav": {
+    "bigRocks": "Big Rocks",
+    "keyPeople": "Persones Clau",
+    "calendar": "Calendari",
+    "gamification": "Gamificacio",
+    "activity": "Activitat",
+    "admin": "Admin",
+    "exit": "Sortir"
+  },
+  "bigRocks": {
+    "title": "Big Rocks",
+    "subtitle": "Objectius mensuals",
+    "new": "Nou Big Rock",
+    "edit": "Editar Big Rock",
+    "delete": "Eliminar Big Rock",
+    "deleteConfirm": "Estas segur que vols eliminar aquest Big Rock?",
+    "titleField": "Titol",
+    "description": "Descripcio",
+    "category": "Categoria",
+    "indicator": "Indicador",
+    "numTars": "Nombre de TARs",
+    "month": "Mes",
+    "status": "Estat",
+    "planned": "Planificat",
+    "inProgress": "En Progres",
+    "completed": "Finalitzat",
+    "tars": "TARs",
+    "meetings": "Reunions"
+  },
+  "tars": {
+    "title": "TARs",
+    "subtitle": "Tasques d'Alt Rendiment",
+    "new": "Nova TAR",
+    "edit": "Editar TAR",
+    "delete": "Eliminar TAR",
+    "description": "Descripcio",
+    "status": "Estat",
+    "progress": "Progres",
+    "pending": "Pendent",
+    "inProgress": "En Progres",
+    "completed": "Completada"
+  },
+  "activities": {
+    "title": "Activitats",
+    "new": "Nova Activitat",
+    "edit": "Editar Activitat",
+    "delete": "Eliminar Activitat",
+    "daily": "Diaria",
+    "weekly": "Setmanal",
+    "completed": "Completada",
+    "notes": "Notes"
+  },
+  "keyPeople": {
+    "title": "Persones Clau",
+    "subtitle": "Persones importants pels teus objectius",
+    "new": "Nova Persona Clau",
+    "edit": "Editar Persona Clau",
+    "delete": "Eliminar Persona Clau",
+    "firstName": "Nom",
+    "lastName": "Cognoms",
+    "role": "Rol",
+    "contact": "Contacte"
+  },
+  "keyMeetings": {
+    "title": "Reunions Clau",
+    "new": "Nova Reunio Clau",
+    "edit": "Editar Reunio Clau",
+    "delete": "Eliminar Reunio Clau",
+    "date": "Data",
+    "outcome": "Resultat"
+  },
+  "calendar": {
+    "title": "Calendari",
+    "monthly": "Mensual",
+    "weekly": "Setmanal",
+    "daily": "Diari",
+    "today": "Avui",
+    "openMonth": "Obrir Mes"
+  },
+  "gamification": {
+    "title": "Gamificacio",
+    "subtitle": "El teu progres i assoliments a la plataforma FASE",
+    "points": "Punts",
+    "level": "Nivell",
+    "streak": "Ratxa",
+    "currentStreak": "Ratxa Actual",
+    "longestStreak": "Millor Ratxa",
+    "days": "dies",
+    "medals": "Medalles",
+    "leaderboard": "Classificacio"
+  },
+  "activityLog": {
+    "title": "Registre d'Activitats",
+    "subtitle": "Historial de totes les accions realitzades a la plataforma",
+    "created": "va crear",
+    "updated": "va actualitzar",
+    "deleted": "va eliminar",
+    "allEntities": "Totes les entitats",
+    "allActions": "Totes les accions",
+    "allUsers": "Tots els usuaris",
+    "noMore": "No hi ha mes registres"
+  },
+  "admin": {
+    "title": "Gestio d'Usuaris",
+    "subtitle": "Administra rols i supervisors",
+    "total": "Total",
+    "admins": "Administradors",
+    "supervisors": "Supervisors",
+    "users": "Usuaris",
+    "role": "Rol",
+    "supervisor": "Supervisor",
+    "noSupervisor": "Sense supervisor",
+    "you": "Tu",
+    "cannotChangeOwnRole": "No pots canviar el teu propi rol",
+    "registeredOn": "Registrat el"
+  },
+  "roles": {
+    "user": "Usuari",
+    "supervisor": "Supervisor",
+    "admin": "Administrador"
+  },
+  "categories": {
+    "focus": "Focus",
+    "atencion": "Atencio",
+    "sistemas": "Sistemes",
+    "energia": "Energia"
+  },
+  "settings": {
+    "title": "Configuracio",
+    "language": "Idioma",
+    "spanish": "Castella",
+    "catalan": "Catala",
+    "english": "Angles"
+  },
+  "footer": {
+    "methodology": "Metodologia FASE per Agustin Peralt"
+  },
+  "platform": {
+    "title": "Plataforma FASE",
+    "subtitle": "Metodologia de gestio d'objectius"
+  }
+}

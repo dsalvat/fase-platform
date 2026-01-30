@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "clearFilters": "Clear filters",
+    "noResults": "No results found",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "signOutButton": "Yes, sign out",
+    "signingOut": "Signing out...",
+    "backToApp": "Back to application",
+    "continueWith": "Continue with {provider}",
+    "connecting": "Connecting...",
+    "accessAccount": "Access your account to manage your goals",
+    "errorOAuth": "This email is already associated with another account.",
+    "errorGeneric": "An error occurred while signing in. Please try again."
+  },
+  "nav": {
+    "bigRocks": "Big Rocks",
+    "keyPeople": "Key People",
+    "calendar": "Calendar",
+    "gamification": "Gamification",
+    "activity": "Activity",
+    "admin": "Admin",
+    "exit": "Exit"
+  },
+  "bigRocks": {
+    "title": "Big Rocks",
+    "subtitle": "Monthly goals",
+    "new": "New Big Rock",
+    "edit": "Edit Big Rock",
+    "delete": "Delete Big Rock",
+    "deleteConfirm": "Are you sure you want to delete this Big Rock?",
+    "titleField": "Title",
+    "description": "Description",
+    "category": "Category",
+    "indicator": "Indicator",
+    "numTars": "Number of TARs",
+    "month": "Month",
+    "status": "Status",
+    "planned": "Planned",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "tars": "TARs",
+    "meetings": "Meetings"
+  },
+  "tars": {
+    "title": "TARs",
+    "subtitle": "High Performance Tasks",
+    "new": "New TAR",
+    "edit": "Edit TAR",
+    "delete": "Delete TAR",
+    "description": "Description",
+    "status": "Status",
+    "progress": "Progress",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "activities": {
+    "title": "Activities",
+    "new": "New Activity",
+    "edit": "Edit Activity",
+    "delete": "Delete Activity",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "completed": "Completed",
+    "notes": "Notes"
+  },
+  "keyPeople": {
+    "title": "Key People",
+    "subtitle": "Important people for your goals",
+    "new": "New Key Person",
+    "edit": "Edit Key Person",
+    "delete": "Delete Key Person",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "role": "Role",
+    "contact": "Contact"
+  },
+  "keyMeetings": {
+    "title": "Key Meetings",
+    "new": "New Key Meeting",
+    "edit": "Edit Key Meeting",
+    "delete": "Delete Key Meeting",
+    "date": "Date",
+    "outcome": "Outcome"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "monthly": "Monthly",
+    "weekly": "Weekly",
+    "daily": "Daily",
+    "today": "Today",
+    "openMonth": "Open Month"
+  },
+  "gamification": {
+    "title": "Gamification",
+    "subtitle": "Your progress and achievements on the FASE platform",
+    "points": "Points",
+    "level": "Level",
+    "streak": "Streak",
+    "currentStreak": "Current Streak",
+    "longestStreak": "Best Streak",
+    "days": "days",
+    "medals": "Medals",
+    "leaderboard": "Leaderboard"
+  },
+  "activityLog": {
+    "title": "Activity Log",
+    "subtitle": "History of all actions performed on the platform",
+    "created": "created",
+    "updated": "updated",
+    "deleted": "deleted",
+    "allEntities": "All entities",
+    "allActions": "All actions",
+    "allUsers": "All users",
+    "noMore": "No more records"
+  },
+  "admin": {
+    "title": "User Management",
+    "subtitle": "Manage roles and supervisors",
+    "total": "Total",
+    "admins": "Administrators",
+    "supervisors": "Supervisors",
+    "users": "Users",
+    "role": "Role",
+    "supervisor": "Supervisor",
+    "noSupervisor": "No supervisor",
+    "you": "You",
+    "cannotChangeOwnRole": "You cannot change your own role",
+    "registeredOn": "Registered on"
+  },
+  "roles": {
+    "user": "User",
+    "supervisor": "Supervisor",
+    "admin": "Administrator"
+  },
+  "categories": {
+    "focus": "Focus",
+    "atencion": "Attention",
+    "sistemas": "Systems",
+    "energia": "Energy"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "spanish": "Spanish",
+    "catalan": "Catalan",
+    "english": "English"
+  },
+  "footer": {
+    "methodology": "FASE Methodology by Agustin Peralt"
+  },
+  "platform": {
+    "title": "FASE Platform",
+    "subtitle": "Goal management methodology"
+  }
+}

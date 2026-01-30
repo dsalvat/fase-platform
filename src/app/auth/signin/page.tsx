@@ -3,6 +3,7 @@
 import { signIn, getProviders } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,10 @@ function SignInContent() {
   const callbackUrl = searchParams.get("callbackUrl") || "/big-rocks";
   const error = searchParams.get("error");
 
+  const t = useTranslations("auth");
+  const tPlatform = useTranslations("platform");
+  const tCategories = useTranslations("categories");
+
   useEffect(() => {
     getProviders().then(setProviders);
   }, []);
@@ -34,25 +39,25 @@ function SignInContent() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Plataforma FASE</h1>
+          <h1 className="text-4xl font-bold mb-2">{tPlatform("title")}</h1>
           <p className="text-muted-foreground">
-            Metodología de gestión de objetivos
+            {tPlatform("subtitle")}
           </p>
         </div>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle>Iniciar Sesión</CardTitle>
+            <CardTitle>{t("signIn")}</CardTitle>
             <CardDescription>
-              Accede a tu cuenta para gestionar tus objetivos
+              {t("accessAccount")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
               <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 rounded-md">
                 {error === "OAuthAccountNotLinked"
-                  ? "Este email ya está asociado a otra cuenta."
-                  : "Ocurrió un error al iniciar sesión. Inténtalo de nuevo."}
+                  ? t("errorOAuth")
+                  : t("errorGeneric")}
               </div>
             )}
 
@@ -85,7 +90,7 @@ function SignInContent() {
                       />
                     </svg>
                   )}
-                  {isLoading ? "Conectando..." : `Continuar con ${provider.name}`}
+                  {isLoading ? t("connecting") : t("continueWith", { provider: provider.name })}
                 </Button>
               ))}
 
@@ -102,18 +107,18 @@ function SignInContent() {
             <span className="font-semibold text-blue-600 dark:text-blue-400">F</span>ocus
           </div>
           <div className="p-2 rounded bg-purple-50 dark:bg-purple-950">
-            <span className="font-semibold text-purple-600 dark:text-purple-400">A</span>tención
+            <span className="font-semibold text-purple-600 dark:text-purple-400">A</span>{tCategories("atencion").toLowerCase()}
           </div>
           <div className="p-2 rounded bg-green-50 dark:bg-green-950">
-            <span className="font-semibold text-green-600 dark:text-green-400">S</span>istemas
+            <span className="font-semibold text-green-600 dark:text-green-400">S</span>{tCategories("sistemas").toLowerCase()}
           </div>
           <div className="p-2 rounded bg-orange-50 dark:bg-orange-950">
-            <span className="font-semibold text-orange-600 dark:text-orange-400">E</span>nergía
+            <span className="font-semibold text-orange-600 dark:text-orange-400">E</span>{tCategories("energia").toLowerCase()}
           </div>
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Por Agustín Peralt
+          Por Agustin Peralt
         </p>
       </div>
     </main>

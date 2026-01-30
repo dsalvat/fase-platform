@@ -17,6 +17,13 @@ enum UserRole {
   ADMIN
 }
 
+// Idiomas disponibles
+enum Language {
+  ES  // Castellano
+  CA  // Catalan
+  EN  // English
+}
+
 // Categorías FASE: Focus, Atención, Sistemas, Energía
 enum FaseCategory {
   FOCUS
@@ -84,6 +91,7 @@ model User {
   name          String?
   image         String?
   role          UserRole    @default(USER)
+  language      Language    @default(ES)
 
   // Relación supervisor (1:1)
   supervisorId  String?
