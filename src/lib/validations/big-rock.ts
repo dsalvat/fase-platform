@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FaseCategory, BigRockStatus } from "@prisma/client";
+import { BigRockStatus } from "@prisma/client";
 
 /**
  * Schema for creating a new Big Rock
@@ -14,10 +14,6 @@ export const createBigRockSchema = z.object({
     .string()
     .min(10, "La descripción debe tener al menos 10 caracteres")
     .max(2000, "La descripción no puede exceder 2000 caracteres"),
-
-  category: z.nativeEnum(FaseCategory, {
-    errorMap: () => ({ message: "Categoría FASE inválida" }),
-  }),
 
   indicator: z
     .string()

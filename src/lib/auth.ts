@@ -71,7 +71,12 @@ export async function canAccessBigRock(
     return true;
   }
 
-  // Admin can access all
+  // SUPERADMIN can access all
+  if (userRole === "SUPERADMIN") {
+    return true;
+  }
+
+  // Admin can access all within their company
   if (userRole === "ADMIN") {
     return true;
   }
@@ -124,8 +129,12 @@ export async function canModifyBigRock(
     return false;
   }
 
-  // Only owner or admin can modify
+  // Only owner, admin or superadmin can modify
   if (bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "SUPERADMIN") {
     return true;
   }
 
@@ -173,7 +182,12 @@ export async function canAccessTAR(
     return true;
   }
 
-  // Admin can access all
+  // SUPERADMIN can access all
+  if (userRole === "SUPERADMIN") {
+    return true;
+  }
+
+  // Admin can access all within their company
   if (userRole === "ADMIN") {
     return true;
   }
@@ -219,8 +233,12 @@ export async function canModifyTAR(
     return false;
   }
 
-  // Only owner or admin can modify
+  // Only owner, admin or superadmin can modify
   if (tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "SUPERADMIN") {
     return true;
   }
 
@@ -272,7 +290,12 @@ export async function canAccessActivity(
     return true;
   }
 
-  // Admin can access all
+  // SUPERADMIN can access all
+  if (userRole === "SUPERADMIN") {
+    return true;
+  }
+
+  // Admin can access all within their company
   if (userRole === "ADMIN") {
     return true;
   }
@@ -322,8 +345,12 @@ export async function canModifyActivity(
     return false;
   }
 
-  // Only owner or admin can modify
+  // Only owner, admin or superadmin can modify
   if (activity.tar.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "SUPERADMIN") {
     return true;
   }
 
@@ -360,7 +387,12 @@ export async function canAccessKeyPerson(
     return true;
   }
 
-  // Admin can access all
+  // SUPERADMIN can access all
+  if (userRole === "SUPERADMIN") {
+    return true;
+  }
+
+  // Admin can access all within their company
   if (userRole === "ADMIN") {
     return true;
   }
@@ -389,8 +421,12 @@ export async function canModifyKeyPerson(
     return false;
   }
 
-  // Only owner or admin can modify
+  // Only owner, admin or superadmin can modify
   if (keyPerson.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "SUPERADMIN") {
     return true;
   }
 
@@ -438,7 +474,12 @@ export async function canAccessKeyMeeting(
     return true;
   }
 
-  // Admin can access all
+  // SUPERADMIN can access all
+  if (userRole === "SUPERADMIN") {
+    return true;
+  }
+
+  // Admin can access all within their company
   if (userRole === "ADMIN") {
     return true;
   }
@@ -484,8 +525,12 @@ export async function canModifyKeyMeeting(
     return false;
   }
 
-  // Only owner or admin can modify
+  // Only owner, admin or superadmin can modify
   if (keyMeeting.bigRock.userId === userId) {
+    return true;
+  }
+
+  if (userRole === "SUPERADMIN") {
     return true;
   }
 

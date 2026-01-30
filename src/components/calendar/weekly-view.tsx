@@ -4,18 +4,10 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ActivityItem, MeetingItem } from "./activity-item";
 import type { WeekCalendarData, DayData } from "@/types/calendar";
-import type { FaseCategory } from "@prisma/client";
 
 interface WeeklyViewProps {
   data: WeekCalendarData;
 }
-
-const categoryColors: Record<FaseCategory, string> = {
-  FOCUS: "border-l-blue-400",
-  ATENCION: "border-l-green-400",
-  SISTEMAS: "border-l-purple-400",
-  ENERGIA: "border-l-orange-400",
-};
 
 function WeekDayColumn({ day }: { day: DayData }) {
   const hasItems = day.activities.length > 0 || day.meetings.length > 0;
@@ -84,10 +76,7 @@ export function WeeklyView({ data }: WeeklyViewProps) {
             {data.tars.map((tar) => (
               <div
                 key={tar.id}
-                className={cn(
-                  "rounded-lg border border-l-4 p-3",
-                  categoryColors[tar.bigRockCategory]
-                )}
+                className="rounded-lg border border-l-4 border-l-blue-400 p-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">

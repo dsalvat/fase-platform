@@ -27,7 +27,6 @@ import type {
   TARWithActivities,
   ActivityWithTARInfo,
   KeyMeetingWithBigRockInfo,
-  FaseSummaryData,
 } from "@/types/calendar";
 
 /**
@@ -112,40 +111,6 @@ async function getUserOpenMonths(userId: string): Promise<string[]> {
 }
 
 /**
- * Get FASE summary data for a month
- * @param userId - User ID
- * @param month - Month string in YYYY-MM format
- * @returns FaseSummaryData
- */
-async function getFaseSummary(userId: string, month: string): Promise<FaseSummaryData> {
-  const bigRocks = await prisma.bigRock.findMany({
-    where: { userId, month },
-    include: {
-      tars: {
-        select: { status: true },
-      },
-    },
-  });
-
-  const summary: FaseSummaryData = {
-    focus: { total: 0, completed: 0 },
-    atencion: { total: 0, completed: 0 },
-    sistemas: { total: 0, completed: 0 },
-    energia: { total: 0, completed: 0 },
-  };
-
-  for (const br of bigRocks) {
-    const categoryKey = br.category.toLowerCase() as keyof FaseSummaryData;
-    summary[categoryKey].total += 1;
-    if (br.status === "FINALIZADO") {
-      summary[categoryKey].completed += 1;
-    }
-  }
-
-  return summary;
-}
-
-/**
  * Get month calendar data
  * @param month - Month string in YYYY-MM format (optional, defaults to current)
  * @returns MonthCalendarData
@@ -185,7 +150,6 @@ export async function getMonthCalendarData(
   const bigRockSummaries: BigRockSummary[] = bigRocks.map((br) => ({
     id: br.id,
     title: br.title,
-    category: br.category,
     status: br.status,
     numTars: br.numTars,
     completedTars: br.tars.filter((t) => t.status === "COMPLETADA").length,
@@ -216,7 +180,6 @@ export async function getMonthCalendarData(
             select: {
               id: true,
               title: true,
-              category: true,
             },
           },
         },
@@ -241,7 +204,6 @@ export async function getMonthCalendarData(
         select: {
           id: true,
           title: true,
-          category: true,
         },
       },
     },
@@ -264,7 +226,6 @@ export async function getMonthCalendarData(
       tarId: activity.tarId,
       tarDescription: activity.tar.description,
       bigRockTitle: activity.tar.bigRock.title,
-      bigRockCategory: activity.tar.bigRock.category,
     });
   }
 
@@ -279,7 +240,6 @@ export async function getMonthCalendarData(
       completed: meeting.completed,
       bigRockId: meeting.bigRockId,
       bigRockTitle: meeting.bigRock.title,
-      bigRockCategory: meeting.bigRock.category,
     });
   }
 
@@ -293,16 +253,12 @@ export async function getMonthCalendarData(
     meetings: meetingMap.get(day.date) || [],
   }));
 
-  // Get FASE summary
-  const faseSummary = await getFaseSummary(user.id, targetMonth);
-
   return {
     month: targetMonth,
     state,
     days,
     bigRocks: bigRockSummaries,
     openMonths,
-    faseSummary,
   };
 }
 
@@ -350,7 +306,6 @@ export async function getWeekCalendarData(
             select: {
               id: true,
               title: true,
-              category: true,
             },
           },
         },
@@ -374,7 +329,6 @@ export async function getWeekCalendarData(
         select: {
           id: true,
           title: true,
-          category: true,
         },
       },
     },
@@ -391,7 +345,6 @@ export async function getWeekCalendarData(
         select: {
           id: true,
           title: true,
-          category: true,
         },
       },
       activities: {
@@ -413,7 +366,6 @@ export async function getWeekCalendarData(
     progress: tar.progress,
     bigRockId: tar.bigRockId,
     bigRockTitle: tar.bigRock.title,
-    bigRockCategory: tar.bigRock.category,
     activities: tar.activities.map((a) => ({
       id: a.id,
       title: a.title,
@@ -422,8 +374,7 @@ export async function getWeekCalendarData(
       tarId: a.tarId,
       tarDescription: tar.description,
       bigRockTitle: tar.bigRock.title,
-      bigRockCategory: tar.bigRock.category,
-    })),
+      })),
   }));
 
   // Map activities and meetings to days
@@ -443,7 +394,6 @@ export async function getWeekCalendarData(
       tarId: activity.tarId,
       tarDescription: activity.tar.description,
       bigRockTitle: activity.tar.bigRock.title,
-      bigRockCategory: activity.tar.bigRock.category,
     });
   }
 
@@ -458,7 +408,6 @@ export async function getWeekCalendarData(
       completed: meeting.completed,
       bigRockId: meeting.bigRockId,
       bigRockTitle: meeting.bigRock.title,
-      bigRockCategory: meeting.bigRock.category,
     });
   }
 
@@ -526,7 +475,6 @@ export async function getDayCalendarData(
             select: {
               id: true,
               title: true,
-              category: true,
             },
           },
         },
@@ -553,7 +501,6 @@ export async function getDayCalendarData(
         select: {
           id: true,
           title: true,
-          category: true,
         },
       },
     },
@@ -576,7 +523,6 @@ export async function getDayCalendarData(
     tarDescription: a.tar.description,
     bigRockId: a.tar.bigRockId,
     bigRockTitle: a.tar.bigRock.title,
-    bigRockCategory: a.tar.bigRock.category,
   }));
 
   // Transform meetings
@@ -589,7 +535,6 @@ export async function getDayCalendarData(
     outcome: m.outcome,
     bigRockId: m.bigRockId,
     bigRockTitle: m.bigRock.title,
-    bigRockCategory: m.bigRock.category,
   }));
 
   return {

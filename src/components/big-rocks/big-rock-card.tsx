@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BigRockWithCounts } from "@/types/big-rock";
-import { CategoryBadge } from "./category-badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Clock, User } from "lucide-react";
@@ -56,12 +55,9 @@ export function BigRockCard({
         )}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-blue-600 transition-colors">
-              {bigRock.title}
-            </CardTitle>
-            <CategoryBadge category={bigRock.category} size="sm" />
-          </div>
+          <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-blue-600 transition-colors">
+            {bigRock.title}
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="pb-3">

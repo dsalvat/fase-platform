@@ -5,7 +5,9 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/language-selector";
+import { CompanySwitcherWrapper } from "@/components/admin/company-switcher-wrapper";
 import { authOptions } from "@/lib/auth-options";
+import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
 import { locales, Locale, defaultLocale } from "@/i18n/config";
 
@@ -22,9 +24,39 @@ export default async function DashboardLayout({
   }
 
   const user = session.user;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userRole = ((user as any)?.role as UserRole) || "USER";
-  const isAdmin = userRole === "ADMIN";
+  const userRole = user?.role || UserRole.USER;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
+  const isSuperAdmin = userRole === UserRole.SUPERADMIN;
+
+  // Get companies for the company switcher
+  let companies: { id: string; name: string; slug: string; logo: string | null }[] = [];
+  let currentCompanyName: string | undefined;
+  let currentCompanyLogo: string | null | undefined;
+
+  if (isSuperAdmin) {
+    // SUPERADMIN sees all companies
+    companies = await prisma.company.findMany({
+      select: { id: true, name: true, slug: true, logo: true },
+      orderBy: { name: "asc" },
+    });
+  } else {
+    // Regular users see their assigned companies
+    companies = (user.companies || []).map((c) => ({ ...c, slug: "" }));
+  }
+
+  // Show company switcher if user has companies to switch between
+  const showCompanySwitcher = isSuperAdmin || companies.length > 1;
+
+  // Get current company info
+  if (user.currentCompanyId && companies.length > 0) {
+    const currentCompany = companies.find((c) => c.id === user.currentCompanyId);
+    currentCompanyName = currentCompany?.name;
+    currentCompanyLogo = currentCompany?.logo;
+  } else if (companies.length === 1) {
+    // If only one company and no currentCompanyId, use that company
+    currentCompanyName = companies[0].name;
+    currentCompanyLogo = companies[0].logo;
+  }
 
   // Get current locale from cookie
   const cookieStore = await cookies();
@@ -35,6 +67,13 @@ export default async function DashboardLayout({
 
   // Get translations
   const t = await getTranslations("nav");
+  const tCompanies = await getTranslations("companies");
+
+  // Translations for company switcher
+  const companySwitcherTranslations = {
+    noCompanySelected: tCompanies("noCompanySelected"),
+    selectCompany: tCompanies("selectCompany"),
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -79,6 +118,24 @@ export default async function DashboardLayout({
 
             {/* User menu */}
             <div className="flex items-center gap-4">
+              {showCompanySwitcher ? (
+                <CompanySwitcherWrapper
+                  companies={companies}
+                  currentCompanyId={user.currentCompanyId}
+                  currentCompanyName={currentCompanyName}
+                  currentCompanyLogo={currentCompanyLogo}
+                  isSuperAdmin={isSuperAdmin}
+                  translations={companySwitcherTranslations}
+                />
+              ) : companies.length === 1 && (
+                // Single company - just show the company name
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  {currentCompanyLogo && (
+                    <img src={currentCompanyLogo} alt="" className="w-5 h-5 rounded object-contain" />
+                  )}
+                  <span>{currentCompanyName}</span>
+                </div>
+              )}
               <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
               <div className="text-sm text-gray-600 hidden sm:block">
                 <p className="font-medium">{user?.name}</p>

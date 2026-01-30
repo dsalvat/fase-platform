@@ -7,4 +7,3 @@ export { WeeklyView } from "./weekly-view";
 export { DailyView } from "./daily-view";
 export { DayCell } from "./day-cell";
 export { ActivityItem, MeetingItem } from "./activity-item";
-export { FaseSummary } from "./fase-summary";

@@ -45,12 +45,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             email: true,
           },
         },
-        tars: {
+        bigRocks: {
           select: {
             id: true,
-            description: true,
+            title: true,
             status: true,
-            bigRockId: true,
           },
         },
       },

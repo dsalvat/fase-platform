@@ -8,7 +8,6 @@ interface TARCardProps {
   tar: TAR & {
     _count?: {
       activities: number;
-      keyPeople: number;
     };
   };
   bigRockId: string;

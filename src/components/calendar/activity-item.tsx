@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import type { ActivitySummary, MeetingSummary } from "@/types/calendar";
-import type { FaseCategory } from "@prisma/client";
 
 interface ActivityItemProps {
   activity: ActivitySummary;
@@ -12,20 +11,13 @@ interface MeetingItemProps {
   compact?: boolean;
 }
 
-const categoryColors: Record<FaseCategory, string> = {
-  FOCUS: "bg-blue-400",
-  ATENCION: "bg-green-400",
-  SISTEMAS: "bg-purple-400",
-  ENERGIA: "bg-orange-400",
-};
-
 export function ActivityItem({ activity, compact = false }: ActivityItemProps) {
   if (compact) {
     return (
       <div
         className={cn(
           "h-1.5 w-1.5 rounded-full",
-          activity.completed ? "bg-green-500" : categoryColors[activity.bigRockCategory]
+          activity.completed ? "bg-green-500" : "bg-blue-400"
         )}
         title={activity.title}
       />
@@ -44,7 +36,7 @@ export function ActivityItem({ activity, compact = false }: ActivityItemProps) {
       <div
         className={cn(
           "h-2 w-2 rounded-full",
-          activity.completed ? "bg-green-500" : categoryColors[activity.bigRockCategory]
+          activity.completed ? "bg-green-500" : "bg-blue-400"
         )}
       />
       <span className="truncate">{activity.title}</span>
@@ -74,7 +66,7 @@ export function MeetingItem({ meeting, compact = false }: MeetingItemProps) {
       <div
         className={cn(
           "h-1.5 w-1.5 rounded-sm",
-          meeting.completed ? "bg-green-500" : categoryColors[meeting.bigRockCategory]
+          meeting.completed ? "bg-green-500" : "bg-amber-400"
         )}
         title={meeting.title}
       />

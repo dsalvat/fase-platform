@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAuth, canModifyKeyPerson, canModifyTAR, canModifyBigRock } from "@/lib/auth";
+import { requireAuth, canModifyKeyPerson, canModifyBigRock } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 import {
   createKeyPersonSchema,
   updateKeyPersonSchema,
@@ -25,6 +26,7 @@ export async function createKeyPerson(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     const user = await requireAuth();
+    const companyId = await getCurrentCompanyId();
 
     // Extract form data
     const rawData = {
@@ -37,7 +39,7 @@ export async function createKeyPerson(
     // Validate with Zod
     const validated = createKeyPersonSchema.parse(rawData);
 
-    // Create Key Person in database
+    // Create Key Person in database (associated with the current company)
     const keyPerson = await prisma.keyPerson.create({
       data: {
         firstName: validated.firstName,
@@ -45,6 +47,7 @@ export async function createKeyPerson(
         role: validated.role || null,
         contact: validated.contact || null,
         userId: user.id,
+        companyId: companyId,
       },
     });
 
@@ -235,180 +238,6 @@ export async function deleteKeyPerson(id: string): Promise<{
     return {
       success: false,
       error: "Error al eliminar la persona clave",
-    };
-  }
-}
-
-/**
- * Server action to link a Key Person to a TAR
- * @param keyPersonId - ID of the Key Person
- * @param tarId - ID of the TAR
- * @returns Success response
- */
-export async function linkKeyPersonToTAR(
-  keyPersonId: string,
-  tarId: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const user = await requireAuth();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userRole = (user as any).role;
-
-    // Check modification permissions for Key Person
-    const canModifyPerson = await canModifyKeyPerson(keyPersonId, user.id, userRole);
-    if (!canModifyPerson) {
-      return {
-        success: false,
-        error: "No tienes permiso para modificar esta persona clave",
-      };
-    }
-
-    // Check modification permissions for TAR
-    const canModifyTar = await canModifyTAR(tarId, user.id, userRole);
-    if (!canModifyTar) {
-      return {
-        success: false,
-        error: "No tienes permiso para modificar esta TAR o el mes es de solo lectura",
-      };
-    }
-
-    // Verify TAR belongs to same user as KeyPerson
-    const [keyPerson, tar] = await Promise.all([
-      prisma.keyPerson.findUnique({
-        where: { id: keyPersonId },
-        select: { userId: true },
-      }),
-      prisma.tAR.findUnique({
-        where: { id: tarId },
-        include: {
-          bigRock: {
-            select: { userId: true, id: true },
-          },
-        },
-      }),
-    ]);
-
-    if (!keyPerson || !tar) {
-      return {
-        success: false,
-        error: "Persona clave o TAR no encontrada",
-      };
-    }
-
-    if (keyPerson.userId !== tar.bigRock.userId) {
-      return {
-        success: false,
-        error: "La persona clave y la TAR deben pertenecer al mismo usuario",
-      };
-    }
-
-    // Link Key Person to TAR
-    await prisma.tAR.update({
-      where: { id: tarId },
-      data: {
-        keyPeople: {
-          connect: { id: keyPersonId },
-        },
-      },
-    });
-
-    // Revalidate relevant paths
-    revalidatePath("/key-people");
-    revalidatePath(`/key-people/${keyPersonId}`);
-    revalidatePath(`/big-rocks/${tar.bigRock.id}/tars/${tarId}`);
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("Error linking Key Person to TAR:", error);
-
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    return {
-      success: false,
-      error: "Error al vincular la persona clave a la TAR",
-    };
-  }
-}
-
-/**
- * Server action to unlink a Key Person from a TAR
- * @param keyPersonId - ID of the Key Person
- * @param tarId - ID of the TAR
- * @returns Success response
- */
-export async function unlinkKeyPersonFromTAR(
-  keyPersonId: string,
-  tarId: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const user = await requireAuth();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userRole = (user as any).role;
-
-    // Check modification permissions for TAR
-    const canModifyTar = await canModifyTAR(tarId, user.id, userRole);
-    if (!canModifyTar) {
-      return {
-        success: false,
-        error: "No tienes permiso para modificar esta TAR o el mes es de solo lectura",
-      };
-    }
-
-    // Get TAR for revalidation path
-    const tar = await prisma.tAR.findUnique({
-      where: { id: tarId },
-      include: {
-        bigRock: {
-          select: { id: true },
-        },
-      },
-    });
-
-    if (!tar) {
-      return {
-        success: false,
-        error: "TAR no encontrada",
-      };
-    }
-
-    // Unlink Key Person from TAR
-    await prisma.tAR.update({
-      where: { id: tarId },
-      data: {
-        keyPeople: {
-          disconnect: { id: keyPersonId },
-        },
-      },
-    });
-
-    // Revalidate relevant paths
-    revalidatePath("/key-people");
-    revalidatePath(`/key-people/${keyPersonId}`);
-    revalidatePath(`/big-rocks/${tar.bigRock.id}/tars/${tarId}`);
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("Error unlinking Key Person from TAR:", error);
-
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    return {
-      success: false,
-      error: "Error al desvincular la persona clave de la TAR",
     };
   }
 }

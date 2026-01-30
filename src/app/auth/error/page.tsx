@@ -22,6 +22,8 @@ const errorMessages: Record<string, string> = {
   EmailCreateAccount: "No se pudo crear la cuenta con el email proporcionado.",
   Callback: "Error en el callback de autenticación.",
   OAuthAccountNotLinked: "Este email ya está registrado con otro método de inicio de sesión.",
+  NotInvited: "No tienes una invitación para acceder a esta aplicación. Contacta al administrador para solicitar acceso.",
+  UserDeactivated: "Tu cuenta ha sido desactivada. Contacta al administrador para más información.",
   Default: "Ocurrió un error inesperado.",
 };
 

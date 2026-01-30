@@ -5,7 +5,7 @@ import { requireAuth, canAccessKeyPerson, canModifyKeyPerson } from "@/lib/auth"
 import { KeyPersonDeleteButton } from "@/components/key-people";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, User, Briefcase, Mail, Phone, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Edit, User, Briefcase, Mail, Phone } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -33,17 +33,12 @@ export default async function KeyPersonDetailPage({ params }: PageProps) {
   const keyPerson = await prisma.keyPerson.findUnique({
     where: { id: personId },
     include: {
-      tars: {
+      bigRocks: {
         select: {
           id: true,
-          description: true,
+          title: true,
           status: true,
-          bigRock: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
+          month: true,
         },
       },
     },
@@ -126,7 +121,7 @@ export default async function KeyPersonDetailPage({ params }: PageProps) {
             <div>
               <p className="text-sm text-gray-500">Vinculada a</p>
               <p className="font-medium">
-                {keyPerson.tars.length} TAR{keyPerson.tars.length !== 1 ? "s" : ""}
+                {keyPerson.bigRocks.length} Big Rock{keyPerson.bigRocks.length !== 1 ? "s" : ""}
               </p>
             </div>
             <div>
@@ -143,44 +138,43 @@ export default async function KeyPersonDetailPage({ params }: PageProps) {
         </CardContent>
       </Card>
 
-      {/* Linked TARs section */}
-      {keyPerson.tars.length > 0 && (
+      {/* Linked Big Rocks section */}
+      {keyPerson.bigRocks.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>TARs Vinculadas ({keyPerson.tars.length})</CardTitle>
+            <CardTitle>Big Rocks Vinculados ({keyPerson.bigRocks.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {keyPerson.tars.map((tar) => (
+              {keyPerson.bigRocks.map((bigRock) => (
                 <Link
-                  key={tar.id}
-                  href={`/big-rocks/${tar.bigRock.id}/tars/${tar.id}`}
+                  key={bigRock.id}
+                  href={`/big-rocks/${bigRock.id}`}
                   className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {tar.description}
+                        {bigRock.title}
                       </p>
                       <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                        <LinkIcon className="h-3 w-3" />
-                        <span>{tar.bigRock.title}</span>
+                        <span>{bigRock.month}</span>
                       </div>
                     </div>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
-                        tar.status === "COMPLETADA"
+                        bigRock.status === "FINALIZADO"
                           ? "bg-green-100 text-green-700"
-                          : tar.status === "EN_PROGRESO"
+                          : bigRock.status === "EN_PROGRESO"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {tar.status === "COMPLETADA"
-                        ? "Completada"
-                        : tar.status === "EN_PROGRESO"
+                      {bigRock.status === "FINALIZADO"
+                        ? "Finalizado"
+                        : bigRock.status === "EN_PROGRESO"
                         ? "En Progreso"
-                        : "Pendiente"}
+                        : "Planificado"}
                     </span>
                   </div>
                 </Link>
@@ -190,12 +184,12 @@ export default async function KeyPersonDetailPage({ params }: PageProps) {
         </Card>
       )}
 
-      {keyPerson.tars.length === 0 && (
+      {keyPerson.bigRocks.length === 0 && (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p>Esta persona clave no esta vinculada a ninguna TAR.</p>
+            <p>Esta persona clave no esta vinculada a ningun Big Rock.</p>
             <p className="text-sm mt-1">
-              Puedes vincularla desde la pagina de edicion de una TAR.
+              Puedes vincularla desde la pagina de edicion de un Big Rock.
             </p>
           </CardContent>
         </Card>

@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             activities: true,
-            keyPeople: true,
           },
         },
       },

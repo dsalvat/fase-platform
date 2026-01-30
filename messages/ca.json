@@ -29,7 +29,9 @@
     "connecting": "Connectant...",
     "accessAccount": "Accedeix al teu compte per gestionar els teus objectius",
     "errorOAuth": "Aquest email ja esta associat a un altre compte.",
-    "errorGeneric": "S'ha produit un error en iniciar sessio. Torna-ho a provar."
+    "errorGeneric": "S'ha produit un error en iniciar sessio. Torna-ho a provar.",
+    "errorNotInvited": "No tens una invitacio per accedir a aquesta aplicacio. Contacta amb l'administrador per sol·licitar acces.",
+    "errorDeactivated": "El teu compte ha estat desactivat. Contacta amb l'administrador per a mes informacio."
   },
   "nav": {
     "bigRocks": "Big Rocks",
@@ -167,17 +169,61 @@
     "admins": "Administradors",
     "supervisors": "Supervisors",
     "users": "Usuaris",
+    "invited": "Convidats",
+    "active": "Actius",
+    "deactivated": "Desactivats",
     "role": "Rol",
+    "status": "Estat",
     "supervisor": "Supervisor",
     "noSupervisor": "Sense supervisor",
     "you": "Tu",
     "cannotChangeOwnRole": "No pots canviar el teu propi rol",
-    "registeredOn": "Registrat el"
+    "cannotChangeOwnStatus": "No pots canviar el teu propi estat",
+    "registeredOn": "Registrat el",
+    "inviteUser": "Convidar Usuari",
+    "inviteUserTitle": "Convidar Nou Usuari",
+    "inviteUserDescription": "L'usuari rebra acces quan iniciï sessio amb aquest email",
+    "sendInvitation": "Enviar Invitacio",
+    "userInvited": "Usuari convidat correctament",
+    "hideDeactivated": "Ocultar usuaris desactivats",
+    "showingUsers": "Mostrant {count} de {total} usuaris",
+    "showingUsersTemplate": "Mostrant '{count}' de '{total}' usuaris",
+    "noName": "Sense nom",
+    "companies": "Empreses"
+  },
+  "companies": {
+    "title": "Empreses",
+    "subtitle": "Gestiona les empreses de la plataforma",
+    "new": "Nova Empresa",
+    "edit": "Editar Empresa",
+    "delete": "Eliminar Empresa",
+    "deleteConfirm": "Estas segur que vols eliminar aquesta empresa?",
+    "name": "Nom",
+    "slug": "Identificador",
+    "slugHelp": "Identificador unic per l'empresa (es genera automaticament)",
+    "logo": "Logo",
+    "logoUrl": "URL del logo",
+    "logoHelp": "URL de la imatge del logo (opcional)",
+    "users": "Usuaris",
+    "noUsers": "Sense usuaris",
+    "switchTo": "Canviar a aquesta empresa",
+    "current": "Empresa actual",
+    "noCompanySelected": "Sense empresa seleccionada",
+    "selectCompany": "Seleccionar empresa",
+    "created": "Empresa creada correctament",
+    "updated": "Empresa actualitzada correctament",
+    "deleted": "Empresa eliminada correctament",
+    "cannotDeleteWithUsers": "No es pot eliminar una empresa amb usuaris",
+    "stats": {
+      "total": "Total empreses",
+      "totalUsers": "Total usuaris"
+    }
   },
   "roles": {
     "user": "Usuari",
     "supervisor": "Supervisor",
-    "admin": "Administrador"
+    "admin": "Administrador",
+    "superadmin": "Super Administrador"
   },
   "categories": {
     "focus": "Focus",

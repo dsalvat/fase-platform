@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireAuth, canModifyBigRock } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 import { BigRockForm } from "@/components/big-rocks/big-rock-form";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -59,9 +60,12 @@ export default async function EditBigRockPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch all available key people for the user
+  // Get current company
+  const companyId = await getCurrentCompanyId();
+
+  // Fetch all available key people for the company (shared across all users)
   const availableKeyPeople = await prisma.keyPerson.findMany({
-    where: { userId: user.id },
+    where: companyId ? { companyId } : {},
     orderBy: { firstName: "asc" },
   });
 
@@ -82,6 +86,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
         mode="edit"
         bigRock={bigRock}
         availableKeyPeople={availableKeyPeople}
+        isConfirmed={bigRock.isConfirmed}
       />
     </div>
   );

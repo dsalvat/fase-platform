@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { getNextMonth, getCurrentMonth } from "@/lib/month-helpers";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 
 interface PageProps {
   searchParams: Promise<{
@@ -21,11 +22,14 @@ export default async function NewBigRockPage({ searchParams }: PageProps) {
   const { month } = await searchParams;
   const defaultMonth = month || getNextMonth(getCurrentMonth());
   const t = await getTranslations("bigRocks");
-  const user = await requireAuth();
+  await requireAuth();
 
-  // Fetch available key people for the user
+  // Get current company
+  const companyId = await getCurrentCompanyId();
+
+  // Fetch available key people for the company (shared across all users)
   const availableKeyPeople = await prisma.keyPerson.findMany({
-    where: { userId: user.id },
+    where: companyId ? { companyId } : {},
     orderBy: { firstName: "asc" },
   });
 

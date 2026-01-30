@@ -53,14 +53,14 @@ export async function middleware(request: NextRequest) {
 
   // Verificar permisos de administrador
   if (adminPaths.some((path) => pathname.startsWith(path))) {
-    if (token.role !== "ADMIN") {
+    if (token.role !== "ADMIN" && token.role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }
 
   // Verificar permisos de supervisor
   if (supervisorPaths.some((path) => pathname.startsWith(path))) {
-    if (token.role !== "SUPERVISOR" && token.role !== "ADMIN") {
+    if (token.role !== "SUPERVISOR" && token.role !== "ADMIN" && token.role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }

@@ -3,19 +3,45 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { UserRole } from "@prisma/client";
-import { UserList } from "@/components/admin";
+import { getCurrentCompanyId, isSuperAdmin } from "@/lib/company-context";
+import { UserRole, UserStatus } from "@prisma/client";
+import { UserList, InviteUserDialog } from "@/components/admin";
 import { Shield } from "lucide-react";
 
-async function getUsers() {
+async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
+  // SUPERADMIN without company selected sees all users
+  // SUPERADMIN with company selected sees only that company's users
+  // ADMIN sees only their company's users
+  const whereClause = isSuperAdmin
+    ? companyId
+      ? { companies: { some: { companyId } } }
+      : {} // Show all if no company selected
+    : companyId
+      ? { companies: { some: { companyId } } }
+      : {}; // Regular admin sees only their company
+
   const users = await prisma.user.findMany({
+    where: whereClause,
     select: {
       id: true,
       email: true,
       name: true,
       image: true,
       role: true,
+      status: true,
       createdAt: true,
+      currentCompanyId: true,
+      companies: {
+        select: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+              logo: true,
+            },
+          },
+        },
+      },
       supervisor: {
         select: {
           id: true,
@@ -35,11 +61,39 @@ async function getUsers() {
     ],
   });
 
-  return users;
+  // Transform companies structure for the UI
+  return users.map((user) => ({
+    ...user,
+    company: user.companies[0]?.company || null,
+    companies: user.companies.map((uc) => ({
+      companyId: uc.company.id,
+      company: uc.company,
+    })),
+  }));
 }
 
-async function getAllUsersForSelector() {
+async function getCompanies() {
+  return prisma.company.findMany({
+    select: {
+      id: true,
+      name: true,
+      logo: true,
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
+async function getAllUsersForSelector(companyId: string | null, isSuperAdmin: boolean) {
+  const whereClause = isSuperAdmin
+    ? companyId
+      ? { companies: { some: { companyId } } }
+      : {}
+    : companyId
+      ? { companies: { some: { companyId } } }
+      : {};
+
   const users = await prisma.user.findMany({
+    where: whereClause,
     select: {
       id: true,
       name: true,
@@ -54,18 +108,23 @@ async function getAllUsersForSelector() {
 export default async function AdminUsuariosPage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userRole = ((session?.user as any)?.role as UserRole) || "USER";
+  const userRole = session?.user?.role || UserRole.USER;
   const t = await getTranslations("admin");
+  const tCommon = await getTranslations("common");
+  const tCompanies = await getTranslations("companies");
 
-  // Only admins can access this page
-  if (userRole !== "ADMIN") {
+  // Only admins and superadmins can access this page
+  if (userRole !== UserRole.ADMIN && userRole !== UserRole.SUPERADMIN) {
     redirect("/unauthorized");
   }
 
-  const [users, allUsers] = await Promise.all([
-    getUsers(),
-    getAllUsersForSelector(),
+  const companyId = await getCurrentCompanyId();
+  const superAdmin = await isSuperAdmin();
+
+  const [users, allUsers, companies] = await Promise.all([
+    getUsers(companyId, superAdmin),
+    getAllUsersForSelector(companyId, superAdmin),
+    superAdmin ? getCompanies() : Promise.resolve([]),
   ]);
 
   const stats = {
@@ -73,27 +132,36 @@ export default async function AdminUsuariosPage() {
     admins: users.filter((u) => u.role === "ADMIN").length,
     supervisors: users.filter((u) => u.role === "SUPERVISOR").length,
     users: users.filter((u) => u.role === "USER").length,
+    invited: users.filter((u) => u.status === UserStatus.INVITED).length,
+    active: users.filter((u) => u.status === UserStatus.ACTIVE).length,
+    deactivated: users.filter((u) => u.status === UserStatus.DEACTIVATED).length,
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-purple-100 rounded-lg">
-          <Shield className="w-6 h-6 text-purple-700" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <Shield className="w-6 h-6 text-purple-700" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+            <p className="text-gray-500">{t("subtitle")}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-500">{t("subtitle")}</p>
-        </div>
+        <InviteUserDialog potentialSupervisors={allUsers} />
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-4 lg:grid-cols-7">
         <StatCard label={t("total")} value={stats.total} color="gray" />
         <StatCard label={t("admins")} value={stats.admins} color="purple" />
         <StatCard label={t("supervisors")} value={stats.supervisors} color="blue" />
         <StatCard label={t("users")} value={stats.users} color="green" />
+        <StatCard label={t("invited")} value={stats.invited} color="amber" />
+        <StatCard label={t("active")} value={stats.active} color="emerald" />
+        <StatCard label={t("deactivated")} value={stats.deactivated} color="red" />
       </div>
 
       {/* User List */}
@@ -101,6 +169,26 @@ export default async function AdminUsuariosPage() {
         users={users}
         allUsers={allUsers}
         currentUserId={userId || ""}
+        companies={companies}
+        isSuperAdmin={superAdmin}
+        translations={{
+          hideDeactivated: t("hideDeactivated"),
+          showingUsersTemplate: t("showingUsersTemplate"),
+          noResults: tCommon("noResults"),
+          you: t("you"),
+          noName: t("noName"),
+          role: t("role"),
+          status: t("status"),
+          supervisor: t("supervisor"),
+          company: tCompanies("name"),
+          cannotChangeOwnRole: t("cannotChangeOwnRole"),
+          cannotChangeOwnStatus: t("cannotChangeOwnStatus"),
+          registeredOn: t("registeredOn"),
+          edit: tCommon("edit"),
+          close: tCommon("close"),
+          noCompany: tCompanies("noCompanySelected"),
+          saving: tCommon("loading"),
+        }}
       />
     </div>
   );
@@ -113,13 +201,16 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  color: "gray" | "purple" | "blue" | "green";
+  color: "gray" | "purple" | "blue" | "green" | "amber" | "emerald" | "red";
 }) {
   const colors = {
     gray: "bg-gray-50 border-gray-200",
     purple: "bg-purple-50 border-purple-200",
     blue: "bg-blue-50 border-blue-200",
     green: "bg-green-50 border-green-200",
+    amber: "bg-amber-50 border-amber-200",
+    emerald: "bg-emerald-50 border-emerald-200",
+    red: "bg-red-50 border-red-200",
   };
 
   return (

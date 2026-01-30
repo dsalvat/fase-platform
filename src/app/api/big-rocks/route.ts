@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       return handleApiError(new Error(validationResult.error.errors[0].message));
     }
 
-    const { title, description, category, indicator, numTars, month, status } = validationResult.data;
+    const { title, description, indicator, numTars, month, status } = validationResult.data;
 
     // Check if month is read-only (past)
     if (isMonthReadOnly(month)) {
@@ -118,7 +118,6 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description,
-        category,
         indicator,
         numTars,
         month,

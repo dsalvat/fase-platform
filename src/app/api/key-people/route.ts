@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
-            tars: true,
+            bigRocks: true,
           },
         },
       },

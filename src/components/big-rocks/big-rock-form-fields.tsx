@@ -22,6 +22,7 @@ interface BigRockFormFieldsProps {
   defaultMonth?: string;
   isPending?: boolean;
   mode?: "create" | "edit";
+  isConfirmed?: boolean;
   // Key People props
   availableKeyPeople?: KeyPerson[];
   selectedKeyPeopleIds?: string[];
@@ -36,13 +37,6 @@ interface BigRockFormFieldsProps {
   onRemoveKeyMeeting?: (index: number) => void;
   onUpdateKeyMeeting?: (index: number, meeting: InlineKeyMeeting) => void;
 }
-
-const categoryOptions = [
-  { value: "FOCUS", label: "Focus - Enfoque y priorización" },
-  { value: "ATENCION", label: "Atención - Presencia y conciencia" },
-  { value: "SISTEMAS", label: "Sistemas - Procesos y estructuras" },
-  { value: "ENERGIA", label: "Energía - Vitalidad y bienestar" },
-];
 
 const statusOptions = [
   { value: "PLANIFICADO", label: "Planificado" },
@@ -59,6 +53,7 @@ export function BigRockFormFields({
   defaultMonth,
   isPending = false,
   mode = "create",
+  isConfirmed = false,
   // Key People props
   availableKeyPeople = [],
   selectedKeyPeopleIds = [],
@@ -76,8 +71,18 @@ export function BigRockFormFields({
   const monthOptions = generateMonthOptions(12, getCurrentMonth());
   const defaultMonthValue = defaultMonth || getNextMonth(getCurrentMonth());
 
+  // When confirmed, core fields are read-only
+  const coreFieldsDisabled = isPending || isConfirmed;
+
   return (
     <div className="space-y-4">
+      {/* Confirmed banner */}
+      {isConfirmed && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-amber-800 text-sm">
+          <p className="font-medium">Big Rock confirmado</p>
+          <p>Solo puedes editar el numero de TARs, Personas Clave y Reuniones Clave.</p>
+        </div>
+      )}
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">
@@ -91,7 +96,7 @@ export function BigRockFormFields({
           required
           minLength={3}
           maxLength={100}
-          disabled={isPending}
+          disabled={coreFieldsDisabled}
         />
         <p className="text-xs text-muted-foreground">
           Entre 3 y 100 caracteres
@@ -112,36 +117,12 @@ export function BigRockFormFields({
           minLength={10}
           maxLength={2000}
           rows={4}
-          disabled={isPending}
+          disabled={coreFieldsDisabled}
           className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         />
         <p className="text-xs text-muted-foreground">
           Entre 10 y 2000 caracteres
         </p>
-      </div>
-
-      {/* Category */}
-      <div className="space-y-2">
-        <Label htmlFor="category">
-          Categoría FASE <span className="text-red-500">*</span>
-        </Label>
-        <Select
-          name="category"
-          defaultValue={defaultValues?.category || undefined}
-          required
-          disabled={isPending}
-        >
-          <SelectTrigger id="category">
-            <SelectValue placeholder="Selecciona una categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            {categoryOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Indicator */}
@@ -158,7 +139,7 @@ export function BigRockFormFields({
           minLength={5}
           maxLength={500}
           rows={2}
-          disabled={isPending}
+          disabled={coreFieldsDisabled}
           className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         />
         <p className="text-xs text-muted-foreground">
@@ -223,7 +204,7 @@ export function BigRockFormFields({
           <Select
             name="status"
             defaultValue={defaultValues?.status || "PLANIFICADO"}
-            disabled={isPending}
+            disabled={coreFieldsDisabled}
           >
             <SelectTrigger id="status">
               <SelectValue />

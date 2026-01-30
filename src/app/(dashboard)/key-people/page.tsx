@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 import { KeyPersonList } from "@/components/key-people";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,19 +10,20 @@ import { Plus, Users } from "lucide-react";
 
 /**
  * Key People list page
- * Server Component that fetches and displays all Key People for the user
+ * Server Component that fetches and displays all Key People for the company
  */
 export default async function KeyPeoplePage() {
-  const user = await requireAuth();
+  await requireAuth();
   const t = await getTranslations("keyPeople");
+  const companyId = await getCurrentCompanyId();
 
-  // Fetch Key People for the user
+  // Fetch Key People for the company (shared across all users)
   const keyPeople = await prisma.keyPerson.findMany({
-    where: { userId: user.id },
+    where: companyId ? { companyId } : {},
     include: {
       _count: {
         select: {
-          tars: true,
+          bigRocks: true,
         },
       },
     },
@@ -30,7 +32,7 @@ export default async function KeyPeoplePage() {
 
   // Calculate stats
   const totalPeople = keyPeople.length;
-  const linkedPeople = keyPeople.filter((p) => p._count.tars > 0).length;
+  const linkedPeople = keyPeople.filter((p) => p._count.bigRocks > 0).length;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

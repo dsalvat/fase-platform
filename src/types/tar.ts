@@ -1,4 +1,4 @@
-import { TAR, Activity, KeyPerson, BigRock, TarStatus } from "@prisma/client";
+import { TAR, Activity, BigRock, TarStatus } from "@prisma/client";
 
 /**
  * TAR with BigRock relation
@@ -13,7 +13,6 @@ export type TARWithBigRock = TAR & {
 export type TARWithRelations = TAR & {
   bigRock: Pick<BigRock, 'id' | 'title' | 'month' | 'userId'>;
   activities: Activity[];
-  keyPeople: KeyPerson[];
 };
 
 /**
@@ -25,7 +24,6 @@ export type TARListItem = Pick<
 > & {
   _count?: {
     activities: number;
-    keyPeople: number;
   };
 };
 

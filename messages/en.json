@@ -29,7 +29,9 @@
     "connecting": "Connecting...",
     "accessAccount": "Access your account to manage your goals",
     "errorOAuth": "This email is already associated with another account.",
-    "errorGeneric": "An error occurred while signing in. Please try again."
+    "errorGeneric": "An error occurred while signing in. Please try again.",
+    "errorNotInvited": "You don't have an invitation to access this application. Contact the administrator to request access.",
+    "errorDeactivated": "Your account has been deactivated. Contact the administrator for more information."
   },
   "nav": {
     "bigRocks": "Big Rocks",
@@ -167,17 +169,61 @@
     "admins": "Administrators",
     "supervisors": "Supervisors",
     "users": "Users",
+    "invited": "Invited",
+    "active": "Active",
+    "deactivated": "Deactivated",
     "role": "Role",
+    "status": "Status",
     "supervisor": "Supervisor",
     "noSupervisor": "No supervisor",
     "you": "You",
     "cannotChangeOwnRole": "You cannot change your own role",
-    "registeredOn": "Registered on"
+    "cannotChangeOwnStatus": "You cannot change your own status",
+    "registeredOn": "Registered on",
+    "inviteUser": "Invite User",
+    "inviteUserTitle": "Invite New User",
+    "inviteUserDescription": "User will get access when they sign in with this email",
+    "sendInvitation": "Send Invitation",
+    "userInvited": "User invited successfully",
+    "hideDeactivated": "Hide deactivated users",
+    "showingUsers": "Showing {count} of {total} users",
+    "showingUsersTemplate": "Showing '{count}' of '{total}' users",
+    "noName": "No name",
+    "companies": "Companies"
+  },
+  "companies": {
+    "title": "Companies",
+    "subtitle": "Manage platform companies",
+    "new": "New Company",
+    "edit": "Edit Company",
+    "delete": "Delete Company",
+    "deleteConfirm": "Are you sure you want to delete this company?",
+    "name": "Name",
+    "slug": "Identifier",
+    "slugHelp": "Unique identifier for the company (auto-generated)",
+    "logo": "Logo",
+    "logoUrl": "Logo URL",
+    "logoHelp": "URL of the logo image (optional)",
+    "users": "Users",
+    "noUsers": "No users",
+    "switchTo": "Switch to this company",
+    "current": "Current company",
+    "noCompanySelected": "No company selected",
+    "selectCompany": "Select company",
+    "created": "Company created successfully",
+    "updated": "Company updated successfully",
+    "deleted": "Company deleted successfully",
+    "cannotDeleteWithUsers": "Cannot delete a company with users",
+    "stats": {
+      "total": "Total companies",
+      "totalUsers": "Total users"
+    }
   },
   "roles": {
     "user": "User",
     "supervisor": "Supervisor",
-    "admin": "Administrator"
+    "admin": "Administrator",
+    "superadmin": "Super Administrator"
   },
   "categories": {
     "focus": "Focus",

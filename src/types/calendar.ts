@@ -1,5 +1,3 @@
-import { FaseCategory } from "@prisma/client";
-
 /**
  * Month state types for calendar
  */
@@ -21,7 +19,6 @@ export interface WeekInfo {
 export interface BigRockSummary {
   id: string;
   title: string;
-  category: FaseCategory;
   status: string;
   numTars: number;
   completedTars: number;
@@ -38,7 +35,6 @@ export interface ActivitySummary {
   tarId: string;
   tarDescription: string;
   bigRockTitle: string;
-  bigRockCategory: FaseCategory;
 }
 
 /**
@@ -50,7 +46,6 @@ export interface MeetingSummary {
   completed: boolean;
   bigRockId: string;
   bigRockTitle: string;
-  bigRockCategory: FaseCategory;
 }
 
 /**
@@ -74,7 +69,6 @@ export interface MonthCalendarData {
   days: DayData[];
   bigRocks: BigRockSummary[];
   openMonths: string[];
-  faseSummary: FaseSummaryData;
 }
 
 /**
@@ -87,7 +81,6 @@ export interface TARWithActivities {
   progress: number;
   bigRockId: string;
   bigRockTitle: string;
-  bigRockCategory: FaseCategory;
   activities: ActivitySummary[];
 }
 
@@ -119,7 +112,6 @@ export interface ActivityWithTARInfo {
   tarDescription: string;
   bigRockId: string;
   bigRockTitle: string;
-  bigRockCategory: FaseCategory;
 }
 
 /**
@@ -134,7 +126,6 @@ export interface KeyMeetingWithBigRockInfo {
   outcome: string | null;
   bigRockId: string;
   bigRockTitle: string;
-  bigRockCategory: FaseCategory;
 }
 
 /**
@@ -148,16 +139,6 @@ export interface DayCalendarData {
   activities: ActivityWithTARInfo[];
   meetings: KeyMeetingWithBigRockInfo[];
   dateLabel: string;
-}
-
-/**
- * FASE summary data for calendar views
- */
-export interface FaseSummaryData {
-  focus: { total: number; completed: number };
-  atencion: { total: number; completed: number };
-  sistemas: { total: number; completed: number };
-  energia: { total: number; completed: number };
 }
 
 /**

@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { DayCell } from "./day-cell";
-import { FaseSummary } from "./fase-summary";
 import { OpenMonthButton } from "./open-month-button";
 import type { MonthCalendarData } from "@/types/calendar";
 
@@ -15,9 +14,6 @@ export function MonthlyView({ data }: MonthlyViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* FASE Summary */}
-      <FaseSummary data={data.faseSummary} />
-
       {/* Calendar Grid */}
       <div className={cn("relative rounded-lg border bg-white shadow-sm", isLocked && "overflow-hidden")}>
         {/* Locked Overlay */}

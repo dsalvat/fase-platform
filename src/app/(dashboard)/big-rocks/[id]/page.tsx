@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { BigRockStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAuth, canAccessBigRock } from "@/lib/auth";
-import { CategoryBadge } from "@/components/big-rocks/category-badge";
 import { BigRockDeleteButton } from "@/components/big-rocks/big-rock-delete-button";
+import { BigRockConfirmButton } from "@/components/big-rocks/big-rock-confirm-button";
 import { TARList } from "@/components/tars/tar-list";
 import { KeyMeetingList } from "@/components/key-meetings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar, ShieldCheck, Users } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -72,7 +72,6 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           _count: {
             select: {
               activities: true,
-              keyPeople: true,
             },
           },
         },
@@ -80,6 +79,9 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       },
       keyMeetings: {
         orderBy: { createdAt: "asc" },
+      },
+      keyPeople: {
+        orderBy: { firstName: "asc" },
       },
     },
   });
@@ -106,19 +108,37 @@ export default async function BigRockDetailPage({ params }: PageProps) {
 
         {canEdit && (
           <div className="flex items-center gap-2">
+            {!bigRock.isConfirmed && (
+              <BigRockConfirmButton
+                bigRockId={id}
+                bigRockTitle={bigRock.title}
+              />
+            )}
             <Link href={`/big-rocks/${id}/edit`}>
               <Button size="sm">
                 <Edit className="h-4 w-4 mr-2" />
                 Editar
               </Button>
             </Link>
-            <BigRockDeleteButton
-              bigRockId={id}
-              bigRockTitle={bigRock.title}
-            />
+            {!bigRock.isConfirmed && (
+              <BigRockDeleteButton
+                bigRockId={id}
+                bigRockTitle={bigRock.title}
+              />
+            )}
           </div>
         )}
       </div>
+
+      {/* Confirmed banner */}
+      {bigRock.isConfirmed && (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-green-600" />
+          <p className="text-sm text-green-800">
+            <strong>Big Rock confirmado.</strong> Solo puedes gestionar TARs, Reuniones Clave y Personas Clave.
+          </p>
+        </div>
+      )}
 
       {/* Read-only banner */}
       {isReadOnly && (
@@ -135,12 +155,17 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <CardTitle className="text-2xl">{bigRock.title}</CardTitle>
-              <div className="flex items-center gap-3 mt-2">
-                <CategoryBadge category={bigRock.category} />
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <StatusIcon className={statusInfo.color} />
                   <span>{statusInfo.label}</span>
                 </div>
+                {bigRock.isConfirmed && (
+                  <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="h-3 w-3" />
+                    <span>Confirmado</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -297,6 +322,49 @@ export default async function BigRockDetailPage({ params }: PageProps) {
                   Ver {bigRock.keyMeetings.length - 5} reuniones mas
                 </Button>
               </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Key People section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Personas Clave ({bigRock.keyPeople.length})
+            </CardTitle>
+            {canEdit && (
+              <Link href={`/big-rocks/${id}/edit`}>
+                <Button size="sm" variant="outline">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Gestionar
+                </Button>
+              </Link>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {bigRock.keyPeople.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No hay personas clave asociadas a este Big Rock.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {bigRock.keyPeople.map((person) => (
+                <Link
+                  key={person.id}
+                  href={`/key-people/${person.id}`}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition-colors"
+                >
+                  <Users className="h-3 w-3" />
+                  <span>{person.firstName} {person.lastName}</span>
+                  {person.role && (
+                    <span className="text-xs text-blue-500">({person.role})</span>
+                  )}
+                </Link>
+              ))}
             </div>
           )}
         </CardContent>

@@ -49,7 +49,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         activities: {
           orderBy: { date: "asc" },
         },
-        keyPeople: true,
       },
     });
 

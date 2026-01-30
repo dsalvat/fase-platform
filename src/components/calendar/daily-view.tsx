@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CategoryBadge } from "@/components/big-rocks/category-badge";
 import type { DayCalendarData } from "@/types/calendar";
 
 interface DailyViewProps {
@@ -69,10 +68,6 @@ export function DailyView({ data }: DailyViewProps) {
                       >
                         {meeting.bigRockTitle}
                       </Link>
-                      <CategoryBadge
-                        category={meeting.bigRockCategory}
-                        size="sm"
-                      />
                     </div>
                     {meeting.outcome && (
                       <div className="mt-2 rounded bg-gray-50 p-2 text-sm text-gray-600">
@@ -178,10 +173,6 @@ export function DailyView({ data }: DailyViewProps) {
                       >
                         {activity.bigRockTitle}
                       </Link>
-                      <CategoryBadge
-                        category={activity.bigRockCategory}
-                        size="sm"
-                      />
                     </div>
                     {activity.notes && (
                       <div className="ml-7 mt-2 rounded bg-gray-50 p-2 text-sm text-gray-600">

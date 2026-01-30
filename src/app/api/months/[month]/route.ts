@@ -78,12 +78,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Calculate stats
     const stats = {
       totalBigRocks: bigRocks.length,
-      byCategory: {
-        FOCUS: bigRocks.filter((b) => b.category === "FOCUS").length,
-        ATENCION: bigRocks.filter((b) => b.category === "ATENCION").length,
-        SISTEMAS: bigRocks.filter((b) => b.category === "SISTEMAS").length,
-        ENERGIA: bigRocks.filter((b) => b.category === "ENERGIA").length,
-      },
       byStatus: {
         PLANIFICADO: bigRocks.filter((b) => b.status === "PLANIFICADO").length,
         EN_PROGRESO: bigRocks.filter((b) => b.status === "EN_PROGRESO").length,
@@ -108,7 +102,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       bigRocks: bigRocks.map((b) => ({
         id: b.id,
         title: b.title,
-        category: b.category,
         status: b.status,
         numTars: b.numTars,
         actualTars: b.tars.length,

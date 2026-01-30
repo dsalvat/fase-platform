@@ -7,10 +7,9 @@ import { TARDeleteButton } from "@/components/tars/tar-delete-button";
 import { TARProgressSlider } from "@/components/tars/tar-progress-slider";
 import { TARStatusToggle } from "@/components/tars/tar-status-toggle";
 import { ActivityList } from "@/components/activities/activity-list";
-import { KeyPersonSelector } from "@/components/key-people";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, Plus, Users } from "lucide-react";
+import { ArrowLeft, Edit, Plus } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -51,7 +50,6 @@ export default async function TARDetailPage({ params }: PageProps) {
       activities: {
         orderBy: { date: "asc" },
       },
-      keyPeople: true,
     },
   });
 
@@ -61,12 +59,6 @@ export default async function TARDetailPage({ params }: PageProps) {
 
   const isReadOnly = isMonthReadOnly(tar.bigRock.month);
   const canModify = await canModifyTAR(tarId, user.id, userRole);
-
-  // Fetch all Key People for the user (for the selector)
-  const allKeyPeople = await prisma.keyPerson.findMany({
-    where: { userId: user.id },
-    orderBy: { firstName: "asc" },
-  });
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -215,36 +207,6 @@ export default async function TARDetailPage({ params }: PageProps) {
         </CardContent>
       </Card>
 
-      {/* Key People section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Personas Clave ({tar.keyPeople.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <KeyPersonSelector
-            tarId={tarId}
-            availableKeyPeople={allKeyPeople}
-            linkedKeyPeople={tar.keyPeople}
-            isReadOnly={isReadOnly || !canModify}
-          />
-          {allKeyPeople.length === 0 && tar.keyPeople.length === 0 && (
-            <div className="mt-4 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                No tienes personas clave creadas.
-              </p>
-              <Link href="/key-people/new">
-                <Button variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Crear persona clave
-                </Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

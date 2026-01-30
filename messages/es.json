@@ -29,7 +29,9 @@
     "connecting": "Conectando...",
     "accessAccount": "Accede a tu cuenta para gestionar tus objetivos",
     "errorOAuth": "Este email ya esta asociado a otra cuenta.",
-    "errorGeneric": "Ocurrio un error al iniciar sesion. Intentalo de nuevo."
+    "errorGeneric": "Ocurrio un error al iniciar sesion. Intentalo de nuevo.",
+    "errorNotInvited": "No tienes una invitacion para acceder a esta aplicacion. Contacta al administrador para solicitar acceso.",
+    "errorDeactivated": "Tu cuenta ha sido desactivada. Contacta al administrador para mas informacion."
   },
   "nav": {
     "bigRocks": "Big Rocks",
@@ -167,17 +169,61 @@
     "admins": "Administradores",
     "supervisors": "Supervisores",
     "users": "Usuarios",
+    "invited": "Invitados",
+    "active": "Activos",
+    "deactivated": "Desactivados",
     "role": "Rol",
+    "status": "Estado",
     "supervisor": "Supervisor",
     "noSupervisor": "Sin supervisor",
     "you": "Tu",
     "cannotChangeOwnRole": "No puedes cambiar tu propio rol",
-    "registeredOn": "Registrado el"
+    "cannotChangeOwnStatus": "No puedes cambiar tu propio estado",
+    "registeredOn": "Registrado el",
+    "inviteUser": "Invitar Usuario",
+    "inviteUserTitle": "Invitar Nuevo Usuario",
+    "inviteUserDescription": "El usuario recibira acceso cuando inicie sesion con este email",
+    "sendInvitation": "Enviar Invitacion",
+    "userInvited": "Usuario invitado correctamente",
+    "hideDeactivated": "Ocultar usuarios desactivados",
+    "showingUsers": "Mostrando {count} de {total} usuarios",
+    "showingUsersTemplate": "Mostrando '{count}' de '{total}' usuarios",
+    "noName": "Sin nombre",
+    "companies": "Empresas"
+  },
+  "companies": {
+    "title": "Empresas",
+    "subtitle": "Gestiona las empresas de la plataforma",
+    "new": "Nueva Empresa",
+    "edit": "Editar Empresa",
+    "delete": "Eliminar Empresa",
+    "deleteConfirm": "¿Estas seguro de que quieres eliminar esta empresa?",
+    "name": "Nombre",
+    "slug": "Identificador",
+    "slugHelp": "Identificador unico para la empresa (se genera automaticamente)",
+    "logo": "Logo",
+    "logoUrl": "URL del logo",
+    "logoHelp": "URL de la imagen del logo (opcional)",
+    "users": "Usuarios",
+    "noUsers": "Sin usuarios",
+    "switchTo": "Cambiar a esta empresa",
+    "current": "Empresa actual",
+    "noCompanySelected": "Sin empresa seleccionada",
+    "selectCompany": "Seleccionar empresa",
+    "created": "Empresa creada correctamente",
+    "updated": "Empresa actualizada correctamente",
+    "deleted": "Empresa eliminada correctamente",
+    "cannotDeleteWithUsers": "No se puede eliminar una empresa con usuarios",
+    "stats": {
+      "total": "Total empresas",
+      "totalUsers": "Total usuarios"
+    }
   },
   "roles": {
     "user": "Usuario",
     "supervisor": "Supervisor",
-    "admin": "Administrador"
+    "admin": "Administrador",
+    "superadmin": "Super Administrador"
   },
   "categories": {
     "focus": "Focus",

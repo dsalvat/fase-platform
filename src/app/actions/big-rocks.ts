@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAuth, canModifyBigRock } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 import { isMonthReadOnly } from "@/lib/month-helpers";
 import {
   createBigRockSchema,
   updateBigRockSchema,
 } from "@/lib/validations/big-rock";
 import { inlineKeyPersonSchema } from "@/lib/validations/key-person";
-import { FaseCategory, BigRockStatus } from "@prisma/client";
+import { BigRockStatus } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
 import {
   logBigRockCreated,
@@ -33,12 +34,12 @@ export async function createBigRock(
 ): Promise<{ success: boolean; id?: string; title?: string; error?: string }> {
   try {
     const user = await requireAuth();
+    const companyId = await getCurrentCompanyId();
 
     // Extract form data
     const rawData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
-      category: formData.get("category") as FaseCategory,
       indicator: formData.get("indicator") as string,
       numTars: Number(formData.get("numTars")),
       month: formData.get("month") as string,
@@ -120,6 +121,7 @@ export async function createBigRock(
             role: person.role || null,
             contact: person.contact || null,
             userId: user.id,
+            companyId: companyId,
           },
         });
         createdKeyPeopleIds.push(newPerson.id);
@@ -138,6 +140,7 @@ export async function createBigRock(
         data: {
           ...validated,
           userId: user.id,
+          companyId: companyId,
           keyPeople: allKeyPeopleIds.length > 0
             ? { connect: allKeyPeopleIds.map(id => ({ id })) }
             : undefined,
@@ -224,6 +227,7 @@ export async function updateBigRock(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await requireAuth();
+    const companyId = await getCurrentCompanyId();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userRole = (user as any).role;
 
@@ -241,7 +245,6 @@ export async function updateBigRock(
       id,
       title: formData.get("title") as string | undefined,
       description: formData.get("description") as string | undefined,
-      category: formData.get("category") as FaseCategory | undefined,
       indicator: formData.get("indicator") as string | undefined,
       numTars: formData.get("numTars") ? Number(formData.get("numTars")) : undefined,
       status: formData.get("status") as BigRockStatus | undefined,
@@ -294,10 +297,11 @@ export async function updateBigRock(
 
     // Verify that all existing keyPeopleIds belong to the user
     if (keyPeopleIds !== null && keyPeopleIds.length > 0) {
+      // Validate keyPeopleIds belong to the company
       const existingPeople = await prisma.keyPerson.findMany({
         where: {
           id: { in: keyPeopleIds },
-          userId: user.id,
+          companyId: companyId,
         },
         select: { id: true },
       });
@@ -317,6 +321,7 @@ export async function updateBigRock(
             role: person.role || null,
             contact: person.contact || null,
             userId: user.id,
+            companyId: companyId,
           },
         });
         createdKeyPeopleIds.push(newPerson.id);
@@ -484,6 +489,103 @@ export async function deleteBigRock(id: string): Promise<{
     return {
       success: false,
       error: "Error al eliminar el Big Rock",
+    };
+  }
+}
+
+/**
+ * Server action to confirm a Big Rock
+ * Once confirmed, only TARs, Key Meetings, and Key People can be edited
+ * @param id - ID of the Big Rock to confirm
+ * @returns Success response
+ */
+export async function confirmBigRock(id: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check if user can modify this Big Rock
+    const canModify = await canModifyBigRock(id, user.id, userRole);
+    if (!canModify) {
+      return {
+        success: false,
+        error: "No tienes permiso para confirmar este Big Rock",
+      };
+    }
+
+    // Get Big Rock to validate
+    const bigRock = await prisma.bigRock.findUnique({
+      where: { id },
+      select: {
+        isConfirmed: true,
+        month: true,
+        title: true,
+        description: true,
+        indicator: true,
+      },
+    });
+
+    if (!bigRock) {
+      return {
+        success: false,
+        error: "Big Rock no encontrado",
+      };
+    }
+
+    if (bigRock.isConfirmed) {
+      return {
+        success: false,
+        error: "Este Big Rock ya está confirmado",
+      };
+    }
+
+    // Validate that all required fields are filled
+    if (!bigRock.title || !bigRock.description || !bigRock.indicator) {
+      return {
+        success: false,
+        error: "Completa todos los campos requeridos antes de confirmar",
+      };
+    }
+
+    // Confirm the Big Rock
+    await prisma.bigRock.update({
+      where: { id },
+      data: { isConfirmed: true },
+    });
+
+    // Record activity log
+    try {
+      await logBigRockUpdated(user.id, id, bigRock.title, { isConfirmed: true });
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
+
+    // Revalidate relevant paths
+    revalidatePath("/big-rocks");
+    revalidatePath(`/big-rocks?month=${bigRock.month}`);
+    revalidatePath(`/big-rocks/${id}`);
+    revalidatePath(`/big-rocks/${id}/edit`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error confirming Big Rock:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al confirmar el Big Rock",
     };
   }
 }

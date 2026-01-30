@@ -7,7 +7,7 @@ import { User, Mail, Phone, Briefcase } from "lucide-react";
 interface KeyPersonCardProps {
   keyPerson: KeyPerson & {
     _count?: {
-      tars: number;
+      bigRocks: number;
     };
   };
 }
@@ -63,11 +63,11 @@ export function KeyPersonCard({ keyPerson }: KeyPersonCardProps) {
                 </div>
               )}
 
-              {keyPerson._count && keyPerson._count.tars > 0 && (
+              {keyPerson._count && keyPerson._count.bigRocks > 0 && (
                 <div className="mt-2">
                   <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                    {keyPerson._count.tars} TAR
-                    {keyPerson._count.tars !== 1 ? "s" : ""} vinculadas
+                    {keyPerson._count.bigRocks} Big Rock
+                    {keyPerson._count.bigRocks !== 1 ? "s" : ""} vinculados
                   </span>
                 </div>
               )}

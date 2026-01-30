@@ -4,7 +4,7 @@ import { KeyPersonCard } from "./key-person-card";
 interface KeyPersonListProps {
   keyPeople: (KeyPerson & {
     _count?: {
-      tars: number;
+      bigRocks: number;
     };
   })[];
 }

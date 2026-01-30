@@ -39,7 +39,6 @@ export default async function TARsPage({ params }: PageProps) {
           _count: {
             select: {
               activities: true,
-              keyPeople: true,
             },
           },
         },

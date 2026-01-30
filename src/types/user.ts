@@ -1,4 +1,4 @@
-import { User, UserRole } from "@prisma/client";
+import { User, UserRole, UserStatus } from "@prisma/client";
 
 /**
  * User with supervisor info
@@ -10,8 +10,11 @@ export type UserWithSupervisor = User & {
 /**
  * User for list views
  */
-export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'role' | 'createdAt'> & {
+export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'role' | 'status' | 'createdAt'> & {
+  currentCompanyId: string | null;
   supervisor: Pick<User, 'id' | 'name' | 'email'> | null;
+  company: { id: string; name: string; logo: string | null } | null; // First/current company for display
+  companies: { companyId: string; company: { id: string; name: string; logo: string | null } }[]; // All companies via UserCompany
   _count: {
     supervisees: number;
   };
@@ -48,5 +51,31 @@ export const roleConfig: Record<UserRole, { label: string; color: string; bgColo
     label: "Administrador",
     color: "text-purple-700",
     bgColor: "bg-purple-100",
+  },
+  SUPERADMIN: {
+    label: "Super Admin",
+    color: "text-red-700",
+    bgColor: "bg-red-100",
+  },
+};
+
+/**
+ * Status display configuration
+ */
+export const statusConfig: Record<UserStatus, { label: string; color: string; bgColor: string }> = {
+  INVITED: {
+    label: "Invitado",
+    color: "text-amber-700",
+    bgColor: "bg-amber-100",
+  },
+  ACTIVE: {
+    label: "Activo",
+    color: "text-green-700",
+    bgColor: "bg-green-100",
+  },
+  DEACTIVATED: {
+    label: "Desactivado",
+    color: "text-red-700",
+    bgColor: "bg-red-100",
   },
 };
