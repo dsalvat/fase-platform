@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth-options";
+import { UserRole } from "@prisma/client";
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +18,9 @@ export default async function DashboardLayout({
   }
 
   const user = session.user;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = ((user as any)?.role as UserRole) || "USER";
+  const isAdmin = userRole === "ADMIN";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,6 +53,13 @@ export default async function DashboardLayout({
                 <Link href="/actividad">
                   <Button variant="ghost">Actividad</Button>
                 </Link>
+                {isAdmin && (
+                  <Link href="/admin/usuarios">
+                    <Button variant="ghost" className="text-purple-600">
+                      Admin
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
 
