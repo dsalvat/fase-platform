@@ -1,0 +1,373 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
+import { requireAuth, canViewSuperviseePlanning } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
+import { UserRole } from "@prisma/client";
+import type {
+  MonthPlanningStatus,
+  SuperviseeWithStatus,
+  SuperviseePlanningData,
+} from "@/types/feedback";
+
+/**
+ * Get the planning status for a specific month
+ * Shows how many Big Rocks are confirmed and if planning is confirmed
+ */
+export async function getMonthPlanningStatus(
+  month: string
+): Promise<MonthPlanningStatus> {
+  const user = await requireAuth();
+  const companyId = await getCurrentCompanyId();
+
+  // Get all Big Rocks for this month
+  const bigRocks = await prisma.bigRock.findMany({
+    where: {
+      userId: user.id,
+      month: month,
+      ...(companyId && { companyId }),
+    },
+    select: {
+      id: true,
+      isConfirmed: true,
+    },
+  });
+
+  // Get the OpenMonth record if exists
+  const openMonth = await prisma.openMonth.findFirst({
+    where: {
+      userId: user.id,
+      month: month,
+    },
+    select: {
+      isPlanningConfirmed: true,
+      planningConfirmedAt: true,
+    },
+  });
+
+  const totalBigRocks = bigRocks.length;
+  const confirmedBigRocks = bigRocks.filter((br) => br.isConfirmed).length;
+  const allConfirmed = totalBigRocks > 0 && confirmedBigRocks === totalBigRocks;
+
+  return {
+    month,
+    totalBigRocks,
+    confirmedBigRocks,
+    isPlanningConfirmed: openMonth?.isPlanningConfirmed ?? false,
+    planningConfirmedAt: openMonth?.planningConfirmedAt ?? null,
+    canConfirmPlanning: allConfirmed && !(openMonth?.isPlanningConfirmed),
+  };
+}
+
+/**
+ * Confirm the month planning
+ * Requires all Big Rocks to be confirmed first
+ */
+export async function confirmMonthPlanning(
+  month: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    const companyId = await getCurrentCompanyId();
+
+    // Get all Big Rocks for this month
+    const bigRocks = await prisma.bigRock.findMany({
+      where: {
+        userId: user.id,
+        month: month,
+        ...(companyId && { companyId }),
+      },
+      select: {
+        id: true,
+        isConfirmed: true,
+      },
+    });
+
+    // Check that there are Big Rocks
+    if (bigRocks.length === 0) {
+      return {
+        success: false,
+        error: "No hay Big Rocks para este mes",
+      };
+    }
+
+    // Check that all Big Rocks are confirmed
+    const allConfirmed = bigRocks.every((br) => br.isConfirmed);
+    if (!allConfirmed) {
+      return {
+        success: false,
+        error: "Todos los Big Rocks deben estar confirmados antes de confirmar la planificacion del mes",
+      };
+    }
+
+    // Upsert the OpenMonth record with confirmation
+    await prisma.openMonth.upsert({
+      where: {
+        month_userId: {
+          month: month,
+          userId: user.id,
+        },
+      },
+      update: {
+        isPlanningConfirmed: true,
+        planningConfirmedAt: new Date(),
+      },
+      create: {
+        month: month,
+        userId: user.id,
+        isPlanningConfirmed: true,
+        planningConfirmedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/big-rocks");
+    revalidatePath(`/big-rocks?month=${month}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error confirming month planning:", error);
+    return {
+      success: false,
+      error: "Error al confirmar la planificacion del mes",
+    };
+  }
+}
+
+/**
+ * Get list of supervisees with their planning status for a specific month
+ * Only for supervisors and admins
+ */
+export async function getSuperviseesWithPlanningStatus(
+  month: string
+): Promise<SuperviseeWithStatus[]> {
+  const user = await requireAuth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+
+  if (userRole !== "SUPERVISOR" && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+    throw new Error("No tienes permiso para ver supervisados");
+  }
+
+  // Get supervisees
+  const supervisees = await prisma.user.findMany({
+    where: {
+      supervisorId: user.id,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  // Get planning status for each supervisee
+  const result: SuperviseeWithStatus[] = [];
+
+  for (const supervisee of supervisees) {
+    // Get Big Rocks count
+    const bigRocks = await prisma.bigRock.findMany({
+      where: {
+        userId: supervisee.id,
+        month: month,
+      },
+      select: {
+        id: true,
+        isConfirmed: true,
+      },
+    });
+
+    // Get OpenMonth record
+    const openMonth = await prisma.openMonth.findFirst({
+      where: {
+        userId: supervisee.id,
+        month: month,
+      },
+      select: {
+        isPlanningConfirmed: true,
+        planningConfirmedAt: true,
+      },
+    });
+
+    const totalBigRocks = bigRocks.length;
+    const confirmedBigRocks = bigRocks.filter((br) => br.isConfirmed).length;
+    const allConfirmed = totalBigRocks > 0 && confirmedBigRocks === totalBigRocks;
+
+    result.push({
+      id: supervisee.id,
+      name: supervisee.name,
+      email: supervisee.email,
+      image: supervisee.image,
+      planningStatus: {
+        month,
+        totalBigRocks,
+        confirmedBigRocks,
+        isPlanningConfirmed: openMonth?.isPlanningConfirmed ?? false,
+        planningConfirmedAt: openMonth?.planningConfirmedAt ?? null,
+        canConfirmPlanning: allConfirmed && !(openMonth?.isPlanningConfirmed),
+      },
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Get full planning data for a supervisee
+ * Only accessible if the planning is confirmed
+ */
+export async function getSuperviseeMonthPlanning(
+  superviseeId: string,
+  month: string
+): Promise<SuperviseePlanningData | null> {
+  const user = await requireAuth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+
+  // Check if user is supervisor or admin
+  if (userRole !== "SUPERVISOR" && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+    throw new Error("No tienes permiso para ver esta planificacion");
+  }
+
+  // Check if can view this supervisee's planning
+  const canView = await canViewSuperviseePlanning(user.id, superviseeId, month);
+  if (!canView && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+    return null;
+  }
+
+  // Get supervisee info
+  const supervisee = await prisma.user.findUnique({
+    where: { id: superviseeId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+  });
+
+  if (!supervisee) {
+    return null;
+  }
+
+  // Get OpenMonth record
+  const openMonth = await prisma.openMonth.findFirst({
+    where: {
+      userId: superviseeId,
+      month: month,
+    },
+    select: {
+      id: true,
+      isPlanningConfirmed: true,
+      planningConfirmedAt: true,
+    },
+  });
+
+  // For non-admin, require planning to be confirmed
+  if (!openMonth?.isPlanningConfirmed && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+    return null;
+  }
+
+  // Get all Big Rocks with details
+  const bigRocks = await prisma.bigRock.findMany({
+    where: {
+      userId: superviseeId,
+      month: month,
+    },
+    include: {
+      tars: {
+        select: {
+          id: true,
+          description: true,
+          status: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
+      keyMeetings: {
+        select: {
+          id: true,
+          title: true,
+          date: true,
+          completed: true,
+        },
+        orderBy: { date: "asc" },
+      },
+      keyPeople: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+        orderBy: { firstName: "asc" },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  // Get feedback for each Big Rock
+  const bigRocksWithFeedback = await Promise.all(
+    bigRocks.map(async (br) => {
+      const feedback = await prisma.feedback.findFirst({
+        where: {
+          targetType: "BIG_ROCK",
+          targetId: br.id,
+        },
+        include: {
+          supervisor: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      return {
+        id: br.id,
+        title: br.title,
+        description: br.description,
+        indicator: br.indicator,
+        numTars: br.numTars,
+        status: br.status,
+        isConfirmed: br.isConfirmed,
+        aiScore: br.aiScore,
+        tars: br.tars,
+        keyMeetings: br.keyMeetings,
+        keyPeople: br.keyPeople,
+        feedback,
+      };
+    })
+  );
+
+  // Get month feedback
+  let monthFeedback = null;
+  if (openMonth) {
+    monthFeedback = await prisma.feedback.findFirst({
+      where: {
+        targetType: "MONTH_PLANNING",
+        targetId: openMonth.id,
+      },
+      include: {
+        supervisor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  return {
+    user: supervisee,
+    month,
+    isPlanningConfirmed: openMonth?.isPlanningConfirmed ?? false,
+    planningConfirmedAt: openMonth?.planningConfirmedAt ?? null,
+    bigRocks: bigRocksWithFeedback,
+    monthFeedback,
+  };
+}

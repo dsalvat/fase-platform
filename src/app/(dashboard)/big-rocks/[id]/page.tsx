@@ -7,9 +7,11 @@ import { BigRockDeleteButton } from "@/components/big-rocks/big-rock-delete-butt
 import { BigRockConfirmButton } from "@/components/big-rocks/big-rock-confirm-button";
 import { TARList } from "@/components/tars/tar-list";
 import { KeyMeetingList } from "@/components/key-meetings";
+import { FeedbackDisplay } from "@/components/feedback";
+import { getBigRockFeedback } from "@/app/actions/feedback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar, ShieldCheck, Users, MessageSquare } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -94,6 +96,10 @@ export default async function BigRockDetailPage({ params }: PageProps) {
   const StatusIcon = statusInfo.icon;
   const isReadOnly = isMonthReadOnly(bigRock.month);
   const canEdit = bigRock.userId === user.id && !isReadOnly;
+  const isOwner = bigRock.userId === user.id;
+
+  // Get supervisor feedback for the Big Rock (only visible to owner)
+  const feedback = isOwner ? await getBigRockFeedback(id) : null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -369,6 +375,21 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Supervisor Feedback section - only visible to owner when feedback exists */}
+      {isOwner && feedback && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Feedback del Supervisor
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FeedbackDisplay feedback={feedback} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

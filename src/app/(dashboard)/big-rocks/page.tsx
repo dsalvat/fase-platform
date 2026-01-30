@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { BigRockList } from "@/components/big-rocks/big-rock-list";
 import { MonthSelector } from "@/components/big-rocks/month-selector";
+import { MonthPlanningStatus } from "@/components/planning";
+import { getMonthPlanningStatus } from "@/app/actions/planning";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { getNextMonth, getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
@@ -25,6 +27,24 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
 
   const t = await getTranslations("bigRocks");
   const tCommon = await getTranslations("common");
+  const tPlanning = await getTranslations("planning");
+
+  // Get planning status for the current month
+  const planningStatus = await getMonthPlanningStatus(displayMonth);
+
+  // Translations for the client component
+  const planningTranslations = {
+    noBigRocks: tPlanning("noBigRocks"),
+    confirmed: tPlanning("confirmed"),
+    planningConfirmedOn: tPlanning("planningConfirmedOn"),
+    notConfirmed: tPlanning("notConfirmed"),
+    bigRocksProgress: tPlanning("bigRocksProgress"),
+    confirmPlanning: tPlanning("confirmPlanning"),
+    confirmPlanningTitle: tPlanning("confirmPlanningTitle"),
+    confirmPlanningDescription: tPlanning("confirmPlanningDescription"),
+    allBigRocksRequired: tPlanning("allBigRocksRequired"),
+    cancel: tCommon("cancel"),
+  };
 
   return (
     <div className="space-y-6">
@@ -47,9 +67,14 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         )}
       </div>
 
-      {/* Month selector and read-only banner */}
+      {/* Month selector and planning status */}
       <div className="flex flex-col gap-4">
         <MonthSelector defaultMonth={defaultMonth} />
+
+        {/* Planning status - show for current or future months */}
+        {!isReadOnly && (
+          <MonthPlanningStatus status={planningStatus} translations={planningTranslations} />
+        )}
 
         {isReadOnly && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">

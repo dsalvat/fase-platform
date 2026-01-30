@@ -39,6 +39,7 @@
     "calendar": "Calendar",
     "gamification": "Gamification",
     "activity": "Activity",
+    "supervisor": "Supervisees",
     "admin": "Admin",
     "exit": "Exit"
   },
@@ -244,5 +245,47 @@
   "platform": {
     "title": "FASE Platform",
     "subtitle": "Goal management methodology"
+  },
+  "planning": {
+    "title": "Monthly Planning",
+    "status": "Planning Status",
+    "confirmed": "Planning Confirmed",
+    "notConfirmed": "Pending Confirmation",
+    "confirmPlanning": "Confirm Month Planning",
+    "confirmPlanningTitle": "Confirm Planning",
+    "confirmPlanningDescription": "Once confirmed, your supervisor will be able to review your planning and give you feedback. This action cannot be undone.",
+    "bigRocksProgress": "{confirmed} of {total} Big Rocks confirmed",
+    "allBigRocksRequired": "You must confirm all Big Rocks before confirming the month planning",
+    "planningConfirmedOn": "Planning confirmed on {date}",
+    "confirmSuccess": "Month planning confirmed successfully",
+    "noBigRocks": "No Big Rocks for this month"
+  },
+  "supervisor": {
+    "title": "Supervisor Dashboard",
+    "supervisees": "My Supervisees",
+    "noSupervisees": "You have no supervised users",
+    "viewPlanning": "View Planning",
+    "planningNotReady": "Pending planning",
+    "awaitingConfirmation": "The user has not yet confirmed their month planning",
+    "planningReady": "Planning ready for review",
+    "bigRocksCount": "{count} Big Rocks",
+    "selectMonth": "Select month"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "supervisorFeedback": "Supervisor Feedback",
+    "giveFeedback": "Give Feedback",
+    "editFeedback": "Edit Feedback",
+    "noFeedback": "No feedback yet",
+    "comment": "Comment",
+    "commentPlaceholder": "Write your feedback here...",
+    "rating": "Rating",
+    "ratingOptional": "Rating (optional)",
+    "submitFeedback": "Submit Feedback",
+    "feedbackSaved": "Feedback saved successfully",
+    "monthFeedback": "General Month Feedback",
+    "bigRockFeedback": "Big Rock Feedback",
+    "deleteFeedback": "Delete Feedback",
+    "deleteConfirm": "Are you sure you want to delete this feedback?"
   }
 }

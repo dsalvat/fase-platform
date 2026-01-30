@@ -39,6 +39,7 @@
     "calendar": "Calendario",
     "gamification": "Gamificacion",
     "activity": "Actividad",
+    "supervisor": "Supervisados",
     "admin": "Admin",
     "exit": "Salir"
   },
@@ -244,5 +245,47 @@
   "platform": {
     "title": "Plataforma FASE",
     "subtitle": "Metodologia de gestion de objetivos"
+  },
+  "planning": {
+    "title": "Planificacion Mensual",
+    "status": "Estado de Planificacion",
+    "confirmed": "Planificacion Confirmada",
+    "notConfirmed": "Pendiente de Confirmar",
+    "confirmPlanning": "Confirmar Planificacion del Mes",
+    "confirmPlanningTitle": "Confirmar Planificacion",
+    "confirmPlanningDescription": "Una vez confirmada, tu supervisor podra revisar tu planificacion y darte feedback. Esta accion no se puede deshacer.",
+    "bigRocksProgress": "{confirmed} de {total} Big Rocks confirmados",
+    "allBigRocksRequired": "Debes confirmar todos los Big Rocks antes de confirmar la planificacion del mes",
+    "planningConfirmedOn": "Planificacion confirmada el {date}",
+    "confirmSuccess": "Planificacion del mes confirmada correctamente",
+    "noBigRocks": "No hay Big Rocks para este mes"
+  },
+  "supervisor": {
+    "title": "Panel de Supervisor",
+    "supervisees": "Mis Supervisados",
+    "noSupervisees": "No tienes usuarios supervisados",
+    "viewPlanning": "Ver Planificacion",
+    "planningNotReady": "Planificacion pendiente",
+    "awaitingConfirmation": "El usuario aun no ha confirmado su planificacion del mes",
+    "planningReady": "Planificacion lista para revisar",
+    "bigRocksCount": "{count} Big Rocks",
+    "selectMonth": "Seleccionar mes"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "supervisorFeedback": "Feedback del Supervisor",
+    "giveFeedback": "Dar Feedback",
+    "editFeedback": "Editar Feedback",
+    "noFeedback": "Sin feedback todavia",
+    "comment": "Comentario",
+    "commentPlaceholder": "Escribe tu feedback aqui...",
+    "rating": "Valoracion",
+    "ratingOptional": "Valoracion (opcional)",
+    "submitFeedback": "Enviar Feedback",
+    "feedbackSaved": "Feedback guardado correctamente",
+    "monthFeedback": "Feedback General del Mes",
+    "bigRockFeedback": "Feedback del Big Rock",
+    "deleteFeedback": "Eliminar Feedback",
+    "deleteConfirm": "¿Estas seguro de que quieres eliminar este feedback?"
   }
 }

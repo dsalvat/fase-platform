@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { UserRole } from "@prisma/client";
+import { UserRole, FeedbackTargetType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth-options";
 
@@ -536,6 +536,116 @@ export async function canModifyKeyMeeting(
 
   if (userRole === "ADMIN") {
     return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if supervisor can view a supervisee's planning for a month
+ * Only allowed if the planning has been confirmed by the supervisee
+ * @param supervisorId - ID of the supervisor
+ * @param superviseeId - ID of the supervisee
+ * @param month - Month string in YYYY-MM format
+ * @returns true if supervisor can view, false otherwise
+ */
+export async function canViewSuperviseePlanning(
+  supervisorId: string,
+  superviseeId: string,
+  month: string
+): Promise<boolean> {
+  // Verify the supervisor-supervisee relationship
+  const supervisee = await prisma.user.findFirst({
+    where: {
+      id: superviseeId,
+      supervisorId: supervisorId,
+    },
+  });
+
+  if (!supervisee) {
+    return false;
+  }
+
+  // Check if the month planning is confirmed
+  const openMonth = await prisma.openMonth.findFirst({
+    where: {
+      userId: superviseeId,
+      month: month,
+      isPlanningConfirmed: true,
+    },
+  });
+
+  return !!openMonth;
+}
+
+/**
+ * Check if user can give feedback to a target (Big Rock or Month Planning)
+ * Only supervisors can give feedback to their supervisees
+ * @param supervisorId - ID of the supervisor giving feedback
+ * @param targetType - Type of feedback target (BIG_ROCK or MONTH_PLANNING)
+ * @param targetId - ID of the target (BigRock ID or OpenMonth ID)
+ * @returns true if can give feedback, false otherwise
+ */
+export async function canGiveFeedback(
+  supervisorId: string,
+  targetType: FeedbackTargetType,
+  targetId: string
+): Promise<boolean> {
+  if (targetType === "BIG_ROCK") {
+    // Get the Big Rock and its owner
+    const bigRock = await prisma.bigRock.findUnique({
+      where: { id: targetId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            supervisorId: true,
+          },
+        },
+      },
+    });
+
+    if (!bigRock) {
+      return false;
+    }
+
+    // Check if supervisor relationship exists and Big Rock is confirmed
+    if (bigRock.user.supervisorId !== supervisorId || !bigRock.isConfirmed) {
+      return false;
+    }
+
+    // Check if the month planning is confirmed
+    const openMonth = await prisma.openMonth.findFirst({
+      where: {
+        userId: bigRock.userId,
+        month: bigRock.month,
+        isPlanningConfirmed: true,
+      },
+    });
+
+    return !!openMonth;
+  }
+
+  if (targetType === "MONTH_PLANNING") {
+    // Get the OpenMonth and its owner
+    const openMonth = await prisma.openMonth.findUnique({
+      where: { id: targetId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            supervisorId: true,
+          },
+        },
+      },
+    });
+
+    if (!openMonth) {
+      return false;
+    }
+
+    // Check if supervisor relationship exists and planning is confirmed
+    return openMonth.user.supervisorId === supervisorId && openMonth.isPlanningConfirmed;
   }
 
   return false;

@@ -84,6 +84,12 @@ enum LogActionType {
   DELETE
 }
 
+// Tipo de objetivo del feedback
+enum FeedbackTargetType {
+  BIG_ROCK
+  MONTH_PLANNING
+}
+
 // Modelo Company (Empresa)
 model Company {
   id          String   @id @default(cuid())
@@ -141,6 +147,10 @@ model User {
   openMonths    OpenMonth[]
   activityLogs  ActivityLog[]
 
+  // Relaciones de feedback
+  givenFeedback     Feedback[]  @relation("GivenFeedback")
+  receivedFeedback  Feedback[]  @relation("ReceivedFeedback")
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -152,11 +162,15 @@ model User {
 
 // Modelo OpenMonth (Meses futuros abiertos para planificación)
 model OpenMonth {
-  id        String   @id @default(uuid())
-  month     String   // Formato: YYYY-MM
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  openedAt  DateTime @default(now())
+  id                    String    @id @default(uuid())
+  month                 String    // Formato: YYYY-MM
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  openedAt              DateTime  @default(now())
+
+  // Confirmación de planificación mensual
+  isPlanningConfirmed   Boolean   @default(false)
+  planningConfirmedAt   DateTime?
 
   @@unique([month, userId])
   @@index([userId])
@@ -355,4 +369,29 @@ model ActivityLog {
   @@index([entityType])
   @@index([createdAt])
   @@index([userId, createdAt])
+}
+
+// Modelo Feedback (Feedback del supervisor)
+model Feedback {
+  id              String              @id @default(uuid())
+  targetType      FeedbackTargetType
+  targetId        String              // BigRock ID o OpenMonth ID
+  comment         String              @db.Text
+  rating          Int?                // Opcional: 1-5
+
+  // Supervisor que da el feedback
+  supervisorId    String
+  supervisor      User                @relation("GivenFeedback", fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  // Usuario que recibe el feedback
+  userId          String
+  user            User                @relation("ReceivedFeedback", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([targetType, targetId])
+  @@index([supervisorId])
+  @@index([userId])
+  @@index([targetType, targetId])
 }

@@ -27,6 +27,7 @@ export default async function DashboardLayout({
   const userRole = user?.role || UserRole.USER;
   const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const isSuperAdmin = userRole === UserRole.SUPERADMIN;
+  const isSupervisor = userRole === UserRole.SUPERVISOR || isAdmin;
 
   // Get companies for the company switcher
   let companies: { id: string; name: string; slug: string; logo: string | null }[] = [];
@@ -106,6 +107,13 @@ export default async function DashboardLayout({
                 <Link href="/actividad">
                   <Button variant="ghost">{t("activity")}</Button>
                 </Link>
+                {isSupervisor && (
+                  <Link href="/supervisor">
+                    <Button variant="ghost" className="text-teal-600">
+                      {t("supervisor")}
+                    </Button>
+                  </Link>
+                )}
                 {isAdmin && (
                   <Link href="/admin/usuarios">
                     <Button variant="ghost" className="text-purple-600">
@@ -159,7 +167,7 @@ export default async function DashboardLayout({
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-gray-500">
             <p>
-              Metodología FASE por Agustín Peralt | © {new Date().getFullYear()}
+              Metodología FASE para el equipo de Ametller Origen | © {new Date().getFullYear()}
             </p>
           </div>
         </div>
