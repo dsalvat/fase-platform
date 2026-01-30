@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth-options";
 import { UserRole } from "@prisma/client";
 import { getActivityLogs, getViewableUsers } from "@/lib/activity-log";
@@ -9,12 +10,13 @@ export default async function ActividadPage() {
   const userId = session?.user?.id;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userRole = ((session?.user as any)?.role as UserRole) || "USER";
+  const t = await getTranslations("activityLog");
 
   if (!userId) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">
-          Debes iniciar sesion para ver el registro de actividades.
+          {t("loginRequired")}
         </p>
       </div>
     );
@@ -30,9 +32,9 @@ export default async function ActividadPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Registro de Actividades</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
         <p className="text-gray-500 mt-1">
-          Historial de todas las acciones realizadas en la plataforma
+          {t("subtitle")}
         </p>
       </div>
 

@@ -58,7 +58,10 @@
     "inProgress": "En Progres",
     "completed": "Finalitzat",
     "tars": "TARs",
-    "meetings": "Reunions"
+    "meetings": "Reunions",
+    "readOnlyMonth": "Aquest mes es de nomes lectura",
+    "readOnlyMonthDesc": "No pots crear, editar o eliminar Big Rocks de mesos passats.",
+    "backToList": "Tornar a Big Rocks"
   },
   "tars": {
     "title": "TARs",
@@ -92,7 +95,12 @@
     "firstName": "Nom",
     "lastName": "Cognoms",
     "role": "Rol",
-    "contact": "Contacte"
+    "contact": "Contacte",
+    "summary": "Resum",
+    "totalPeople": "Total persones",
+    "linkedToTars": "Vinculades a TARs",
+    "people": "Persones",
+    "backToList": "Tornar a Persones Clau"
   },
   "keyMeetings": {
     "title": "Reunions Clau",
@@ -120,7 +128,8 @@
     "longestStreak": "Millor Ratxa",
     "days": "dies",
     "medals": "Medalles",
-    "leaderboard": "Classificacio"
+    "leaderboard": "Classificacio",
+    "loginRequired": "Has d'iniciar sessio per veure la teva gamificacio."
   },
   "activityLog": {
     "title": "Registre d'Activitats",
@@ -131,7 +140,8 @@
     "allEntities": "Totes les entitats",
     "allActions": "Totes les accions",
     "allUsers": "Tots els usuaris",
-    "noMore": "No hi ha mes registres"
+    "noMore": "No hi ha mes registres",
+    "loginRequired": "Has d'iniciar sessio per veure el registre d'activitats."
   },
   "admin": {
     "title": "Gestio d'Usuaris",

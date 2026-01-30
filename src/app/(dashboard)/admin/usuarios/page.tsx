@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
@@ -55,6 +56,7 @@ export default async function AdminUsuariosPage() {
   const userId = session?.user?.id;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userRole = ((session?.user as any)?.role as UserRole) || "USER";
+  const t = await getTranslations("admin");
 
   // Only admins can access this page
   if (userRole !== "ADMIN") {
@@ -81,17 +83,17 @@ export default async function AdminUsuariosPage() {
           <Shield className="w-6 h-6 text-purple-700" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion de Usuarios</h1>
-          <p className="text-gray-500">Administra roles y supervisores</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-gray-500">{t("subtitle")}</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <StatCard label="Total" value={stats.total} color="gray" />
-        <StatCard label="Administradores" value={stats.admins} color="purple" />
-        <StatCard label="Supervisores" value={stats.supervisors} color="blue" />
-        <StatCard label="Usuarios" value={stats.users} color="green" />
+        <StatCard label={t("total")} value={stats.total} color="gray" />
+        <StatCard label={t("admins")} value={stats.admins} color="purple" />
+        <StatCard label={t("supervisors")} value={stats.supervisors} color="blue" />
+        <StatCard label={t("users")} value={stats.users} color="green" />
       </div>
 
       {/* User List */}

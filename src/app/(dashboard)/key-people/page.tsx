@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { KeyPersonList } from "@/components/key-people";
@@ -12,6 +13,7 @@ import { Plus, Users } from "lucide-react";
  */
 export default async function KeyPeoplePage() {
   const user = await requireAuth();
+  const t = await getTranslations("keyPeople");
 
   // Fetch Key People for the user
   const keyPeople = await prisma.keyPerson.findMany({
@@ -35,16 +37,16 @@ export default async function KeyPeoplePage() {
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Personas Clave</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Gestiona las personas que te ayudan a lograr tus objetivos
+            {t("subtitle")}
           </p>
         </div>
 
         <Link href="/key-people/new">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            Nueva Persona
+            {t("new")}
           </Button>
         </Link>
       </div>
@@ -54,18 +56,18 @@ export default async function KeyPeoplePage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Resumen
+            {t("summary")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold">{totalPeople}</p>
-              <p className="text-sm text-muted-foreground">Total personas</p>
+              <p className="text-sm text-muted-foreground">{t("totalPeople")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-blue-600">{linkedPeople}</p>
-              <p className="text-sm text-muted-foreground">Vinculadas a TARs</p>
+              <p className="text-sm text-muted-foreground">{t("linkedToTars")}</p>
             </div>
           </div>
         </CardContent>
@@ -74,7 +76,7 @@ export default async function KeyPeoplePage() {
       {/* Key People List */}
       <Card>
         <CardHeader>
-          <CardTitle>Personas ({totalPeople})</CardTitle>
+          <CardTitle>{t("people")} ({totalPeople})</CardTitle>
         </CardHeader>
         <CardContent>
           <KeyPersonList keyPeople={keyPeople} />

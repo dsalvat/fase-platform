@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { getLevelProgress, getPointsForNextLevel, MEDAL_CONFIG, MEDAL_LEVEL_CONFIG } from "@/types/gamification";
@@ -140,11 +141,12 @@ function calculateMedalProgress(gamification: {
 export default async function GamificacionPage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
+  const t = await getTranslations("gamification");
 
   if (!userId) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Debes iniciar sesion para ver tu gamificacion.</p>
+        <p className="text-gray-500">{t("loginRequired")}</p>
       </div>
     );
   }
@@ -193,9 +195,9 @@ export default async function GamificacionPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Gamificacion</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
         <p className="text-gray-500 mt-1">
-          Tu progreso y logros en la plataforma FASE
+          {t("subtitle")}
         </p>
       </div>
 

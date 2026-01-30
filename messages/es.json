@@ -58,7 +58,10 @@
     "inProgress": "En Progreso",
     "completed": "Finalizado",
     "tars": "TARs",
-    "meetings": "Reuniones"
+    "meetings": "Reuniones",
+    "readOnlyMonth": "Este mes es de solo lectura",
+    "readOnlyMonthDesc": "No puedes crear, editar o eliminar Big Rocks de meses pasados.",
+    "backToList": "Volver a Big Rocks"
   },
   "tars": {
     "title": "TARs",
@@ -92,7 +95,12 @@
     "firstName": "Nombre",
     "lastName": "Apellidos",
     "role": "Rol",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "summary": "Resumen",
+    "totalPeople": "Total personas",
+    "linkedToTars": "Vinculadas a TARs",
+    "people": "Personas",
+    "backToList": "Volver a Personas Clave"
   },
   "keyMeetings": {
     "title": "Reuniones Clave",
@@ -120,7 +128,8 @@
     "longestStreak": "Mejor Racha",
     "days": "dias",
     "medals": "Medallas",
-    "leaderboard": "Clasificacion"
+    "leaderboard": "Clasificacion",
+    "loginRequired": "Debes iniciar sesion para ver tu gamificacion."
   },
   "activityLog": {
     "title": "Registro de Actividades",
@@ -131,7 +140,8 @@
     "allEntities": "Todas las entidades",
     "allActions": "Todas las acciones",
     "allUsers": "Todos los usuarios",
-    "noMore": "No hay mas registros"
+    "noMore": "No hay mas registros",
+    "loginRequired": "Debes iniciar sesion para ver el registro de actividades."
   },
   "admin": {
     "title": "Gestion de Usuarios",

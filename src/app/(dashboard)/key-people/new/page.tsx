@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { requireAuth } from "@/lib/auth";
 import { KeyPersonForm } from "@/components/key-people";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 export default async function NewKeyPersonPage() {
   // Ensure user is authenticated
   await requireAuth();
+  const t = await getTranslations("keyPeople");
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -19,7 +21,7 @@ export default async function NewKeyPersonPage() {
         <Link href="/key-people">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver a Personas Clave
+            {t("backToList")}
           </Button>
         </Link>
       </div>

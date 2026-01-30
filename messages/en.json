@@ -58,7 +58,10 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "tars": "TARs",
-    "meetings": "Meetings"
+    "meetings": "Meetings",
+    "readOnlyMonth": "This month is read-only",
+    "readOnlyMonthDesc": "You cannot create, edit or delete Big Rocks from past months.",
+    "backToList": "Back to Big Rocks"
   },
   "tars": {
     "title": "TARs",
@@ -92,7 +95,12 @@
     "firstName": "First Name",
     "lastName": "Last Name",
     "role": "Role",
-    "contact": "Contact"
+    "contact": "Contact",
+    "summary": "Summary",
+    "totalPeople": "Total people",
+    "linkedToTars": "Linked to TARs",
+    "people": "People",
+    "backToList": "Back to Key People"
   },
   "keyMeetings": {
     "title": "Key Meetings",
@@ -120,7 +128,8 @@
     "longestStreak": "Best Streak",
     "days": "days",
     "medals": "Medals",
-    "leaderboard": "Leaderboard"
+    "leaderboard": "Leaderboard",
+    "loginRequired": "You must sign in to view your gamification."
   },
   "activityLog": {
     "title": "Activity Log",
@@ -131,7 +140,8 @@
     "allEntities": "All entities",
     "allActions": "All actions",
     "allUsers": "All users",
-    "noMore": "No more records"
+    "noMore": "No more records",
+    "loginRequired": "You must sign in to view the activity log."
   },
   "admin": {
     "title": "User Management",

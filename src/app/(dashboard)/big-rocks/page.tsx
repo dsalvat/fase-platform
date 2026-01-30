@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { BigRockList } from "@/components/big-rocks/big-rock-list";
 import { MonthSelector } from "@/components/big-rocks/month-selector";
 import { Button } from "@/components/ui/button";
@@ -22,14 +23,17 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
   const displayMonth = month || defaultMonth;
   const isReadOnly = isMonthReadOnly(displayMonth);
 
+  const t = await getTranslations("bigRocks");
+  const tCommon = await getTranslations("common");
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Big Rocks</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-gray-600 mt-1">
-            Tus objetivos mensuales siguiendo la metodología FASE
+            {t("subtitle")}
           </p>
         </div>
 
@@ -37,7 +41,7 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
           <Link href={`/big-rocks/new?month=${displayMonth}`}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Crear Big Rock
+              {t("new")}
             </Button>
           </Link>
         )}
@@ -65,10 +69,10 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
               </svg>
               <div>
                 <p className="text-sm font-medium text-yellow-800">
-                  Este mes es de solo lectura
+                  {t("readOnlyMonth")}
                 </p>
                 <p className="text-xs text-yellow-700">
-                  No puedes crear, editar o eliminar Big Rocks de meses pasados.
+                  {t("readOnlyMonthDesc")}
                 </p>
               </div>
             </div>
@@ -81,7 +85,7 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         fallback={
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Cargando Big Rocks...</span>
+            <span className="ml-3 text-gray-600">{tCommon("loading")}</span>
           </div>
         }
       >
