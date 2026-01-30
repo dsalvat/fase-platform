@@ -32,6 +32,19 @@ export const createKeyMeetingSchema = z.object({
     .max(2000, "El resultado no puede exceder 2000 caracteres")
     .optional()
     .nullable(),
+
+  objective: z
+    .string()
+    .min(5, "El objetivo debe tener al menos 5 caracteres")
+    .max(500, "El objetivo no puede exceder 500 caracteres")
+    .optional()
+    .nullable(),
+
+  expectedDecision: z
+    .string()
+    .max(500, "La decisión esperada no puede exceder 500 caracteres")
+    .optional()
+    .nullable(),
 });
 
 /**
@@ -66,6 +79,19 @@ export const updateKeyMeetingSchema = z.object({
   outcome: z
     .string()
     .max(2000, "El resultado no puede exceder 2000 caracteres")
+    .optional()
+    .nullable(),
+
+  objective: z
+    .string()
+    .min(5, "El objetivo debe tener al menos 5 caracteres")
+    .max(500, "El objetivo no puede exceder 500 caracteres")
+    .optional()
+    .nullable(),
+
+  expectedDecision: z
+    .string()
+    .max(500, "La decisión esperada no puede exceder 500 caracteres")
     .optional()
     .nullable(),
 });

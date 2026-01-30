@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAuth, canModifyKeyPerson, canModifyTAR } from "@/lib/auth";
+import { requireAuth, canModifyKeyPerson, canModifyTAR, canModifyBigRock } from "@/lib/auth";
 import {
   createKeyPersonSchema,
   updateKeyPersonSchema,
@@ -409,6 +409,159 @@ export async function unlinkKeyPersonFromTAR(
     return {
       success: false,
       error: "Error al desvincular la persona clave de la TAR",
+    };
+  }
+}
+
+/**
+ * Server action to link a Key Person to a BigRock
+ * @param keyPersonId - ID of the Key Person
+ * @param bigRockId - ID of the BigRock
+ * @returns Success response
+ */
+export async function linkKeyPersonToBigRock(
+  keyPersonId: string,
+  bigRockId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check modification permissions for Key Person
+    const canModifyPerson = await canModifyKeyPerson(keyPersonId, user.id, userRole);
+    if (!canModifyPerson) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar esta persona clave",
+      };
+    }
+
+    // Check modification permissions for BigRock
+    const canModifyRock = await canModifyBigRock(bigRockId, user.id, userRole);
+    if (!canModifyRock) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar este Big Rock o el mes es de solo lectura",
+      };
+    }
+
+    // Verify BigRock belongs to same user as KeyPerson
+    const [keyPerson, bigRock] = await Promise.all([
+      prisma.keyPerson.findUnique({
+        where: { id: keyPersonId },
+        select: { userId: true },
+      }),
+      prisma.bigRock.findUnique({
+        where: { id: bigRockId },
+        select: { userId: true },
+      }),
+    ]);
+
+    if (!keyPerson || !bigRock) {
+      return {
+        success: false,
+        error: "Persona clave o Big Rock no encontrado",
+      };
+    }
+
+    if (keyPerson.userId !== bigRock.userId) {
+      return {
+        success: false,
+        error: "La persona clave y el Big Rock deben pertenecer al mismo usuario",
+      };
+    }
+
+    // Link Key Person to BigRock
+    await prisma.bigRock.update({
+      where: { id: bigRockId },
+      data: {
+        keyPeople: {
+          connect: { id: keyPersonId },
+        },
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+    revalidatePath(`/key-people/${keyPersonId}`);
+    revalidatePath(`/big-rocks/${bigRockId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error linking Key Person to BigRock:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al vincular la persona clave al Big Rock",
+    };
+  }
+}
+
+/**
+ * Server action to unlink a Key Person from a BigRock
+ * @param keyPersonId - ID of the Key Person
+ * @param bigRockId - ID of the BigRock
+ * @returns Success response
+ */
+export async function unlinkKeyPersonFromBigRock(
+  keyPersonId: string,
+  bigRockId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Check modification permissions for BigRock
+    const canModifyRock = await canModifyBigRock(bigRockId, user.id, userRole);
+    if (!canModifyRock) {
+      return {
+        success: false,
+        error: "No tienes permiso para modificar este Big Rock o el mes es de solo lectura",
+      };
+    }
+
+    // Unlink Key Person from BigRock
+    await prisma.bigRock.update({
+      where: { id: bigRockId },
+      data: {
+        keyPeople: {
+          disconnect: { id: keyPersonId },
+        },
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/key-people");
+    revalidatePath(`/key-people/${keyPersonId}`);
+    revalidatePath(`/big-rocks/${bigRockId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error unlinking Key Person from BigRock:", error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Error al desvincular la persona clave del Big Rock",
     };
   }
 }

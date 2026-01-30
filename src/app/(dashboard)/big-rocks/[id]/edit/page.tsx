@@ -28,7 +28,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
     redirect(`/big-rocks/${id}`);
   }
 
-  // Fetch Big Rock
+  // Fetch Big Rock with keyPeople and keyMeetings
   const bigRock = await prisma.bigRock.findUnique({
     where: { id },
     include: {
@@ -44,9 +44,12 @@ export default async function EditBigRockPage({ params }: PageProps) {
           status: true,
         },
       },
+      keyPeople: true,
+      keyMeetings: true,
       _count: {
         select: {
           keyMeetings: true,
+          keyPeople: true,
         },
       },
     },
@@ -55,6 +58,12 @@ export default async function EditBigRockPage({ params }: PageProps) {
   if (!bigRock) {
     notFound();
   }
+
+  // Fetch all available key people for the user
+  const availableKeyPeople = await prisma.keyPerson.findMany({
+    where: { userId: user.id },
+    orderBy: { firstName: "asc" },
+  });
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -69,7 +78,11 @@ export default async function EditBigRockPage({ params }: PageProps) {
       </div>
 
       {/* Form */}
-      <BigRockForm mode="edit" bigRock={bigRock} />
+      <BigRockForm
+        mode="edit"
+        bigRock={bigRock}
+        availableKeyPeople={availableKeyPeople}
+      />
     </div>
   );
 }

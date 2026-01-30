@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { getNextMonth, getCurrentMonth } from "@/lib/month-helpers";
+import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
 interface PageProps {
   searchParams: Promise<{
@@ -19,6 +21,13 @@ export default async function NewBigRockPage({ searchParams }: PageProps) {
   const { month } = await searchParams;
   const defaultMonth = month || getNextMonth(getCurrentMonth());
   const t = await getTranslations("bigRocks");
+  const user = await requireAuth();
+
+  // Fetch available key people for the user
+  const availableKeyPeople = await prisma.keyPerson.findMany({
+    where: { userId: user.id },
+    orderBy: { firstName: "asc" },
+  });
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -33,7 +42,11 @@ export default async function NewBigRockPage({ searchParams }: PageProps) {
       </div>
 
       {/* Form */}
-      <BigRockForm mode="create" defaultMonth={defaultMonth} />
+      <BigRockForm
+        mode="create"
+        defaultMonth={defaultMonth}
+        availableKeyPeople={availableKeyPeople}
+      />
     </div>
   );
 }

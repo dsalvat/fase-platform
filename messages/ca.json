@@ -61,7 +61,19 @@
     "meetings": "Reunions",
     "readOnlyMonth": "Aquest mes es de nomes lectura",
     "readOnlyMonthDesc": "No pots crear, editar o eliminar Big Rocks de mesos passats.",
-    "backToList": "Tornar a Big Rocks"
+    "backToList": "Tornar a Big Rocks",
+    "keyPeopleSection": "Persones Clau",
+    "keyPeopleDescription": "Selecciona persones existents o crea noves que t'ajudaran a aconseguir aquest objectiu.",
+    "selectKeyPeople": "Seleccionar persones clau existents",
+    "createNewPerson": "Crear nova persona",
+    "newPersonAdded": "Nova persona (es creara en desar)",
+    "keyMeetingsSection": "Reunions Clau",
+    "keyMeetingsDescription": "Afegeix les reunions necessaries per validar, refinar i prendre decisions sobre aquest objectiu.",
+    "addKeyMeeting": "Afegir reunio clau",
+    "noKeyPeople": "No hi ha persones clau seleccionades",
+    "noKeyMeetings": "No hi ha reunions clau afegides",
+    "selectedPeople": "Persones seleccionades",
+    "availablePeople": "Persones disponibles"
   },
   "tars": {
     "title": "TARs",
@@ -108,7 +120,12 @@
     "edit": "Editar Reunio Clau",
     "delete": "Eliminar Reunio Clau",
     "date": "Data",
-    "outcome": "Resultat"
+    "outcome": "Resultat",
+    "objective": "Objectiu de la reunio",
+    "objectivePlaceholder": "Quin es el proposit d'aquesta reunio?",
+    "expectedDecision": "Decisio esperada",
+    "expectedDecisionPlaceholder": "Quina decisio ha de sortir d'aquesta reunio?",
+    "additionalDescription": "Descripcio addicional"
   },
   "calendar": {
     "title": "Calendari",

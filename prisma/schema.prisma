@@ -149,6 +149,7 @@ model BigRock {
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tars            TAR[]
   keyMeetings     KeyMeeting[]
+  keyPeople       KeyPerson[]    // Personas clave asociadas al Big Rock
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -215,6 +216,7 @@ model KeyPerson {
   userId          String
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tars            TAR[]
+  bigRocks        BigRock[]      // Big Rocks asociados a esta persona
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -230,6 +232,8 @@ model KeyMeeting {
   date            DateTime
   completed       Boolean        @default(false)
   outcome         String?        // Resultado de la reunión
+  objective       String?        // Objetivo de la reunión
+  expectedDecision String?       // Decisión esperada
 
   // Relación
   bigRockId       String

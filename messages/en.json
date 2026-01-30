@@ -61,7 +61,19 @@
     "meetings": "Meetings",
     "readOnlyMonth": "This month is read-only",
     "readOnlyMonthDesc": "You cannot create, edit or delete Big Rocks from past months.",
-    "backToList": "Back to Big Rocks"
+    "backToList": "Back to Big Rocks",
+    "keyPeopleSection": "Key People",
+    "keyPeopleDescription": "Select existing people or create new ones who will help you achieve this goal.",
+    "selectKeyPeople": "Select existing key people",
+    "createNewPerson": "Create new person",
+    "newPersonAdded": "New person (will be created on save)",
+    "keyMeetingsSection": "Key Meetings",
+    "keyMeetingsDescription": "Add the meetings needed to validate, refine, and make decisions about this goal.",
+    "addKeyMeeting": "Add key meeting",
+    "noKeyPeople": "No key people selected",
+    "noKeyMeetings": "No key meetings added",
+    "selectedPeople": "Selected people",
+    "availablePeople": "Available people"
   },
   "tars": {
     "title": "TARs",
@@ -108,7 +120,12 @@
     "edit": "Edit Key Meeting",
     "delete": "Delete Key Meeting",
     "date": "Date",
-    "outcome": "Outcome"
+    "outcome": "Outcome",
+    "objective": "Meeting objective",
+    "objectivePlaceholder": "What is the purpose of this meeting?",
+    "expectedDecision": "Expected decision",
+    "expectedDecisionPlaceholder": "What decision should come out of this meeting?",
+    "additionalDescription": "Additional description"
   },
   "calendar": {
     "title": "Calendar",

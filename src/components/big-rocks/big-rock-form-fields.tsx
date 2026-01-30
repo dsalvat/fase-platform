@@ -11,12 +11,30 @@ import {
 } from "@/components/ui/select";
 import { BigRockWithCounts } from "@/types/big-rock";
 import { generateMonthOptions, getCurrentMonth, getNextMonth } from "@/lib/month-helpers";
+import { BigRockKeyPersonSelector } from "./big-rock-key-person-selector";
+import { BigRockKeyMeetingInline } from "./big-rock-key-meeting-inline";
+import { KeyPerson } from "@prisma/client";
+import { InlineKeyPerson, InlineKeyMeeting } from "@/types/inline-forms";
+import { Users, Calendar } from "lucide-react";
 
 interface BigRockFormFieldsProps {
   defaultValues?: Partial<BigRockWithCounts>;
   defaultMonth?: string;
   isPending?: boolean;
   mode?: "create" | "edit";
+  // Key People props
+  availableKeyPeople?: KeyPerson[];
+  selectedKeyPeopleIds?: string[];
+  newKeyPeople?: InlineKeyPerson[];
+  onSelectKeyPerson?: (id: string) => void;
+  onDeselectKeyPerson?: (id: string) => void;
+  onAddNewKeyPerson?: (person: InlineKeyPerson) => void;
+  onRemoveNewKeyPerson?: (index: number) => void;
+  // Key Meetings props
+  keyMeetings?: InlineKeyMeeting[];
+  onAddKeyMeeting?: (meeting: InlineKeyMeeting) => void;
+  onRemoveKeyMeeting?: (index: number) => void;
+  onUpdateKeyMeeting?: (index: number, meeting: InlineKeyMeeting) => void;
 }
 
 const categoryOptions = [
@@ -41,6 +59,19 @@ export function BigRockFormFields({
   defaultMonth,
   isPending = false,
   mode = "create",
+  // Key People props
+  availableKeyPeople = [],
+  selectedKeyPeopleIds = [],
+  newKeyPeople = [],
+  onSelectKeyPerson,
+  onDeselectKeyPerson,
+  onAddNewKeyPerson,
+  onRemoveNewKeyPerson,
+  // Key Meetings props
+  keyMeetings = [],
+  onAddKeyMeeting,
+  onRemoveKeyMeeting,
+  onUpdateKeyMeeting,
 }: BigRockFormFieldsProps) {
   const monthOptions = generateMonthOptions(12, getCurrentMonth());
   const defaultMonthValue = defaultMonth || getNextMonth(getCurrentMonth());
@@ -205,6 +236,49 @@ export function BigRockFormFields({
               ))}
             </SelectContent>
           </Select>
+        </div>
+      )}
+
+      {/* Key People Section */}
+      {onSelectKeyPerson && onDeselectKeyPerson && onAddNewKeyPerson && onRemoveNewKeyPerson && (
+        <div className="space-y-3 pt-4 border-t">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            <Label className="text-base font-semibold">Personas Clave</Label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Selecciona personas existentes o crea nuevas que te ayudaran a lograr este objetivo.
+          </p>
+          <BigRockKeyPersonSelector
+            availableKeyPeople={availableKeyPeople}
+            selectedIds={selectedKeyPeopleIds}
+            newPeople={newKeyPeople}
+            onSelect={onSelectKeyPerson}
+            onDeselect={onDeselectKeyPerson}
+            onAddNew={onAddNewKeyPerson}
+            onRemoveNew={onRemoveNewKeyPerson}
+            disabled={isPending}
+          />
+        </div>
+      )}
+
+      {/* Key Meetings Section */}
+      {onAddKeyMeeting && onRemoveKeyMeeting && onUpdateKeyMeeting && (
+        <div className="space-y-3 pt-4 border-t">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+            <Label className="text-base font-semibold">Reuniones Clave</Label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Agrega las reuniones necesarias para validar, refinar y tomar decisiones sobre este objetivo.
+          </p>
+          <BigRockKeyMeetingInline
+            meetings={keyMeetings}
+            onAdd={onAddKeyMeeting}
+            onRemove={onRemoveKeyMeeting}
+            onUpdate={onUpdateKeyMeeting}
+            disabled={isPending}
+          />
         </div>
       )}
     </div>

@@ -58,6 +58,8 @@ export async function createKeyMeeting(
         date: new Date(validated.date),
         completed: validated.completed || false,
         outcome: validated.outcome || null,
+        objective: validated.objective || null,
+        expectedDecision: validated.expectedDecision || null,
         bigRockId: validated.bigRockId,
       },
       include: {
@@ -135,6 +137,8 @@ export async function updateKeyMeeting(
       date: formData.get("date") as string | undefined,
       completed: formData.has("completed") ? formData.get("completed") === "true" : undefined,
       outcome: formData.get("outcome") as string | null,
+      objective: formData.get("objective") as string | null,
+      expectedDecision: formData.get("expectedDecision") as string | null,
     };
 
     // Validate with Zod
@@ -149,6 +153,8 @@ export async function updateKeyMeeting(
     if (updateData.date !== undefined) dataToUpdate.date = new Date(updateData.date);
     if (updateData.completed !== undefined) dataToUpdate.completed = updateData.completed;
     if (updateData.outcome !== undefined) dataToUpdate.outcome = updateData.outcome;
+    if (updateData.objective !== undefined) dataToUpdate.objective = updateData.objective;
+    if (updateData.expectedDecision !== undefined) dataToUpdate.expectedDecision = updateData.expectedDecision;
 
     // Update Key Meeting in database
     const keyMeeting = await prisma.keyMeeting.update({
