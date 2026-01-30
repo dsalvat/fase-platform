@@ -7,6 +7,11 @@ import {
   createKeyPersonSchema,
   updateKeyPersonSchema,
 } from "@/lib/validations/key-person";
+import {
+  logKeyPersonCreated,
+  logKeyPersonUpdated,
+  logKeyPersonDeleted,
+} from "@/lib/activity-log";
 
 /**
  * Server action to create a new Key Person
@@ -42,6 +47,14 @@ export async function createKeyPerson(
         userId: user.id,
       },
     });
+
+    // Record activity log
+    try {
+      const fullName = `${keyPerson.firstName} ${keyPerson.lastName}`;
+      await logKeyPersonCreated(user.id, keyPerson.id, fullName);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath("/key-people");
@@ -115,10 +128,18 @@ export async function updateKeyPerson(
     if (updateData.contact !== undefined) dataToUpdate.contact = updateData.contact;
 
     // Update Key Person in database
-    await prisma.keyPerson.update({
+    const keyPerson = await prisma.keyPerson.update({
       where: { id },
       data: dataToUpdate,
     });
+
+    // Record activity log
+    try {
+      const fullName = `${keyPerson.firstName} ${keyPerson.lastName}`;
+      await logKeyPersonUpdated(keyPerson.userId, keyPerson.id, fullName, dataToUpdate);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath("/key-people");
@@ -167,10 +188,33 @@ export async function deleteKeyPerson(id: string): Promise<{
       };
     }
 
+    // Get Key Person data before deleting
+    const keyPerson = await prisma.keyPerson.findUnique({
+      where: { id },
+      select: { firstName: true, lastName: true, userId: true },
+    });
+
+    if (!keyPerson) {
+      return {
+        success: false,
+        error: "Persona clave no encontrada",
+      };
+    }
+
+    const fullName = `${keyPerson.firstName} ${keyPerson.lastName}`;
+    const ownerId = keyPerson.userId;
+
     // Delete Key Person (cascade will handle TAR relations)
     await prisma.keyPerson.delete({
       where: { id },
     });
+
+    // Record activity log
+    try {
+      await logKeyPersonDeleted(ownerId, id, fullName);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath("/key-people");

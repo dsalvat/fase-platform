@@ -10,6 +10,11 @@ import {
 } from "@/lib/validations/activity";
 import { ActivityType } from "@prisma/client";
 import { recordDailyLog } from "@/lib/gamification";
+import {
+  logActivityCreated,
+  logActivityUpdated,
+  logActivityDeleted,
+} from "@/lib/activity-log";
 
 /**
  * Server action to create a new Activity
@@ -67,10 +72,22 @@ export async function createActivity(
         tar: {
           select: {
             bigRockId: true,
+            bigRock: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
     });
+
+    // Record activity log
+    try {
+      await logActivityCreated(activity.tar.bigRock.userId, activity.id, activity.title);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${activity.tar.bigRockId}/tars/${validated.tarId}`);
@@ -150,10 +167,22 @@ export async function updateActivity(
           select: {
             id: true,
             bigRockId: true,
+            bigRock: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
     });
+
+    // Record activity log
+    try {
+      await logActivityUpdated(activity.tar.bigRock.userId, activity.id, activity.title, updateData);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${activity.tar.bigRockId}/tars/${activity.tar.id}`);
@@ -206,10 +235,16 @@ export async function deleteActivity(id: string): Promise<{
     const activity = await prisma.activity.findUnique({
       where: { id },
       select: {
+        title: true,
         tarId: true,
         tar: {
           select: {
             bigRockId: true,
+            bigRock: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
@@ -222,10 +257,20 @@ export async function deleteActivity(id: string): Promise<{
       };
     }
 
+    const activityTitle = activity.title;
+    const activityOwnerId = activity.tar.bigRock.userId;
+
     // Delete Activity
     await prisma.activity.delete({
       where: { id },
     });
+
+    // Record activity log
+    try {
+      await logActivityDeleted(activityOwnerId, id, activityTitle);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${activity.tar.bigRockId}/tars/${activity.tarId}`);

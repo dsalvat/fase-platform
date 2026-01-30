@@ -46,6 +46,9 @@ export default async function DashboardLayout({
                 <Link href="/gamificacion">
                   <Button variant="ghost">Gamificacion</Button>
                 </Link>
+                <Link href="/actividad">
+                  <Button variant="ghost">Actividad</Button>
+                </Link>
               </div>
             </div>
 

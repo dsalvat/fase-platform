@@ -11,6 +11,11 @@ import {
 } from "@/lib/validations/tar";
 import { TarStatus } from "@prisma/client";
 import { recordTARCompleted } from "@/lib/gamification";
+import {
+  logTARCreated,
+  logTARUpdated,
+  logTARDeleted,
+} from "@/lib/activity-log";
 
 /**
  * Server action to create a new TAR
@@ -58,6 +63,13 @@ export async function createTAR(
         },
       },
     });
+
+    // Record activity log
+    try {
+      await logTARCreated(user.id, tar.id, tar.description);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${validated.bigRockId}`);
@@ -132,10 +144,18 @@ export async function updateTAR(
         bigRock: {
           select: {
             id: true,
+            userId: true,
           },
         },
       },
     });
+
+    // Record activity log
+    try {
+      await logTARUpdated(tar.bigRock.userId, tar.id, tar.description, updateData);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${tar.bigRock.id}`);
@@ -189,7 +209,7 @@ export async function deleteTAR(id: string): Promise<{
     // Get TAR to know the Big Rock for revalidation
     const tar = await prisma.tAR.findUnique({
       where: { id },
-      select: { bigRockId: true },
+      select: { bigRockId: true, description: true, bigRock: { select: { userId: true } } },
     });
 
     if (!tar) {
@@ -199,10 +219,20 @@ export async function deleteTAR(id: string): Promise<{
       };
     }
 
+    const tarDescription = tar.description;
+    const tarOwnerId = tar.bigRock.userId;
+
     // Delete TAR (cascades to Activities)
     await prisma.tAR.delete({
       where: { id },
     });
+
+    // Record activity log
+    try {
+      await logTARDeleted(tarOwnerId, id, tarDescription);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${tar.bigRockId}`);

@@ -10,6 +10,11 @@ import {
 } from "@/lib/validations/big-rock";
 import { FaseCategory, BigRockStatus } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
+import {
+  logBigRockCreated,
+  logBigRockUpdated,
+  logBigRockDeleted,
+} from "@/lib/activity-log";
 
 /**
  * Server action to create a new Big Rock
@@ -60,6 +65,13 @@ export async function createBigRock(
     } catch (gamificationError) {
       // Log but don't fail the main operation
       console.error("Error recording gamification:", gamificationError);
+    }
+
+    // Record activity log
+    try {
+      await logBigRockCreated(user.id, bigRock.id, bigRock.title);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
     }
 
     // Revalidate relevant paths
@@ -136,6 +148,13 @@ export async function updateBigRock(
       data: updateData,
     });
 
+    // Record activity log
+    try {
+      await logBigRockUpdated(user.id, bigRock.id, bigRock.title, updateData);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
+
     // Revalidate relevant paths
     revalidatePath("/big-rocks");
     revalidatePath(`/big-rocks?month=${bigRock.month}`);
@@ -187,7 +206,7 @@ export async function deleteBigRock(id: string): Promise<{
     // Get Big Rock to know the month for revalidation
     const bigRock = await prisma.bigRock.findUnique({
       where: { id },
-      select: { month: true },
+      select: { month: true, title: true },
     });
 
     if (!bigRock) {
@@ -197,10 +216,19 @@ export async function deleteBigRock(id: string): Promise<{
       };
     }
 
+    const bigRockTitle = bigRock.title;
+
     // Delete Big Rock (cascades to TARs and KeyMeetings)
     await prisma.bigRock.delete({
       where: { id },
     });
+
+    // Record activity log
+    try {
+      await logBigRockDeleted(user.id, id, bigRockTitle);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath("/big-rocks");

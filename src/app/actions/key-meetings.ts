@@ -7,6 +7,11 @@ import {
   createKeyMeetingSchema,
   updateKeyMeetingSchema,
 } from "@/lib/validations/key-meeting";
+import {
+  logKeyMeetingCreated,
+  logKeyMeetingUpdated,
+  logKeyMeetingDeleted,
+} from "@/lib/activity-log";
 
 /**
  * Server action to create a new Key Meeting
@@ -55,7 +60,21 @@ export async function createKeyMeeting(
         outcome: validated.outcome || null,
         bigRockId: validated.bigRockId,
       },
+      include: {
+        bigRock: {
+          select: {
+            userId: true,
+          },
+        },
+      },
     });
+
+    // Record activity log
+    try {
+      await logKeyMeetingCreated(keyMeeting.bigRock.userId, keyMeeting.id, keyMeeting.title);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${validated.bigRockId}`);
@@ -139,10 +158,18 @@ export async function updateKeyMeeting(
         bigRock: {
           select: {
             id: true,
+            userId: true,
           },
         },
       },
     });
+
+    // Record activity log
+    try {
+      await logKeyMeetingUpdated(keyMeeting.bigRock.userId, keyMeeting.id, keyMeeting.title, dataToUpdate);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${keyMeeting.bigRock.id}`);
@@ -196,7 +223,7 @@ export async function deleteKeyMeeting(id: string): Promise<{
     // Get Key Meeting to know the Big Rock for revalidation
     const keyMeeting = await prisma.keyMeeting.findUnique({
       where: { id },
-      select: { bigRockId: true },
+      select: { bigRockId: true, title: true, bigRock: { select: { userId: true } } },
     });
 
     if (!keyMeeting) {
@@ -206,10 +233,20 @@ export async function deleteKeyMeeting(id: string): Promise<{
       };
     }
 
+    const meetingTitle = keyMeeting.title;
+    const meetingOwnerId = keyMeeting.bigRock.userId;
+
     // Delete Key Meeting
     await prisma.keyMeeting.delete({
       where: { id },
     });
+
+    // Record activity log
+    try {
+      await logKeyMeetingDeleted(meetingOwnerId, id, meetingTitle);
+    } catch (logError) {
+      console.error("Error recording activity log:", logError);
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${keyMeeting.bigRockId}`);

@@ -61,6 +61,22 @@ enum MedalLevel {
   DIAMANTE
 }
 
+// Tipos de entidad para Activity Log
+enum LogEntityType {
+  BIG_ROCK
+  TAR
+  ACTIVITY
+  KEY_PERSON
+  KEY_MEETING
+}
+
+// Tipos de accion para Activity Log
+enum LogActionType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 // Modelo User
 model User {
   id            String      @id @default(uuid())
@@ -79,6 +95,7 @@ model User {
   keyPeople     KeyPerson[]
   gamification  Gamification?
   openMonths    OpenMonth[]
+  activityLogs  ActivityLog[]
 
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -261,4 +278,26 @@ model Medal {
   @@index([gamificationId])
   @@index([type])
   @@index([level])
+}
+
+// Modelo ActivityLog (Registro de Actividades del Sistema)
+model ActivityLog {
+  id          String          @id @default(uuid())
+  action      LogActionType
+  entityType  LogEntityType
+  entityId    String
+  description String
+  entityTitle String?
+  metadata    Json?
+
+  // Relación con usuario
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@index([userId, createdAt])
 }
