@@ -10,6 +10,7 @@ import {
   updateTARStatusSchema,
 } from "@/lib/validations/tar";
 import { TarStatus } from "@prisma/client";
+import { recordTARCompleted } from "@/lib/gamification";
 
 /**
  * Server action to create a new TAR
@@ -320,6 +321,14 @@ export async function updateTARStatus(
     // Validate
     const validated = updateTARStatusSchema.parse({ id, status });
 
+    // Get current TAR status to check if it's changing to COMPLETADA
+    const currentTar = await prisma.tAR.findUnique({
+      where: { id },
+      select: { status: true, bigRock: { select: { userId: true } } },
+    });
+
+    const wasNotCompleted = currentTar?.status !== "COMPLETADA";
+
     // If setting to COMPLETADA, also set progress to 100
     const updateData: { status: TarStatus; progress?: number } = {
       status: validated.status
@@ -340,6 +349,16 @@ export async function updateTARStatus(
         },
       },
     });
+
+    // Award gamification points if TAR is now completed (and wasn't before)
+    if (validated.status === "COMPLETADA" && wasNotCompleted && currentTar?.bigRock?.userId) {
+      try {
+        await recordTARCompleted(currentTar.bigRock.userId);
+      } catch (gamificationError) {
+        // Log but don't fail the main operation
+        console.error("Error recording gamification:", gamificationError);
+      }
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${tar.bigRock.id}`);

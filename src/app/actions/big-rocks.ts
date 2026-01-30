@@ -9,6 +9,7 @@ import {
   updateBigRockSchema,
 } from "@/lib/validations/big-rock";
 import { FaseCategory, BigRockStatus } from "@prisma/client";
+import { recordBigRockCreated } from "@/lib/gamification";
 
 /**
  * Server action to create a new Big Rock
@@ -52,6 +53,14 @@ export async function createBigRock(
         userId: user.id,
       },
     });
+
+    // Award gamification points for creating a Big Rock
+    try {
+      await recordBigRockCreated(user.id);
+    } catch (gamificationError) {
+      // Log but don't fail the main operation
+      console.error("Error recording gamification:", gamificationError);
+    }
 
     // Revalidate relevant paths
     revalidatePath("/big-rocks");

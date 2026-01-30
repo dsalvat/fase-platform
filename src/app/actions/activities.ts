@@ -9,6 +9,7 @@ import {
   getWeekString,
 } from "@/lib/validations/activity";
 import { ActivityType } from "@prisma/client";
+import { recordDailyLog } from "@/lib/gamification";
 
 /**
  * Server action to create a new Activity
@@ -281,10 +282,25 @@ export async function toggleActivityCompletion(
           select: {
             id: true,
             bigRockId: true,
+            bigRock: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
     });
+
+    // Award gamification points for completing a daily activity
+    if (completed && activity.tar.bigRock?.userId) {
+      try {
+        await recordDailyLog(activity.tar.bigRock.userId);
+      } catch (gamificationError) {
+        // Log but don't fail the main operation
+        console.error("Error recording gamification:", gamificationError);
+      }
+    }
 
     // Revalidate relevant paths
     revalidatePath(`/big-rocks/${activity.tar.bigRockId}/tars/${activity.tar.id}`);
