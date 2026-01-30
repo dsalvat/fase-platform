@@ -74,10 +74,10 @@ export function TARForm({ tar, bigRockId, bigRockTitle, mode }: TARFormProps) {
           {/* Success message */}
           {state?.success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">¡Éxito!</p>
+              <p className="text-sm font-medium">Exito!</p>
               <p className="text-sm">
                 {mode === "create"
-                  ? `TAR "${state.description?.substring(0, 50)}${(state.description?.length || 0) > 50 ? '...' : ''}" creada correctamente. Redirigiendo...`
+                  ? "TAR creada correctamente. Redirigiendo..."
                   : "TAR actualizada correctamente. Redirigiendo..."}
               </p>
             </div>

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireAuth, canAccessBigRock } from "@/lib/auth";
+import { requireAuth, canAccessBigRock, canModifyBigRock } from "@/lib/auth";
 import { successResponse, handleApiError } from "@/lib/api-response";
-import { uuidParamSchema } from "@/lib/validations/big-rock";
+import { uuidParamSchema, updateBigRockSchema } from "@/lib/validations/big-rock";
 
 interface RouteParams {
   params: Promise<{
@@ -60,6 +60,109 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     return successResponse(bigRock);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * PUT /api/big-rocks/:id
+ * Update a Big Rock
+ */
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Validate ID format
+    const idValidation = uuidParamSchema.safeParse(id);
+    if (!idValidation.success) {
+      return handleApiError(new Error("ID invalido"));
+    }
+
+    // Check modification permissions
+    const canModify = await canModifyBigRock(id, user.id, userRole);
+    if (!canModify) {
+      return handleApiError(new Error("Forbidden"));
+    }
+
+    const body = await request.json();
+
+    // Validate request body
+    const validationResult = updateBigRockSchema.safeParse({ ...body, id });
+    if (!validationResult.success) {
+      return handleApiError(new Error(validationResult.error.errors[0].message));
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, ...updateData } = validationResult.data;
+
+    // Update Big Rock
+    const bigRock = await prisma.bigRock.update({
+      where: { id },
+      data: updateData,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        tars: {
+          orderBy: { createdAt: "asc" },
+        },
+        keyMeetings: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    return successResponse(bigRock);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * PATCH /api/big-rocks/:id
+ * Partial update a Big Rock (alias for PUT)
+ */
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  return PUT(request, { params });
+}
+
+/**
+ * DELETE /api/big-rocks/:id
+ * Delete a Big Rock
+ */
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role;
+
+    // Validate ID format
+    const idValidation = uuidParamSchema.safeParse(id);
+    if (!idValidation.success) {
+      return handleApiError(new Error("ID invalido"));
+    }
+
+    // Check modification permissions
+    const canModify = await canModifyBigRock(id, user.id, userRole);
+    if (!canModify) {
+      return handleApiError(new Error("Forbidden"));
+    }
+
+    // Delete Big Rock (cascades to TARs and KeyMeetings)
+    await prisma.bigRock.delete({
+      where: { id },
+    });
+
+    return successResponse({ deleted: true });
   } catch (error) {
     return handleApiError(error);
   }

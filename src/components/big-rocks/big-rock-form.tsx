@@ -68,10 +68,10 @@ export function BigRockForm({ bigRock, mode, defaultMonth }: BigRockFormProps) {
           {/* Success message */}
           {state?.success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">¡Éxito!</p>
+              <p className="text-sm font-medium">Exito!</p>
               <p className="text-sm">
                 {mode === "create"
-                  ? `Big Rock "${state.title}" creado correctamente. Redirigiendo...`
+                  ? "Big Rock creado correctamente. Redirigiendo..."
                   : "Big Rock actualizado correctamente. Redirigiendo..."}
               </p>
             </div>

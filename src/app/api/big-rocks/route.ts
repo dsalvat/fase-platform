@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { isMonthReadOnly } from "@/lib/month-helpers";
 import { successResponse, handleApiError } from "@/lib/api-response";
-import { monthParamSchema } from "@/lib/validations/big-rock";
+import { monthParamSchema, createBigRockSchema } from "@/lib/validations/big-rock";
 
 /**
  * GET /api/big-rocks
@@ -84,6 +85,62 @@ export async function GET(request: NextRequest) {
     });
 
     return successResponse(bigRocks);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * POST /api/big-rocks
+ * Create a new Big Rock
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireAuth();
+
+    const body = await request.json();
+
+    // Validate request body
+    const validationResult = createBigRockSchema.safeParse(body);
+    if (!validationResult.success) {
+      return handleApiError(new Error(validationResult.error.errors[0].message));
+    }
+
+    const { title, description, category, indicator, numTars, month, status } = validationResult.data;
+
+    // Check if month is read-only (past)
+    if (isMonthReadOnly(month)) {
+      return handleApiError(new Error("No se pueden crear Big Rocks para meses pasados"));
+    }
+
+    // Create Big Rock
+    const bigRock = await prisma.bigRock.create({
+      data: {
+        title,
+        description,
+        category,
+        indicator,
+        numTars,
+        month,
+        status: status || "PLANIFICADO",
+        userId: user.id,
+      },
+      include: {
+        tars: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
+        _count: {
+          select: {
+            keyMeetings: true,
+          },
+        },
+      },
+    });
+
+    return successResponse(bigRock, 201);
   } catch (error) {
     return handleApiError(error);
   }

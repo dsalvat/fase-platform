@@ -81,10 +81,10 @@ export function ActivityForm({
           {/* Success message */}
           {state?.success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">¡Éxito!</p>
+              <p className="text-sm font-medium">Exito!</p>
               <p className="text-sm">
                 {mode === "create"
-                  ? `Actividad "${state.title}" creada correctamente. Redirigiendo...`
+                  ? "Actividad creada correctamente. Redirigiendo..."
                   : "Actividad actualizada correctamente. Redirigiendo..."}
               </p>
             </div>

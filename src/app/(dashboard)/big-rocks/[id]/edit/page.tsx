@@ -32,6 +32,12 @@ export default async function EditBigRockPage({ params }: PageProps) {
   const bigRock = await prisma.bigRock.findUnique({
     where: { id },
     include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       tars: {
         select: {
           id: true,
