@@ -35,7 +35,7 @@ export const createBigRockSchema = z.object({
       errorMap: () => ({ message: "Estado inválido" }),
     })
     .optional()
-    .default("PLANIFICADO"),
+    .default("CREADO"),
 });
 
 /**
