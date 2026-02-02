@@ -29,7 +29,7 @@ const roleOptions = [
 export function InviteUserDialog({ potentialSupervisors }: InviteUserDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("USER");
-  const [selectedSupervisorId, setSelectedSupervisorId] = useState<string>("");
+  const [selectedSupervisorId, setSelectedSupervisorId] = useState<string>("none");
 
   const [state, formAction, isPending] = useActionState(inviteUser, null);
 
@@ -38,7 +38,7 @@ export function InviteUserDialog({ potentialSupervisors }: InviteUserDialogProps
     if (state?.success) {
       setIsOpen(false);
       setSelectedRole("USER");
-      setSelectedSupervisorId("");
+      setSelectedSupervisorId("none");
     }
   }, [state?.success]);
 
@@ -133,7 +133,7 @@ export function InviteUserDialog({ potentialSupervisors }: InviteUserDialogProps
                 <SelectValue placeholder="Sin supervisor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin supervisor</SelectItem>
+                <SelectItem value="none">Sin supervisor</SelectItem>
                 {potentialSupervisors.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name || user.email}

@@ -198,11 +198,12 @@ export async function inviteUser(
   try {
     await requireRole([UserRole.ADMIN, UserRole.SUPERADMIN]);
 
+    const supervisorIdRaw = formData.get("supervisorId") as string | null;
     const rawData = {
       email: formData.get("email") as string,
       name: formData.get("name") as string | null,
       role: (formData.get("role") as UserRole) || "USER",
-      supervisorId: formData.get("supervisorId") as string | null,
+      supervisorId: supervisorIdRaw === "none" || supervisorIdRaw === "" ? null : supervisorIdRaw,
     };
 
     // Validate input
