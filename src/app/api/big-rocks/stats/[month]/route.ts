@@ -46,7 +46,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Calculate status distribution
     const statusDistribution = {
-      PLANIFICADO: 0,
+      CREADO: 0,
+      CONFIRMADO: 0,
+      FEEDBACK_RECIBIDO: 0,
       EN_PROGRESO: 0,
       FINALIZADO: 0,
     };
