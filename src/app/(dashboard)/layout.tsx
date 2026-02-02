@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/language-selector";
 import { CompanySwitcherWrapper } from "@/components/admin/company-switcher-wrapper";
+import { UserMenu } from "@/components/user-menu";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
@@ -145,15 +146,17 @@ export default async function DashboardLayout({
                 </div>
               )}
               <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
-              <div className="text-sm text-gray-600 hidden sm:block">
-                <p className="font-medium">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
-              </div>
-              <Link href="/auth/signout">
-                <Button variant="outline" size="sm">
-                  {t("exit")}
-                </Button>
-              </Link>
+              <UserMenu
+                user={{
+                  name: user?.name,
+                  email: user?.email,
+                  image: user?.image,
+                }}
+                translations={{
+                  myProfile: t("myProfile"),
+                  signOut: t("signOut"),
+                }}
+              />
             </div>
           </div>
         </div>

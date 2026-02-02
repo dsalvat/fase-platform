@@ -41,7 +41,29 @@
     "activity": "Actividad",
     "supervisor": "Supervisados",
     "admin": "Admin",
-    "exit": "Salir"
+    "exit": "Salir",
+    "myProfile": "Mi Perfil",
+    "signOut": "Salir"
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "subtitle": "Gestiona tu informacion personal",
+    "accountInfo": "Informacion de la cuenta",
+    "accountInfoDescription": "Esta informacion es de solo lectura",
+    "email": "Correo electronico",
+    "role": "Rol",
+    "companies": "Empresas",
+    "editProfile": "Editar perfil",
+    "editProfileDescription": "Actualiza tu informacion personal",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre",
+    "supervisor": "Supervisor",
+    "noSupervisor": "Sin supervisor",
+    "saved": "Guardado correctamente",
+    "roleUser": "Usuario",
+    "roleSupervisor": "Supervisor",
+    "roleAdmin": "Administrador",
+    "roleSuperAdmin": "Super Administrador"
   },
   "bigRocks": {
     "title": "Big Rocks",

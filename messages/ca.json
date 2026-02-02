@@ -41,7 +41,29 @@
     "activity": "Activitat",
     "supervisor": "Supervisats",
     "admin": "Admin",
-    "exit": "Sortir"
+    "exit": "Sortir",
+    "myProfile": "El meu Perfil",
+    "signOut": "Sortir"
+  },
+  "profile": {
+    "title": "El meu Perfil",
+    "subtitle": "Gestiona la teva informacio personal",
+    "accountInfo": "Informacio del compte",
+    "accountInfoDescription": "Aquesta informacio es de nomes lectura",
+    "email": "Correu electronic",
+    "role": "Rol",
+    "companies": "Empreses",
+    "editProfile": "Editar perfil",
+    "editProfileDescription": "Actualitza la teva informacio personal",
+    "name": "Nom",
+    "namePlaceholder": "El teu nom",
+    "supervisor": "Supervisor",
+    "noSupervisor": "Sense supervisor",
+    "saved": "Guardat correctament",
+    "roleUser": "Usuari",
+    "roleSupervisor": "Supervisor",
+    "roleAdmin": "Administrador",
+    "roleSuperAdmin": "Super Administrador"
   },
   "bigRocks": {
     "title": "Big Rocks",
