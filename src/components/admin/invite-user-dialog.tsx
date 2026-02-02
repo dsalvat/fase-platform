@@ -52,7 +52,7 @@ export function InviteUserDialog({ potentialSupervisors }: InviteUserDialogProps
   }
 
   return (
-    <Card className="fixed inset-0 m-auto w-full max-w-md h-fit z-50 shadow-xl">
+    <Card className="fixed inset-0 m-auto w-full max-w-md h-fit z-50 shadow-xl bg-white">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
