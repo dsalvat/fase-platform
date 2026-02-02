@@ -276,7 +276,13 @@ function UserCard({
           </div>
 
           {/* Actions */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <Link href={`/supervisor/${user.id}/${getCurrentMonth()}`}>
+              <Button variant="outline" size="sm">
+                <Target className="h-4 w-4 mr-1" />
+                {t.viewBigRocks}
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -359,16 +365,8 @@ function UserCard({
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-gray-500">
-                {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}
-              </div>
-              <Link href={`/supervisor/${user.id}/${getCurrentMonth()}`}>
-                <Button variant="outline" size="sm">
-                  <Target className="h-4 w-4 mr-2" />
-                  {t.viewBigRocks}
-                </Button>
-              </Link>
+            <div className="text-xs text-gray-500">
+              {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}
             </div>
           </div>
         )}
