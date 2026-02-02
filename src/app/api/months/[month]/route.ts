@@ -79,7 +79,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const stats = {
       totalBigRocks: bigRocks.length,
       byStatus: {
-        PLANIFICADO: bigRocks.filter((b) => b.status === "PLANIFICADO").length,
+        CREADO: bigRocks.filter((b) => b.status === "CREADO").length,
+        CONFIRMADO: bigRocks.filter((b) => b.status === "CONFIRMADO").length,
+        FEEDBACK_RECIBIDO: bigRocks.filter((b) => b.status === "FEEDBACK_RECIBIDO").length,
         EN_PROGRESO: bigRocks.filter((b) => b.status === "EN_PROGRESO").length,
         FINALIZADO: bigRocks.filter((b) => b.status === "FINALIZADO").length,
       },
