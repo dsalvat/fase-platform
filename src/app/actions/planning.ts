@@ -19,14 +19,12 @@ export async function getMonthPlanningStatus(
   month: string
 ): Promise<MonthPlanningStatus> {
   const user = await requireAuth();
-  const companyId = await getCurrentCompanyId();
 
-  // Get all Big Rocks for this month
+  // Get all Big Rocks for this month (all user's Big Rocks, regardless of company)
   const bigRocks = await prisma.bigRock.findMany({
     where: {
       userId: user.id,
       month: month,
-      ...(companyId && { companyId }),
     },
     select: {
       id: true,
