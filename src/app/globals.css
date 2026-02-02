@@ -67,3 +67,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Navigation loading cursor */
+body[style*="cursor: wait"] * {
+  cursor: wait !important;
+}

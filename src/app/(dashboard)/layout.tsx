@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/language-selector";
 import { CompanySwitcherWrapper } from "@/components/admin/company-switcher-wrapper";
 import { UserMenu } from "@/components/user-menu";
+import { NavigationProgress } from "@/components/navigation-progress";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
@@ -79,6 +81,11 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation progress indicator */}
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
+
       {/* Navigation */}
       <nav className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4">
