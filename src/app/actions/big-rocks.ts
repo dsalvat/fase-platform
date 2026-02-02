@@ -43,7 +43,7 @@ export async function createBigRock(
       indicator: formData.get("indicator") as string,
       numTars: Number(formData.get("numTars")),
       month: formData.get("month") as string,
-      status: (formData.get("status") as BigRockStatus) || "PLANIFICADO",
+      status: (formData.get("status") as BigRockStatus) || "CREADO",
     };
 
     // Validate with Zod
@@ -495,6 +495,7 @@ export async function deleteBigRock(id: string): Promise<{
 
 /**
  * Server action to confirm a Big Rock
+ * Changes status from CREADO to CONFIRMADO
  * Once confirmed, only TARs, Key Meetings, and Key People can be edited
  * @param id - ID of the Big Rock to confirm
  * @returns Success response
@@ -521,7 +522,7 @@ export async function confirmBigRock(id: string): Promise<{
     const bigRock = await prisma.bigRock.findUnique({
       where: { id },
       select: {
-        isConfirmed: true,
+        status: true,
         month: true,
         title: true,
         description: true,
@@ -536,10 +537,11 @@ export async function confirmBigRock(id: string): Promise<{
       };
     }
 
-    if (bigRock.isConfirmed) {
+    // Can only confirm if status is CREADO
+    if (bigRock.status !== "CREADO") {
       return {
         success: false,
-        error: "Este Big Rock ya está confirmado",
+        error: "Este Big Rock ya ha sido confirmado",
       };
     }
 
@@ -551,15 +553,15 @@ export async function confirmBigRock(id: string): Promise<{
       };
     }
 
-    // Confirm the Big Rock
+    // Confirm the Big Rock - change status to CONFIRMADO
     await prisma.bigRock.update({
       where: { id },
-      data: { isConfirmed: true },
+      data: { status: "CONFIRMADO" },
     });
 
     // Record activity log
     try {
-      await logBigRockUpdated(user.id, id, bigRock.title, { isConfirmed: true });
+      await logBigRockUpdated(user.id, id, bigRock.title, { status: "CONFIRMADO" });
     } catch (logError) {
       console.error("Error recording activity log:", logError);
     }

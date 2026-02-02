@@ -80,7 +80,6 @@ async function getSuperviseesWithBigRocks(supervisorId: string, month: string, u
             id: true,
             title: true,
             status: true,
-            isConfirmed: true,
           },
         },
       },
@@ -103,7 +102,6 @@ async function getSuperviseesWithBigRocks(supervisorId: string, month: string, u
             id: true,
             title: true,
             status: true,
-            isConfirmed: true,
           },
         },
       },
@@ -222,7 +220,8 @@ export default async function HomePage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {supervisees.map((supervisee) => {
-                const confirmedCount = supervisee.bigRocks.filter(b => b.isConfirmed).length;
+                // A Big Rock is "confirmed" if status is not CREADO
+                const confirmedCount = supervisee.bigRocks.filter(b => b.status !== "CREADO").length;
                 const totalCount = supervisee.bigRocks.length;
                 const allConfirmed = totalCount > 0 && confirmedCount === totalCount;
 
@@ -274,7 +273,7 @@ export default async function HomePage() {
                         <ul className="space-y-1">
                           {supervisee.bigRocks.slice(0, 3).map((br) => (
                             <li key={br.id} className="flex items-center gap-2 text-sm">
-                              {br.isConfirmed ? (
+                              {br.status !== "CREADO" ? (
                                 <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
                               ) : (
                                 <Clock className="h-3 w-3 text-yellow-500 flex-shrink-0" />

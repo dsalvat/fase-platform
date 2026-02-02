@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BigRockWithCounts } from "@/types/big-rock";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Clock, User } from "lucide-react";
+import { CheckCircle2, Circle, Clock, User, MessageSquare, Play } from "lucide-react";
 
 interface BigRockCardProps {
   bigRock: BigRockWithCounts;
@@ -11,15 +11,25 @@ interface BigRockCardProps {
 }
 
 const statusConfig = {
-  PLANIFICADO: {
-    label: "Planificado",
+  CREADO: {
+    label: "Creado",
     icon: Circle,
     color: "text-gray-500",
   },
+  CONFIRMADO: {
+    label: "Confirmado",
+    icon: CheckCircle2,
+    color: "text-blue-500",
+  },
+  FEEDBACK_RECIBIDO: {
+    label: "Feedback Recibido",
+    icon: MessageSquare,
+    color: "text-purple-500",
+  },
   EN_PROGRESO: {
     label: "En Progreso",
-    icon: Clock,
-    color: "text-blue-500",
+    icon: Play,
+    color: "text-orange-500",
   },
   FINALIZADO: {
     label: "Finalizado",

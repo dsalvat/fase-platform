@@ -38,8 +38,10 @@ interface BigRockFormFieldsProps {
   onUpdateKeyMeeting?: (index: number, meeting: InlineKeyMeeting) => void;
 }
 
-const statusOptions = [
-  { value: "PLANIFICADO", label: "Planificado" },
+// Status options for confirmed Big Rocks (users can progress to EN_PROGRESO or FINALIZADO)
+const statusOptionsForConfirmed = [
+  { value: "CONFIRMADO", label: "Confirmado" },
+  { value: "FEEDBACK_RECIBIDO", label: "Feedback Recibido" },
   { value: "EN_PROGRESO", label: "En Progreso" },
   { value: "FINALIZADO", label: "Finalizado" },
 ];
@@ -197,26 +199,29 @@ export function BigRockFormFields({
         </div>
       )}
 
-      {/* Status (only in edit mode) */}
-      {mode === "edit" && (
+      {/* Status (only in edit mode when confirmed) */}
+      {mode === "edit" && isConfirmed && (
         <div className="space-y-2">
           <Label htmlFor="status">Estado</Label>
           <Select
             name="status"
-            defaultValue={defaultValues?.status || "PLANIFICADO"}
-            disabled={coreFieldsDisabled}
+            defaultValue={defaultValues?.status || "CONFIRMADO"}
+            disabled={isPending}
           >
             <SelectTrigger id="status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {statusOptions.map((option) => (
+              {statusOptionsForConfirmed.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground">
+            Cambia el estado a medida que avanzas en el objetivo
+          </p>
         </div>
       )}
 

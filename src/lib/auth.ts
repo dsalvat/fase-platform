@@ -609,8 +609,8 @@ export async function canGiveFeedback(
       return false;
     }
 
-    // Check if supervisor relationship exists and Big Rock is confirmed
-    if (bigRock.user.supervisorId !== supervisorId || !bigRock.isConfirmed) {
+    // Check if supervisor relationship exists and Big Rock is confirmed (status !== CREADO)
+    if (bigRock.user.supervisorId !== supervisorId || bigRock.status === "CREADO") {
       return false;
     }
 

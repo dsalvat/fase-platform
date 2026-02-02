@@ -53,7 +53,6 @@ export interface SuperviseePlanningData {
     indicator: string;
     numTars: number;
     status: string;
-    isConfirmed: boolean;
     aiScore: number | null;
     tars: Array<{
       id: string;

@@ -32,11 +32,13 @@ enum Language {
   EN  // English
 }
 
-// Estados de Big Rock
+// Estados de Big Rock (progresión única)
 enum BigRockStatus {
-  PLANIFICADO
-  EN_PROGRESO
-  FINALIZADO
+  CREADO              // Estado inicial al crear el Big Rock
+  CONFIRMADO          // Usuario confirma el Big Rock
+  FEEDBACK_RECIBIDO   // Supervisor ha dado feedback
+  EN_PROGRESO         // Trabajo en progreso
+  FINALIZADO          // Completado
 }
 
 // Estados de TAR
@@ -184,8 +186,7 @@ model BigRock {
   description     String
   indicator       String         // Métrica para medir el éxito
   numTars         Int            // Número de TAR planificadas
-  status          BigRockStatus  @default(PLANIFICADO)
-  isConfirmed     Boolean        @default(false) // Cuando está confirmado, solo se puede editar TARs, Reuniones y Personas Clave
+  status          BigRockStatus  @default(CREADO)
 
   // Mes al que pertenece (formato: YYYY-MM)
   month           String

@@ -21,6 +21,7 @@ import {
   Users,
   Star,
   MessageSquare,
+  Play,
 } from "lucide-react";
 
 interface PageProps {
@@ -31,15 +32,25 @@ interface PageProps {
 }
 
 const statusConfig: Record<string, { label: string; icon: typeof Circle; color: string }> = {
-  PLANIFICADO: {
-    label: "Planificado",
+  CREADO: {
+    label: "Creado",
     icon: Circle,
     color: "text-gray-500",
   },
+  CONFIRMADO: {
+    label: "Confirmado",
+    icon: CheckCircle2,
+    color: "text-blue-500",
+  },
+  FEEDBACK_RECIBIDO: {
+    label: "Feedback Recibido",
+    icon: MessageSquare,
+    color: "text-purple-500",
+  },
   EN_PROGRESO: {
     label: "En Progreso",
-    icon: Clock,
-    color: "text-blue-500",
+    icon: Play,
+    color: "text-orange-500",
   },
   FINALIZADO: {
     label: "Finalizado",
@@ -131,7 +142,7 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
         </h2>
 
         {planningData.bigRocks.map((bigRock) => {
-          const statusInfo = statusConfig[bigRock.status] || statusConfig.PLANIFICADO;
+          const statusInfo = statusConfig[bigRock.status] || statusConfig.CREADO;
           const StatusIcon = statusInfo.icon;
           const completedTars = bigRock.tars.filter(
             (t) => t.status === "COMPLETADA"
@@ -148,12 +159,6 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                         <StatusIcon className={statusInfo.color} />
                         <span>{statusInfo.label}</span>
                       </div>
-                      {bigRock.isConfirmed && (
-                        <Badge className="bg-green-100 text-green-700 text-xs">
-                          <ShieldCheck className="h-3 w-3 mr-1" />
-                          Confirmado
-                        </Badge>
-                      )}
                       {bigRock.aiScore !== null && (
                         <Badge variant="outline" className="text-xs">
                           <Star className="h-3 w-3 mr-1" />

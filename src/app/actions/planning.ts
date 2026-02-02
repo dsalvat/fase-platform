@@ -28,7 +28,7 @@ export async function getMonthPlanningStatus(
     },
     select: {
       id: true,
-      isConfirmed: true,
+      status: true,
     },
   });
 
@@ -45,7 +45,8 @@ export async function getMonthPlanningStatus(
   });
 
   const totalBigRocks = bigRocks.length;
-  const confirmedBigRocks = bigRocks.filter((br) => br.isConfirmed).length;
+  // A Big Rock is "confirmed" if status is not CREADO
+  const confirmedBigRocks = bigRocks.filter((br) => br.status !== "CREADO").length;
   const allConfirmed = totalBigRocks > 0 && confirmedBigRocks === totalBigRocks;
 
   return {
@@ -78,7 +79,7 @@ export async function confirmMonthPlanning(
       },
       select: {
         id: true,
-        isConfirmed: true,
+        status: true,
       },
     });
 
@@ -90,8 +91,8 @@ export async function confirmMonthPlanning(
       };
     }
 
-    // Check that all Big Rocks are confirmed
-    const allConfirmed = bigRocks.every((br) => br.isConfirmed);
+    // Check that all Big Rocks are confirmed (status !== CREADO)
+    const allConfirmed = bigRocks.every((br) => br.status !== "CREADO");
     if (!allConfirmed) {
       return {
         success: false,
@@ -175,7 +176,7 @@ export async function getSuperviseesWithPlanningStatus(
       },
       select: {
         id: true,
-        isConfirmed: true,
+        status: true,
       },
     });
 
@@ -192,7 +193,8 @@ export async function getSuperviseesWithPlanningStatus(
     });
 
     const totalBigRocks = bigRocks.length;
-    const confirmedBigRocks = bigRocks.filter((br) => br.isConfirmed).length;
+    // A Big Rock is "confirmed" if status is not CREADO
+    const confirmedBigRocks = bigRocks.filter((br) => br.status !== "CREADO").length;
     const allConfirmed = totalBigRocks > 0 && confirmedBigRocks === totalBigRocks;
 
     result.push({
@@ -331,7 +333,6 @@ export async function getSuperviseeMonthPlanning(
         indicator: br.indicator,
         numTars: br.numTars,
         status: br.status,
-        isConfirmed: br.isConfirmed,
         aiScore: br.aiScore,
         tars: br.tars,
         keyMeetings: br.keyMeetings,

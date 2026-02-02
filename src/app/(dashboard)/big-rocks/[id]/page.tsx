@@ -11,7 +11,7 @@ import { FeedbackDisplay } from "@/components/feedback";
 import { getBigRockFeedback } from "@/app/actions/feedback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar, ShieldCheck, Users, MessageSquare } from "lucide-react";
+import { ArrowLeft, Edit, CheckCircle2, Circle, Clock, Plus, Calendar, ShieldCheck, Users, MessageSquare, Play } from "lucide-react";
 import { isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 
 interface PageProps {
@@ -25,15 +25,25 @@ const statusConfig: Record<BigRockStatus, {
   icon: typeof Circle;
   color: string;
 }> = {
-  PLANIFICADO: {
-    label: "Planificado",
+  CREADO: {
+    label: "Creado",
     icon: Circle,
     color: "text-gray-500",
   },
+  CONFIRMADO: {
+    label: "Confirmado",
+    icon: CheckCircle2,
+    color: "text-blue-500",
+  },
+  FEEDBACK_RECIBIDO: {
+    label: "Feedback Recibido",
+    icon: MessageSquare,
+    color: "text-purple-500",
+  },
   EN_PROGRESO: {
     label: "En Progreso",
-    icon: Clock,
-    color: "text-blue-500",
+    icon: Play,
+    color: "text-orange-500",
   },
   FINALIZADO: {
     label: "Finalizado",
@@ -97,6 +107,8 @@ export default async function BigRockDetailPage({ params }: PageProps) {
   const isReadOnly = isMonthReadOnly(bigRock.month);
   const canEdit = bigRock.userId === user.id && !isReadOnly;
   const isOwner = bigRock.userId === user.id;
+  // A Big Rock is "confirmed" when status is not CREADO
+  const isConfirmed = bigRock.status !== "CREADO";
 
   // Get supervisor feedback for the Big Rock (only visible to owner)
   const feedback = isOwner ? await getBigRockFeedback(id) : null;
@@ -114,7 +126,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
 
         {canEdit && (
           <div className="flex items-center gap-2">
-            {!bigRock.isConfirmed && (
+            {!isConfirmed && (
               <BigRockConfirmButton
                 bigRockId={id}
                 bigRockTitle={bigRock.title}
@@ -126,7 +138,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
                 Editar
               </Button>
             </Link>
-            {!bigRock.isConfirmed && (
+            {!isConfirmed && (
               <BigRockDeleteButton
                 bigRockId={id}
                 bigRockTitle={bigRock.title}
@@ -137,7 +149,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       </div>
 
       {/* Confirmed banner */}
-      {bigRock.isConfirmed && (
+      {isConfirmed && (
         <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-green-600" />
           <p className="text-sm text-green-800">
@@ -166,7 +178,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
                   <StatusIcon className={statusInfo.color} />
                   <span>{statusInfo.label}</span>
                 </div>
-                {bigRock.isConfirmed && (
+                {isConfirmed && (
                   <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                     <ShieldCheck className="h-3 w-3" />
                     <span>Confirmado</span>

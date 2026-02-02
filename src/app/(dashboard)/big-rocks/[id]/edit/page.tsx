@@ -86,7 +86,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
         mode="edit"
         bigRock={bigRock}
         availableKeyPeople={availableKeyPeople}
-        isConfirmed={bigRock.isConfirmed}
+        isConfirmed={bigRock.status !== "CREADO"}
       />
     </div>
   );
