@@ -23,6 +23,7 @@ interface BigRockFormFieldsProps {
   isPending?: boolean;
   mode?: "create" | "edit";
   isConfirmed?: boolean;
+  canResetStatus?: boolean;
   // Key People props
   availableKeyPeople?: KeyPerson[];
   selectedKeyPeopleIds?: string[];
@@ -46,6 +47,15 @@ const statusOptionsForConfirmed = [
   { value: "FINALIZADO", label: "Finalizado" },
 ];
 
+// Status options for admin/superadmin (includes CREADO to allow resetting)
+const statusOptionsForAdmin = [
+  { value: "CREADO", label: "Creado" },
+  { value: "CONFIRMADO", label: "Confirmado" },
+  { value: "FEEDBACK_RECIBIDO", label: "Feedback Recibido" },
+  { value: "EN_PROGRESO", label: "En Progreso" },
+  { value: "FINALIZADO", label: "Finalizado" },
+];
+
 /**
  * Reusable form fields for Big Rock create/edit forms
  * Client Component - needs state and interactivity
@@ -56,6 +66,7 @@ export function BigRockFormFields({
   isPending = false,
   mode = "create",
   isConfirmed = false,
+  canResetStatus = false,
   // Key People props
   availableKeyPeople = [],
   selectedKeyPeopleIds = [],
@@ -73,16 +84,23 @@ export function BigRockFormFields({
   const monthOptions = generateMonthOptions(12, getCurrentMonth());
   const defaultMonthValue = defaultMonth || getNextMonth(getCurrentMonth());
 
-  // When confirmed, core fields are read-only
-  const coreFieldsDisabled = isPending || isConfirmed;
+  // When confirmed, core fields are read-only (unless admin can reset status)
+  const coreFieldsDisabled = isPending || (isConfirmed && !canResetStatus);
 
   return (
     <div className="space-y-4">
       {/* Confirmed banner */}
-      {isConfirmed && (
+      {isConfirmed && !canResetStatus && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-amber-800 text-sm">
           <p className="font-medium">Big Rock confirmado</p>
           <p>Solo puedes editar el numero de TARs, Personas Clave y Reuniones Clave.</p>
+        </div>
+      )}
+      {/* Admin reset banner */}
+      {isConfirmed && canResetStatus && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-blue-800 text-sm">
+          <p className="font-medium">Modo administrador</p>
+          <p>Puedes editar todos los campos y cambiar el estado a CREADO si es necesario.</p>
         </div>
       )}
       {/* Title */}
@@ -199,20 +217,20 @@ export function BigRockFormFields({
         </div>
       )}
 
-      {/* Status (only in edit mode when confirmed) */}
-      {mode === "edit" && isConfirmed && (
+      {/* Status (only in edit mode when confirmed or admin can reset) */}
+      {mode === "edit" && (isConfirmed || canResetStatus) && (
         <div className="space-y-2">
           <Label htmlFor="status">Estado</Label>
           <Select
             name="status"
-            defaultValue={defaultValues?.status || "CONFIRMADO"}
+            defaultValue={defaultValues?.status || "CREADO"}
             disabled={isPending}
           >
             <SelectTrigger id="status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {statusOptionsForConfirmed.map((option) => (
+              {(canResetStatus ? statusOptionsForAdmin : statusOptionsForConfirmed).map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -220,7 +238,9 @@ export function BigRockFormFields({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Cambia el estado a medida que avanzas en el objetivo
+            {canResetStatus
+              ? "Como administrador, puedes cambiar el estado a CREADO para permitir ediciones"
+              : "Cambia el estado a medida que avanzas en el objetivo"}
           </p>
         </div>
       )}

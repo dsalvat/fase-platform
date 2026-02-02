@@ -7,7 +7,10 @@ import { MonthPlanningStatus } from "@/components/planning";
 import { getMonthPlanningStatus } from "@/app/actions/planning";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { getNextMonth, getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
+import { getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
+
+// Force dynamic rendering to avoid stale translations
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
@@ -33,10 +36,11 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
   const planningStatus = await getMonthPlanningStatus(displayMonth);
 
   // Translations for the client component
+  // For planningConfirmedOn, we pass a placeholder that will be replaced in the client
   const planningTranslations = {
     noBigRocks: tPlanning("noBigRocks"),
     confirmed: tPlanning("confirmed"),
-    planningConfirmedOn: tPlanning("planningConfirmedOn"),
+    planningConfirmedOn: tPlanning("planningConfirmedOn", { date: "__DATE__" }),
     notConfirmed: tPlanning("notConfirmed"),
     bigRocksProgress: tPlanning("bigRocksProgress"),
     confirmPlanning: tPlanning("confirmPlanning"),

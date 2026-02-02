@@ -16,6 +16,7 @@ interface BigRockFormProps {
   defaultMonth?: string;
   availableKeyPeople?: KeyPerson[];
   isConfirmed?: boolean;
+  canResetStatus?: boolean;
 }
 
 /**
@@ -36,7 +37,7 @@ function convertToInlineKeyMeetings(meetings: KeyMeeting[] | undefined): InlineK
  * Form component for creating/editing Big Rocks
  * Client Component - uses useActionState for progressive enhancement
  */
-export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = [], isConfirmed = false }: BigRockFormProps) {
+export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = [], isConfirmed = false, canResetStatus = false }: BigRockFormProps) {
   const router = useRouter();
 
   // State for key people
@@ -132,6 +133,7 @@ export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = 
             isPending={isPending}
             mode={mode}
             isConfirmed={isConfirmed}
+            canResetStatus={canResetStatus}
             // Key People props
             availableKeyPeople={availableKeyPeople}
             selectedKeyPeopleIds={selectedKeyPeopleIds}

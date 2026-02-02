@@ -173,17 +173,9 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <CardTitle className="text-2xl">{bigRock.title}</CardTitle>
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <StatusIcon className={statusInfo.color} />
-                  <span>{statusInfo.label}</span>
-                </div>
-                {isConfirmed && (
-                  <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    <ShieldCheck className="h-3 w-3" />
-                    <span>Confirmado</span>
-                  </div>
-                )}
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2">
+                <StatusIcon className={statusInfo.color} />
+                <span>{statusInfo.label}</span>
               </div>
             </div>
           </div>

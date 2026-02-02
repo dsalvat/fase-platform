@@ -87,7 +87,7 @@ export function MonthPlanningStatus({ status, translations: t }: MonthPlanningSt
               </p>
               {status.planningConfirmedAt && (
                 <p className="text-xs text-green-600">
-                  {t.planningConfirmedOn.replace("{date}", new Date(status.planningConfirmedAt).toLocaleDateString())}
+                  {t.planningConfirmedOn.replace("__DATE__", new Date(status.planningConfirmedAt).toLocaleDateString())}
                 </p>
               )}
             </div>

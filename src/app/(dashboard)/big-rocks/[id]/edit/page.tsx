@@ -87,6 +87,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
         bigRock={bigRock}
         availableKeyPeople={availableKeyPeople}
         isConfirmed={bigRock.status !== "CREADO"}
+        canResetStatus={userRole === "ADMIN" || userRole === "SUPERADMIN"}
       />
     </div>
   );
