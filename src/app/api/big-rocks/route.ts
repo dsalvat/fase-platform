@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         indicator,
         numTars,
         month,
-        status: status || "PLANIFICADO",
+        status: status || "CREADO",
         userId: user.id,
       },
       include: {
