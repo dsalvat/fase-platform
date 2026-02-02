@@ -188,6 +188,7 @@ export default async function AdminUsuariosPage() {
           close: tCommon("close"),
           noCompany: tCompanies("noCompanySelected"),
           saving: tCommon("loading"),
+          viewBigRocks: t("viewBigRocks"),
         }}
       />
     </div>

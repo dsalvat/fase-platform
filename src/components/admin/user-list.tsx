@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { User, Users, ShieldCheck, Crown, Filter, Building2 } from "lucide-react";
+import Link from "next/link";
+import { User, Users, ShieldCheck, Crown, Filter, Building2, Target } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ interface UserListTranslations {
   close: string;
   noCompany: string;
   saving: string;
+  viewBigRocks: string;
 }
 
 interface UserListProps {
@@ -54,6 +56,12 @@ const roleIcons = {
   ADMIN: ShieldCheck,
   SUPERADMIN: Crown,
 };
+
+// Helper to get current month in YYYY-MM format
+function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 // Default translations (Spanish)
 const defaultTranslations: UserListTranslations = {
@@ -73,6 +81,7 @@ const defaultTranslations: UserListTranslations = {
   close: "Cerrar",
   noCompany: "Sin empresa",
   saving: "Guardando...",
+  viewBigRocks: "Ver Big Rocks",
 };
 
 // Helper function to format the showingUsers template
@@ -350,8 +359,16 @@ function UserCard({
               )}
             </div>
 
-            <div className="text-xs text-gray-500">
-              {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}
+              </div>
+              <Link href={`/supervisor/${user.id}/${getCurrentMonth()}`}>
+                <Button variant="outline" size="sm">
+                  <Target className="h-4 w-4 mr-2" />
+                  {t.viewBigRocks}
+                </Button>
+              </Link>
             </div>
           </div>
         )}

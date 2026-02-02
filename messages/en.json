@@ -181,6 +181,7 @@
     "cannotChangeOwnRole": "You cannot change your own role",
     "cannotChangeOwnStatus": "You cannot change your own status",
     "registeredOn": "Registered on",
+    "viewBigRocks": "View Big Rocks",
     "inviteUser": "Invite User",
     "inviteUserTitle": "Invite New User",
     "inviteUserDescription": "User will get access when they sign in with this email",
