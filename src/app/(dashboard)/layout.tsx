@@ -85,7 +85,7 @@ export default async function DashboardLayout({
           <div className="flex items-center justify-between h-16">
             {/* Logo and main nav */}
             <div className="flex items-center gap-8">
-              <Link href="/big-rocks" className="flex items-center gap-2">
+              <Link href="/home" className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">F</span>
                 </div>

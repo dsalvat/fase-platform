@@ -65,6 +65,19 @@
     "roleAdmin": "Administrator",
     "roleSuperAdmin": "Super Administrator"
   },
+  "home": {
+    "myBigRocks": "My Big Rocks",
+    "superviseesBigRocks": "Supervisees Big Rocks",
+    "viewAll": "View all",
+    "noBigRocks": "No Big Rocks",
+    "noBigRocksDescription": "Create your first Big Rock for this month",
+    "noSupervisees": "You have no assigned supervisees",
+    "confirmed": "Confirmed",
+    "inProgress": "In progress",
+    "more": "more",
+    "noBigRocksYet": "No Big Rocks yet",
+    "viewDetails": "View details"
+  },
   "bigRocks": {
     "title": "Big Rocks",
     "subtitle": "Monthly goals",

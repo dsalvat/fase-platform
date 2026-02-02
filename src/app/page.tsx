@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
-  // If authenticated, redirect to Big Rocks dashboard
+  // If authenticated, redirect to home dashboard
   if (session?.user) {
-    redirect("/big-rocks");
+    redirect("/home");
   }
 
   // Landing page for unauthenticated users

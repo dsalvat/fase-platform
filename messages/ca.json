@@ -65,6 +65,19 @@
     "roleAdmin": "Administrador",
     "roleSuperAdmin": "Super Administrador"
   },
+  "home": {
+    "myBigRocks": "Els meus Big Rocks",
+    "superviseesBigRocks": "Big Rocks dels meus supervisats",
+    "viewAll": "Veure tots",
+    "noBigRocks": "No hi ha Big Rocks",
+    "noBigRocksDescription": "Crea el teu primer Big Rock per aquest mes",
+    "noSupervisees": "No tens supervisats assignats",
+    "confirmed": "Confirmat",
+    "inProgress": "En progres",
+    "more": "mes",
+    "noBigRocksYet": "Sense Big Rocks encara",
+    "viewDetails": "Veure detalls"
+  },
   "bigRocks": {
     "title": "Big Rocks",
     "subtitle": "Objectius mensuals",
