@@ -21,7 +21,7 @@ interface PageProps {
  */
 export default async function BigRocksPage({ searchParams }: PageProps) {
   const { month } = await searchParams;
-  const defaultMonth = getNextMonth(getCurrentMonth());
+  const defaultMonth = getCurrentMonth();
   const displayMonth = month || defaultMonth;
   const isReadOnly = isMonthReadOnly(displayMonth);
 

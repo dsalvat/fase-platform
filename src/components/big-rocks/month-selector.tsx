@@ -23,7 +23,7 @@ export function MonthSelector({ defaultMonth }: MonthSelectorProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const currentMonth = searchParams.get("month") || defaultMonth || getNextMonth(getCurrentMonth());
+  const currentMonth = searchParams.get("month") || defaultMonth || getCurrentMonth();
 
   // Generate month options (next 12 months)
   const months = generateMonthOptions(12, getCurrentMonth());
