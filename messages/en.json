@@ -299,7 +299,11 @@
     "allBigRocksRequired": "You must confirm all Big Rocks before confirming the month planning",
     "planningConfirmedOn": "Planning confirmed on {date}",
     "confirmSuccess": "Month planning confirmed successfully",
-    "noBigRocks": "No Big Rocks for this month"
+    "noBigRocks": "No Big Rocks for this month",
+    "unconfirmPlanning": "Unconfirm",
+    "unconfirmPlanningTitle": "Unconfirm Planning",
+    "unconfirmPlanningDescription": "This will allow the user to edit their planning again. The supervisor will no longer be able to see the planning until it is confirmed again.",
+    "unconfirmSuccess": "Planning unconfirmed successfully"
   },
   "supervisor": {
     "title": "Supervisor Dashboard",

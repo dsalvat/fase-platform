@@ -5,9 +5,11 @@ import { BigRockList } from "@/components/big-rocks/big-rock-list";
 import { MonthSelector } from "@/components/big-rocks/month-selector";
 import { MonthPlanningStatus } from "@/components/planning";
 import { getMonthPlanningStatus } from "@/app/actions/planning";
+import { requireAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
+import { UserRole } from "@prisma/client";
 
 // Force dynamic rendering to avoid stale translations
 export const dynamic = "force-dynamic";
@@ -32,6 +34,12 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
   const tCommon = await getTranslations("common");
   const tPlanning = await getTranslations("planning");
 
+  // Get user role to check if can unconfirm
+  const user = await requireAuth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const canUnconfirm = userRole === "ADMIN" || userRole === "SUPERADMIN";
+
   // Get planning status for the current month
   const planningStatus = await getMonthPlanningStatus(displayMonth);
 
@@ -48,6 +56,9 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
     confirmPlanningDescription: tPlanning("confirmPlanningDescription"),
     allBigRocksRequired: tPlanning("allBigRocksRequired"),
     cancel: tCommon("cancel"),
+    unconfirmPlanning: tPlanning("unconfirmPlanning"),
+    unconfirmPlanningTitle: tPlanning("unconfirmPlanningTitle"),
+    unconfirmPlanningDescription: tPlanning("unconfirmPlanningDescription"),
   };
 
   return (
@@ -77,7 +88,11 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
 
         {/* Planning status - show for current or future months */}
         {!isReadOnly && (
-          <MonthPlanningStatus status={planningStatus} translations={planningTranslations} />
+          <MonthPlanningStatus
+            status={planningStatus}
+            translations={planningTranslations}
+            canUnconfirm={canUnconfirm}
+          />
         )}
 
         {isReadOnly && (

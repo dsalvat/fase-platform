@@ -17,7 +17,7 @@ export const createKeyMeetingSchema = z.object({
 
   date: z
     .string()
-    .datetime({ message: "Fecha inválida" })
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Fecha inválida" })
     .or(z.date()),
 
   bigRockId: z.string().uuid("ID de Big Rock inválido"),
@@ -68,7 +68,7 @@ export const updateKeyMeetingSchema = z.object({
 
   date: z
     .string()
-    .datetime({ message: "Fecha inválida" })
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Fecha inválida" })
     .or(z.date())
     .optional(),
 

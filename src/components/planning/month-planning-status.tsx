@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { confirmMonthPlanning } from "@/app/actions/planning";
+import { confirmMonthPlanning, unconfirmMonthPlanning } from "@/app/actions/planning";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CheckCircle, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { CheckCircle, Loader2, ShieldCheck, Clock, XCircle } from "lucide-react";
 import type { MonthPlanningStatus as MonthPlanningStatusType } from "@/types/feedback";
 
 interface MonthPlanningStatusTranslations {
@@ -30,18 +30,23 @@ interface MonthPlanningStatusTranslations {
   confirmPlanningDescription: string;
   allBigRocksRequired: string;
   cancel: string;
+  unconfirmPlanning?: string;
+  unconfirmPlanningTitle?: string;
+  unconfirmPlanningDescription?: string;
 }
 
 interface MonthPlanningStatusProps {
   status: MonthPlanningStatusType;
   translations: MonthPlanningStatusTranslations;
+  canUnconfirm?: boolean;
 }
 
-export function MonthPlanningStatus({ status, translations: t }: MonthPlanningStatusProps) {
+export function MonthPlanningStatus({ status, translations: t, canUnconfirm = false }: MonthPlanningStatusProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [unconfirmOpen, setUnconfirmOpen] = useState(false);
 
   const progress =
     status.totalBigRocks > 0
@@ -58,6 +63,20 @@ export function MonthPlanningStatus({ status, translations: t }: MonthPlanningSt
         router.refresh();
       } else {
         setError(result.error || "Error al confirmar");
+      }
+    });
+  };
+
+  const handleUnconfirm = () => {
+    setError(null);
+    startTransition(async () => {
+      const result = await unconfirmMonthPlanning(status.month);
+
+      if (result.success) {
+        setUnconfirmOpen(false);
+        router.refresh();
+      } else {
+        setError(result.error || "Error al desconfirmar");
       }
     });
   };
@@ -92,8 +111,60 @@ export function MonthPlanningStatus({ status, translations: t }: MonthPlanningSt
               )}
             </div>
           </div>
-          <div className="text-sm text-green-700">
-            {status.confirmedBigRocks}/{status.totalBigRocks} Big Rocks
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-green-700">
+              {status.confirmedBigRocks}/{status.totalBigRocks} Big Rocks
+            </div>
+            {canUnconfirm && (
+              <AlertDialog open={unconfirmOpen} onOpenChange={setUnconfirmOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {t.unconfirmPlanning || "Desconfirmar"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t.unconfirmPlanningTitle || "Desconfirmar Planificacion"}</AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-3 text-sm text-muted-foreground">
+                        <p>{t.unconfirmPlanningDescription || "Esto permitira al usuario volver a editar su planificacion."}</p>
+                        {error && <p className="text-red-600 text-sm">{error}</p>}
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isPending}>
+                      {t.cancel}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleUnconfirm();
+                      }}
+                      disabled={isPending}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Desconfirmando...
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 mr-2" />
+                          {t.unconfirmPlanning || "Desconfirmar"}
+                        </>
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       </div>

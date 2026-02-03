@@ -134,6 +134,77 @@ export async function confirmMonthPlanning(
 }
 
 /**
+ * Unconfirm the month planning
+ * Only ADMIN and SUPERADMIN can do this
+ * Can be used on any user's planning (including own)
+ */
+export async function unconfirmMonthPlanning(
+  month: string,
+  targetUserId?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role as UserRole;
+
+    // Only ADMIN and SUPERADMIN can unconfirm
+    if (userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+      return {
+        success: false,
+        error: "No tienes permiso para desconfirmar la planificacion",
+      };
+    }
+
+    // Use targetUserId if provided, otherwise use current user's id
+    const userId = targetUserId || user.id;
+
+    // Update the OpenMonth record to remove confirmation
+    const openMonth = await prisma.openMonth.findFirst({
+      where: {
+        userId: userId,
+        month: month,
+      },
+    });
+
+    if (!openMonth) {
+      return {
+        success: false,
+        error: "No se encontro la planificacion del mes",
+      };
+    }
+
+    if (!openMonth.isPlanningConfirmed) {
+      return {
+        success: false,
+        error: "La planificacion no esta confirmada",
+      };
+    }
+
+    await prisma.openMonth.update({
+      where: {
+        id: openMonth.id,
+      },
+      data: {
+        isPlanningConfirmed: false,
+        planningConfirmedAt: null,
+      },
+    });
+
+    revalidatePath("/big-rocks");
+    revalidatePath(`/big-rocks?month=${month}`);
+    revalidatePath("/supervisor");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error unconfirming month planning:", error);
+    return {
+      success: false,
+      error: "Error al desconfirmar la planificacion del mes",
+    };
+  }
+}
+
+/**
  * Get list of supervisees with their planning status for a specific month
  * Only for supervisors and admins
  */

@@ -299,7 +299,11 @@
     "allBigRocksRequired": "Has de confirmar tots els Big Rocks abans de confirmar la planificacio del mes",
     "planningConfirmedOn": "Planificacio confirmada el {date}",
     "confirmSuccess": "Planificacio del mes confirmada correctament",
-    "noBigRocks": "No hi ha Big Rocks per aquest mes"
+    "noBigRocks": "No hi ha Big Rocks per aquest mes",
+    "unconfirmPlanning": "Desconfirmar",
+    "unconfirmPlanningTitle": "Desconfirmar Planificacio",
+    "unconfirmPlanningDescription": "Aixo permetra a l'usuari tornar a editar la seva planificacio. El supervisor ja no podra veure la planificacio fins que es confirmi de nou.",
+    "unconfirmSuccess": "Planificacio desconfirmada correctament"
   },
   "supervisor": {
     "title": "Panell de Supervisor",
