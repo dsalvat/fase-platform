@@ -332,5 +332,24 @@
     "bigRockFeedback": "Feedback del Big Rock",
     "deleteFeedback": "Eliminar Feedback",
     "deleteConfirm": "Estas segur que vols eliminar aquest feedback?"
+  },
+  "onboarding": {
+    "skipTour": "Saltar Tour",
+    "nextStep": "Seguent",
+    "previousStep": "Anterior",
+    "finish": "Finalitzar",
+    "stepOf": "Pas {current} de {total}",
+    "step1Title": "Big Rocks - Objectius Mensuals",
+    "step1Content": "Els Big Rocks son els teus objectius mensuals principals. Aqui planifiques el que vols aconseguir aquest mes seguint la metodologia FASE (Focus, Atencio, Sistemes, Energia).",
+    "step2Title": "Crear un Big Rock",
+    "step2Content": "Fes clic aqui per crear un nou objectiu mensual. Defineix el titol, descripcio, indicador d'exit i categoria FASE.",
+    "step3Title": "Confirmar Big Rocks",
+    "step3Content": "Un cop creat, has de confirmar el teu Big Rock. En confirmar-lo, podras gestionar TARs, reunions i persones clau.",
+    "step4Title": "TARs - Tasques d'Alt Rendiment",
+    "step4Content": "Les TARs son blocs de treball que contribueixen directament a aconseguir el teu Big Rock. Descomponen el teu objectiu en accions concretes amb activitats setmanals i diaries.",
+    "step5Title": "Activitats",
+    "step5Content": "Cada TAR es descompon en activitats setmanals i diaries. Registra el teu progres diari i marca les activitats completades per fer seguiment del teu avanc.",
+    "step6Title": "Reunions i Persones Clau",
+    "step6Content": "Identifica les persones que t'ajudaran a aconseguir els teus objectius i programa les reunions necessaries per validar, refinar i prendre decisions."
   }
 }

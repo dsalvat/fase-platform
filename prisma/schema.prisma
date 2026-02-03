@@ -133,6 +133,9 @@ model User {
   status        UserStatus  @default(ACTIVE)  // Estado del usuario
   language      Language    @default(ES)
 
+  // Onboarding tracking
+  onboardingCompletedAt DateTime?  // null = no completado, timestamp = completado
+
   // Empresa actual seleccionada (para navegación)
   currentCompanyId String?
 

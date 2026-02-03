@@ -332,5 +332,24 @@
     "bigRockFeedback": "Big Rock Feedback",
     "deleteFeedback": "Delete Feedback",
     "deleteConfirm": "Are you sure you want to delete this feedback?"
+  },
+  "onboarding": {
+    "skipTour": "Skip Tour",
+    "nextStep": "Next",
+    "previousStep": "Previous",
+    "finish": "Finish",
+    "stepOf": "Step {current} of {total}",
+    "step1Title": "Big Rocks - Monthly Goals",
+    "step1Content": "Big Rocks are your main monthly objectives. Here you plan what you want to achieve this month following the FASE methodology (Focus, Attention, Systems, Energy).",
+    "step2Title": "Create a Big Rock",
+    "step2Content": "Click here to create a new monthly objective. Define the title, description, success indicator, and FASE category.",
+    "step3Title": "Confirm Big Rocks",
+    "step3Content": "Once created, you must confirm your Big Rock. After confirming, you can manage TARs, meetings, and key people.",
+    "step4Title": "TARs - High Performance Tasks",
+    "step4Content": "TARs are work blocks that directly contribute to achieving your Big Rock. They break down your objective into concrete actions with weekly and daily activities.",
+    "step5Title": "Activities",
+    "step5Content": "Each TAR is broken down into weekly and daily activities. Record your daily progress and mark completed activities to track your advancement.",
+    "step6Title": "Meetings and Key People",
+    "step6Content": "Identify the people who will help you achieve your objectives and schedule the necessary meetings to validate, refine, and make decisions."
   }
 }

@@ -73,7 +73,7 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         </div>
 
         {!isReadOnly && (
-          <Link href={`/big-rocks/new?month=${displayMonth}`}>
+          <Link href={`/big-rocks/new?month=${displayMonth}`} data-tour="new-big-rock-button">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               {t("new")}

@@ -9,6 +9,7 @@ import { LanguageSelector } from "@/components/language-selector";
 import { CompanySwitcherWrapper } from "@/components/admin/company-switcher-wrapper";
 import { UserMenu } from "@/components/user-menu";
 import { NavigationProgress } from "@/components/navigation-progress";
+import { OnboardingProvider } from "@/components/onboarding";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
@@ -72,6 +73,7 @@ export default async function DashboardLayout({
   // Get translations
   const t = await getTranslations("nav");
   const tCompanies = await getTranslations("companies");
+  const tOnboarding = await getTranslations("onboarding");
 
   // Translations for company switcher
   const companySwitcherTranslations = {
@@ -79,12 +81,40 @@ export default async function DashboardLayout({
     selectCompany: tCompanies("selectCompany"),
   };
 
+  // Translations for onboarding tour
+  const onboardingTranslations = {
+    skipTour: tOnboarding("skipTour"),
+    nextStep: tOnboarding("nextStep"),
+    previousStep: tOnboarding("previousStep"),
+    finish: tOnboarding("finish"),
+    stepOf: tOnboarding("stepOf"),
+    step1Title: tOnboarding("step1Title"),
+    step1Content: tOnboarding("step1Content"),
+    step2Title: tOnboarding("step2Title"),
+    step2Content: tOnboarding("step2Content"),
+    step3Title: tOnboarding("step3Title"),
+    step3Content: tOnboarding("step3Content"),
+    step4Title: tOnboarding("step4Title"),
+    step4Content: tOnboarding("step4Content"),
+    step5Title: tOnboarding("step5Title"),
+    step5Content: tOnboarding("step5Content"),
+    step6Title: tOnboarding("step6Title"),
+    step6Content: tOnboarding("step6Content"),
+  };
+
+  // Check if onboarding is completed
+  const onboardingCompleted = user.onboardingCompletedAt !== null;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation progress indicator */}
-      <Suspense fallback={null}>
-        <NavigationProgress />
-      </Suspense>
+    <OnboardingProvider
+      translations={onboardingTranslations}
+      onboardingCompleted={onboardingCompleted}
+    >
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation progress indicator */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
 
       {/* Navigation */}
       <nav className="bg-white border-b shadow-sm">
@@ -100,10 +130,10 @@ export default async function DashboardLayout({
               </Link>
 
               <div className="hidden md:flex items-center gap-1">
-                <Link href="/big-rocks">
+                <Link href="/big-rocks" data-tour="nav-big-rocks">
                   <Button variant="ghost">{t("bigRocks")}</Button>
                 </Link>
-                <Link href="/key-people">
+                <Link href="/key-people" data-tour="nav-key-people">
                   <Button variant="ghost">{t("keyPeople")}</Button>
                 </Link>
                 <Link href="/calendario">
@@ -183,5 +213,6 @@ export default async function DashboardLayout({
         </div>
       </footer>
     </div>
+    </OnboardingProvider>
   );
 }

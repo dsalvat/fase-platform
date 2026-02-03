@@ -257,7 +257,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       </Card>
 
       {/* TARs section */}
-      <Card>
+      <Card data-tour="tars-section">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>

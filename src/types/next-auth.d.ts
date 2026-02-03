@@ -13,6 +13,7 @@ declare module "next-auth" {
       status: UserStatus;
       currentCompanyId: string | null; // Empresa actual seleccionada
       companies: { id: string; name: string; logo: string | null }[]; // Empresas del usuario
+      onboardingCompletedAt: Date | null; // Onboarding tracking
     };
   }
 
@@ -20,6 +21,7 @@ declare module "next-auth" {
     role: UserRole;
     status: UserStatus;
     currentCompanyId: string | null;
+    onboardingCompletedAt: Date | null;
   }
 }
 
@@ -30,5 +32,6 @@ declare module "next-auth/jwt" {
     status: UserStatus;
     currentCompanyId: string | null;
     companies: { id: string; name: string; logo: string | null }[];
+    onboardingCompletedAt: Date | null;
   }
 }

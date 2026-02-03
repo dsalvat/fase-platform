@@ -104,13 +104,14 @@ export async function BigRockList({ month, userId }: BigRockListProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {bigRocks.map((bigRock) => (
-        <BigRockCard
-          key={bigRock.id}
-          bigRock={bigRock}
-          isReadOnly={isReadOnly}
-          canEdit={canEdit}
-        />
+      {bigRocks.map((bigRock, index) => (
+        <div key={bigRock.id} data-tour={index === 0 ? "big-rock-card" : undefined}>
+          <BigRockCard
+            bigRock={bigRock}
+            isReadOnly={isReadOnly}
+            canEdit={canEdit}
+          />
+        </div>
       ))}
     </div>
   );

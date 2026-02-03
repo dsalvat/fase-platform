@@ -177,7 +177,7 @@ export default async function TARDetailPage({ params }: PageProps) {
       </Card>
 
       {/* Activities section */}
-      <Card>
+      <Card data-tour="activities-section">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>

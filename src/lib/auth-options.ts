@@ -85,6 +85,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             status: true,
             currentCompanyId: true,
+            onboardingCompletedAt: true,
             companies: {
               select: {
                 company: {
@@ -102,6 +103,7 @@ export const authOptions: NextAuthOptions = {
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.status = dbUser.status;
+          token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
           token.companies = dbUser.companies.map((uc) => uc.company);
 
           // Solo inicializar currentCompanyId en signIn o si no existe
@@ -140,6 +142,7 @@ export const authOptions: NextAuthOptions = {
         session.user.status = token.status as UserStatus;
         session.user.currentCompanyId = token.currentCompanyId as string | null;
         session.user.companies = (token.companies as { id: string; name: string; logo: string | null }[]) || [];
+        session.user.onboardingCompletedAt = token.onboardingCompletedAt as Date | null;
       }
       return session;
     },
