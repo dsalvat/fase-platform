@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/language-selector";
@@ -123,10 +124,25 @@ export default async function DashboardLayout({
             {/* Logo and main nav */}
             <div className="flex items-center gap-8">
               <Link href="/home" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">F</span>
-                </div>
-                <span className="font-bold text-xl text-gray-900">FASE</span>
+                {currentCompanyLogo ? (
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                    <Image
+                      src={currentCompanyLogo}
+                      alt={currentCompanyName || ""}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">
+                      {currentCompanyName ? currentCompanyName.charAt(0).toUpperCase() : "F"}
+                    </span>
+                  </div>
+                )}
+                <span className="font-bold text-xl text-gray-900">
+                  {currentCompanyName ? currentCompanyName.toUpperCase() : "FASE"}
+                </span>
               </Link>
 
               <div className="hidden md:flex items-center gap-1">
