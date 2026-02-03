@@ -78,67 +78,33 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, trigger, session }) {
       // Siempre obtener datos actualizados de la BD para reflejar cambios de rol
       if (token.email) {
-        // Try to fetch with onboardingCompletedAt, fallback if field doesn't exist yet
-        let dbUser: {
-          id: string;
-          role: UserRole;
-          status: UserStatus;
-          currentCompanyId: string | null;
-          onboardingCompletedAt?: Date | null;
-          companies: { company: { id: string; name: string; logo: string | null } }[];
-        } | null = null;
-
-        try {
-          dbUser = await prisma.user.findUnique({
-            where: { email: token.email },
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              currentCompanyId: true,
-              onboardingCompletedAt: true,
-              companies: {
-                select: {
-                  company: {
-                    select: {
-                      id: true,
-                      name: true,
-                      logo: true,
-                    },
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: {
+            id: true,
+            role: true,
+            status: true,
+            currentCompanyId: true,
+            companies: {
+              select: {
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    logo: true,
                   },
                 },
               },
             },
-          });
-        } catch {
-          // Fallback: onboardingCompletedAt field might not exist in DB yet
-          dbUser = await prisma.user.findUnique({
-            where: { email: token.email },
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              currentCompanyId: true,
-              companies: {
-                select: {
-                  company: {
-                    select: {
-                      id: true,
-                      name: true,
-                      logo: true,
-                    },
-                  },
-                },
-              },
-            },
-          });
-        }
+          },
+        });
 
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.status = dbUser.status;
-          token.onboardingCompletedAt = dbUser.onboardingCompletedAt ?? null;
+          // NOTE: onboardingCompletedAt temporarily disabled until migration is run in production
+          token.onboardingCompletedAt = null;
           token.companies = dbUser.companies.map((uc) => uc.company);
 
           // Solo inicializar currentCompanyId en signIn o si no existe

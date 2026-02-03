@@ -103,7 +103,9 @@ export default async function DashboardLayout({
   };
 
   // Check if onboarding is completed
-  const onboardingCompleted = user.onboardingCompletedAt !== null;
+  // NOTE: Onboarding temporarily disabled until migration is run in production
+  // Once migration is deployed, change this to: user.onboardingCompletedAt !== null
+  const onboardingCompleted = true;
 
   return (
     <OnboardingProvider
