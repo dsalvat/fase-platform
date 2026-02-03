@@ -180,7 +180,7 @@ export default async function DashboardLayout({
 
             {/* User menu */}
             <div className="flex items-center gap-4">
-              {showCompanySwitcher ? (
+              {showCompanySwitcher && (
                 <CompanySwitcherWrapper
                   companies={companies}
                   currentCompanyId={user.currentCompanyId}
@@ -189,14 +189,6 @@ export default async function DashboardLayout({
                   isSuperAdmin={isSuperAdmin}
                   translations={companySwitcherTranslations}
                 />
-              ) : companies.length === 1 && (
-                // Single company - just show the company name
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  {currentCompanyLogo && (
-                    <img src={currentCompanyLogo} alt="" className="w-5 h-5 rounded object-contain" />
-                  )}
-                  <span>{currentCompanyName}</span>
-                </div>
               )}
               <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
               <UserMenu
