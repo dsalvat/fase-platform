@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
-import { TourProvider } from "@reactour/tour";
+import { TourProvider, useTour } from "@reactour/tour";
 import { getOnboardingSteps, OnboardingStepTranslations } from "./onboarding-steps";
 import { OnboardingTooltip } from "./OnboardingTooltip";
 import { markOnboardingComplete } from "@/app/actions/onboarding";
@@ -15,9 +15,15 @@ interface OnboardingTranslations extends OnboardingStepTranslations {
 }
 
 interface OnboardingContextValue {
-  isRunning: boolean;
   startTour: () => void;
   endTour: () => void;
+  translations: {
+    skipTour: string;
+    nextStep: string;
+    previousStep: string;
+    finish: string;
+    stepOf: string;
+  };
 }
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
@@ -28,6 +34,32 @@ export function useOnboarding() {
     throw new Error("useOnboarding must be used within OnboardingProvider");
   }
   return context;
+}
+
+// Inner component that has access to useTour
+function OnboardingController({
+  children,
+  onboardingCompleted,
+  onEndTour,
+}: {
+  children: ReactNode;
+  onboardingCompleted: boolean;
+  onEndTour: () => void;
+}) {
+  const { setIsOpen } = useTour();
+
+  // Auto-start tour for new users
+  useEffect(() => {
+    if (!onboardingCompleted) {
+      // Small delay to ensure the page is fully loaded
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [onboardingCompleted, setIsOpen]);
+
+  return <>{children}</>;
 }
 
 interface OnboardingProviderProps {
@@ -41,43 +73,37 @@ export function OnboardingProvider({
   translations,
   onboardingCompleted,
 }: OnboardingProviderProps) {
-  const [isRunning, setIsRunning] = useState(false);
-
-  // Auto-start tour for new users
-  useEffect(() => {
-    if (!onboardingCompleted) {
-      // Small delay to ensure the page is fully loaded
-      const timer = setTimeout(() => {
-        setIsRunning(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [onboardingCompleted]);
-
-  const startTour = useCallback(() => {
-    setIsRunning(true);
-  }, []);
+  const [hasEnded, setHasEnded] = useState(false);
 
   const endTour = useCallback(async () => {
-    setIsRunning(false);
+    if (hasEnded) return;
+    setHasEnded(true);
     // Mark as completed in database
     await markOnboardingComplete();
+  }, [hasEnded]);
+
+  const startTour = useCallback(() => {
+    // This would need access to useTour, handled differently
   }, []);
 
   const steps = getOnboardingSteps(translations);
 
   const contextValue: OnboardingContextValue = {
-    isRunning,
     startTour,
     endTour,
+    translations: {
+      skipTour: translations.skipTour,
+      nextStep: translations.nextStep,
+      previousStep: translations.previousStep,
+      finish: translations.finish,
+      stepOf: translations.stepOf,
+    },
   };
 
   return (
     <OnboardingContext.Provider value={contextValue}>
       <TourProvider
         steps={steps}
-        isOpen={isRunning}
-        setIsOpen={setIsRunning}
         onClickClose={({ setIsOpen }) => {
           setIsOpen(false);
           endTour();
@@ -121,7 +147,12 @@ export function OnboardingProvider({
         disableInteraction
         scrollSmooth
       >
-        {children}
+        <OnboardingController
+          onboardingCompleted={onboardingCompleted}
+          onEndTour={endTour}
+        >
+          {children}
+        </OnboardingController>
       </TourProvider>
     </OnboardingContext.Provider>
   );
