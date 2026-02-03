@@ -351,5 +351,16 @@
     "step5Content": "Cada TAR es descompon en activitats setmanals i diaries. Registra el teu progres diari i marca les activitats completades per fer seguiment del teu avanc.",
     "step6Title": "Reunions i Persones Clau",
     "step6Content": "Identifica les persones que t'ajudaran a aconseguir els teus objectius i programa les reunions necessaries per validar, refinar i prendre decisions."
+  },
+  "chat": {
+    "title": "Xat amb IA",
+    "placeholder": "Escriu la teva pregunta...",
+    "credits": "credits",
+    "creditsRemaining": "{remaining} de {total} credits",
+    "noCredits": "Has esgotat els teus credits d'avui. Es resetejen dema.",
+    "thinking": "Pensant...",
+    "error": "Error en enviar missatge",
+    "newConversation": "Nova conversacio",
+    "welcome": "Hola! Soc el teu assistent de la plataforma. Et puc ajudar amb els teus Big Rocks, TARs i planificacio. En que et puc ajudar?"
   }
 }

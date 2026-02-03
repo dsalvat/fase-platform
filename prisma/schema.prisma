@@ -156,6 +156,10 @@ model User {
   givenFeedback     Feedback[]  @relation("GivenFeedback")
   receivedFeedback  Feedback[]  @relation("ReceivedFeedback")
 
+  // Relaciones de chat con IA
+  chatConversations ChatConversation[]
+  chatCredits       UserChatCredits?
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -398,4 +402,44 @@ model Feedback {
   @@index([supervisorId])
   @@index([userId])
   @@index([targetType, targetId])
+}
+
+// Modelo ChatConversation (Conversaciones con IA)
+model ChatConversation {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?       // Título auto-generado del primer mensaje
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Modelo ChatMessage (Mensajes de chat)
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String           // "user" | "assistant"
+  content        String           @db.Text
+  creditsUsed    Int              @default(0)
+  createdAt      DateTime         @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+// Modelo UserChatCredits (Créditos diarios de chat)
+model UserChatCredits {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditsUsed Int      @default(0)
+  lastResetAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }

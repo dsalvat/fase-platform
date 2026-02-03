@@ -351,5 +351,16 @@
     "step5Content": "Each TAR is broken down into weekly and daily activities. Record your daily progress and mark completed activities to track your advancement.",
     "step6Title": "Meetings and Key People",
     "step6Content": "Identify the people who will help you achieve your objectives and schedule the necessary meetings to validate, refine, and make decisions."
+  },
+  "chat": {
+    "title": "AI Chat",
+    "placeholder": "Type your question...",
+    "credits": "credits",
+    "creditsRemaining": "{remaining} of {total} credits",
+    "noCredits": "You have used all your credits for today. They reset tomorrow.",
+    "thinking": "Thinking...",
+    "error": "Error sending message",
+    "newConversation": "New conversation",
+    "welcome": "Hello! I'm your platform assistant. I can help you with your Big Rocks, TARs and planning. How can I help you?"
   }
 }

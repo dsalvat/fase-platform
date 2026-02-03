@@ -11,6 +11,7 @@ import { CompanySwitcherWrapper } from "@/components/admin/company-switcher-wrap
 import { UserMenu } from "@/components/user-menu";
 import { NavigationProgress } from "@/components/navigation-progress";
 import { OnboardingProvider } from "@/components/onboarding";
+import { ChatButton } from "@/components/chat";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
@@ -75,6 +76,7 @@ export default async function DashboardLayout({
   const t = await getTranslations("nav");
   const tCompanies = await getTranslations("companies");
   const tOnboarding = await getTranslations("onboarding");
+  const tChat = await getTranslations("chat");
 
   // Translations for company switcher
   const companySwitcherTranslations = {
@@ -105,6 +107,19 @@ export default async function DashboardLayout({
 
   // Check if onboarding is completed (null = not completed, Date = completed)
   const onboardingCompleted = user.onboardingCompletedAt !== null;
+
+  // Translations for AI chat
+  const chatTranslations = {
+    title: tChat("title"),
+    placeholder: tChat("placeholder"),
+    credits: tChat("credits"),
+    creditsRemaining: tChat("creditsRemaining"),
+    noCredits: tChat("noCredits"),
+    thinking: tChat("thinking"),
+    error: tChat("error"),
+    newConversation: tChat("newConversation"),
+    welcome: tChat("welcome"),
+  };
 
   return (
     <OnboardingProvider
@@ -220,6 +235,9 @@ export default async function DashboardLayout({
           </div>
         </div>
       </footer>
+
+      {/* AI Chat */}
+      <ChatButton translations={chatTranslations} />
     </div>
     </OnboardingProvider>
   );

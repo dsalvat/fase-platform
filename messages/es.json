@@ -351,5 +351,16 @@
     "step5Content": "Cada TAR se descompone en actividades semanales y diarias. Registra tu progreso diario y marca las actividades completadas para hacer seguimiento de tu avance.",
     "step6Title": "Reuniones y Personas Clave",
     "step6Content": "Identifica las personas que te ayudaran a lograr tus objetivos y programa las reuniones necesarias para validar, refinar y tomar decisiones."
+  },
+  "chat": {
+    "title": "Chat con IA",
+    "placeholder": "Escribe tu pregunta...",
+    "credits": "creditos",
+    "creditsRemaining": "{remaining} de {total} creditos",
+    "noCredits": "Has agotado tus creditos de hoy. Se resetean manana.",
+    "thinking": "Pensando...",
+    "error": "Error al enviar mensaje",
+    "newConversation": "Nueva conversacion",
+    "welcome": "Hola! Soy tu asistente de la plataforma. Puedo ayudarte con tus Big Rocks, TARs y planificacion. ¿En que puedo ayudarte?"
   }
 }
