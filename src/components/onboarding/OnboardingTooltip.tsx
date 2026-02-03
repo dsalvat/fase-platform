@@ -12,14 +12,8 @@ interface TooltipTranslations {
   stepOf: string;
 }
 
-interface ContentProps {
-  content: {
-    title?: string;
-    description?: string;
-  } | string;
-}
-
-interface OnboardingTooltipProps extends ContentProps {
+interface OnboardingTooltipProps {
+  content: string;
   translations: TooltipTranslations;
   onSkip: () => void;
 }
@@ -34,9 +28,10 @@ export function OnboardingTooltip({
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  // Handle string or object content
-  const title = typeof content === "string" ? "" : content.title;
-  const description = typeof content === "string" ? content : content.description;
+  // Parse content - format is "**Title**\n\nDescription"
+  const parts = content.split("\n\n");
+  const title = parts[0]?.replace(/\*\*/g, "") || "";
+  const description = parts[1] || "";
 
   const handleNext = () => {
     if (isLastStep) {

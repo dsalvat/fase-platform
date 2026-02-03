@@ -15,54 +15,50 @@ export interface OnboardingStepTranslations {
   step6Content: string;
 }
 
+// Store translations for use in tooltip
+let currentTranslations: OnboardingStepTranslations | null = null;
+
+export function setOnboardingTranslations(t: OnboardingStepTranslations) {
+  currentTranslations = t;
+}
+
+export function getOnboardingTranslations(): OnboardingStepTranslations | null {
+  return currentTranslations;
+}
+
 export function getOnboardingSteps(t: OnboardingStepTranslations): StepType[] {
+  // Store translations for tooltip access
+  setOnboardingTranslations(t);
+
   return [
     {
       selector: '[data-tour="nav-big-rocks"]',
-      content: {
-        title: t.step1Title,
-        description: t.step1Content,
-      },
+      content: `**${t.step1Title}**\n\n${t.step1Content}`,
       position: "bottom",
     },
     {
       selector: '[data-tour="new-big-rock-button"]',
-      content: {
-        title: t.step2Title,
-        description: t.step2Content,
-      },
+      content: `**${t.step2Title}**\n\n${t.step2Content}`,
       position: "bottom",
     },
     {
       selector: '[data-tour="big-rock-card"]',
-      content: {
-        title: t.step3Title,
-        description: t.step3Content,
-      },
+      content: `**${t.step3Title}**\n\n${t.step3Content}`,
       position: "right",
     },
     {
       selector: '[data-tour="tars-section"]',
-      content: {
-        title: t.step4Title,
-        description: t.step4Content,
-      },
+      content: `**${t.step4Title}**\n\n${t.step4Content}`,
       position: "top",
     },
     {
       selector: '[data-tour="activities-section"]',
-      content: {
-        title: t.step5Title,
-        description: t.step5Content,
-      },
+      content: `**${t.step5Title}**\n\n${t.step5Content}`,
       position: "top",
     },
     {
       selector: '[data-tour="nav-key-people"]',
-      content: {
-        title: t.step6Title,
-        description: t.step6Content,
-      },
+      content: `**${t.step6Title}**\n\n${t.step6Content}`,
       position: "bottom",
     },
   ];
