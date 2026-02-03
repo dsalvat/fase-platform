@@ -133,8 +133,8 @@ model User {
   status        UserStatus  @default(ACTIVE)  // Estado del usuario
   language      Language    @default(ES)
 
-  // NOTE: onboardingCompletedAt field will be added after running migration in production
-  // For now, onboarding is disabled until migration is deployed
+  // Onboarding tracking
+  onboardingCompletedAt DateTime?  // null = no completado, timestamp = completado
 
   // Empresa actual seleccionada (para navegación)
   currentCompanyId String?

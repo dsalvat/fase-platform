@@ -85,6 +85,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             status: true,
             currentCompanyId: true,
+            onboardingCompletedAt: true,
             companies: {
               select: {
                 company: {
@@ -103,8 +104,7 @@ export const authOptions: NextAuthOptions = {
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.status = dbUser.status;
-          // NOTE: onboardingCompletedAt temporarily disabled until migration is run in production
-          token.onboardingCompletedAt = null;
+          token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
           token.companies = dbUser.companies.map((uc) => uc.company);
 
           // Solo inicializar currentCompanyId en signIn o si no existe

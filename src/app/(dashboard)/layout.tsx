@@ -102,10 +102,8 @@ export default async function DashboardLayout({
     step6Content: tOnboarding("step6Content"),
   };
 
-  // Check if onboarding is completed
-  // NOTE: Onboarding temporarily disabled until migration is run in production
-  // Once migration is deployed, change this to: user.onboardingCompletedAt !== null
-  const onboardingCompleted = true;
+  // Check if onboarding is completed (null = not completed, Date = completed)
+  const onboardingCompleted = user.onboardingCompletedAt !== null;
 
   return (
     <OnboardingProvider
