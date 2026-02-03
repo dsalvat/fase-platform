@@ -29,8 +29,15 @@ export function EditCompanyDialog({ company, translations: t, onClose }: EditCom
   const [name, setName] = useState(company.name);
   const [slug, setSlug] = useState(company.slug);
   const [logo, setLogo] = useState(company.logo || "");
+  const [logoError, setLogoError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Reset logo error when URL changes
+  const handleLogoChange = (value: string) => {
+    setLogo(value);
+    setLogoError(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,14 +77,14 @@ export function EditCompanyDialog({ company, translations: t, onClose }: EditCom
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Logo Preview */}
           <div className="flex justify-center">
-            {logo ? (
+            {logo && !logoError ? (
               <div className="relative w-20 h-20 rounded-lg overflow-hidden border">
                 <Image
                   src={logo}
                   alt={name}
                   fill
                   className="object-contain"
-                  onError={() => setLogo("")}
+                  onError={() => setLogoError(true)}
                 />
               </div>
             ) : (
@@ -113,7 +120,7 @@ export function EditCompanyDialog({ company, translations: t, onClose }: EditCom
               id="logo"
               type="url"
               value={logo}
-              onChange={(e) => setLogo(e.target.value)}
+              onChange={(e) => handleLogoChange(e.target.value)}
               placeholder="https://example.com/logo.png"
             />
             <p className="text-xs text-gray-500 mt-1">{t.logoHelp}</p>
