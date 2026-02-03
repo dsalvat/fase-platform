@@ -102,23 +102,8 @@ function SignInContent() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 grid grid-cols-4 gap-2 text-center text-xs text-muted-foreground">
-          <div className="p-2 rounded bg-blue-50 dark:bg-blue-950">
-            <span className="font-semibold text-blue-600 dark:text-blue-400">F</span>ocus
-          </div>
-          <div className="p-2 rounded bg-purple-50 dark:bg-purple-950">
-            <span className="font-semibold text-purple-600 dark:text-purple-400">A</span>{tCategories("atencion").toLowerCase()}
-          </div>
-          <div className="p-2 rounded bg-green-50 dark:bg-green-950">
-            <span className="font-semibold text-green-600 dark:text-green-400">S</span>{tCategories("sistemas").toLowerCase()}
-          </div>
-          <div className="p-2 rounded bg-orange-50 dark:bg-orange-950">
-            <span className="font-semibold text-orange-600 dark:text-orange-400">E</span>{tCategories("energia").toLowerCase()}
-          </div>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Por Agustin Peralt
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Plataforma de metodologia de gestio Estrategica - Ametller Origen
         </p>
       </div>
     </main>

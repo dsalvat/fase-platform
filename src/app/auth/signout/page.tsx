@@ -70,7 +70,7 @@ export default function SignOutPage() {
         </Card>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Por Agustin Peralt
+          Plataforma de metodologia de gestio Estrategica - Ametller Origen
         </p>
       </div>
     </main>

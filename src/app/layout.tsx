@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FASE Platform - Gestión de Objetivos",
-  description: "Plataforma de gestión de objetivos basada en la metodología FASE por Agustín Peralt",
+  title: "FASE Platform - Gestio Estrategica",
+  description: "Plataforma de metodologia de gestio Estrategica - Ametller Origen",
 };
 
 export default function RootLayout({

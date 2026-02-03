@@ -281,7 +281,7 @@
     "english": "Ingles"
   },
   "footer": {
-    "methodology": "Metodologia FASE por Agustin Peralt"
+    "methodology": "Plataforma de metodologia de gestio Estrategica - Ametller Origen"
   },
   "platform": {
     "title": "Plataforma FASE",
@@ -340,9 +340,9 @@
     "finish": "Finalizar",
     "stepOf": "Paso {current} de {total}",
     "step1Title": "Big Rocks - Objetivos Mensuales",
-    "step1Content": "Los Big Rocks son tus objetivos mensuales principales. Aqui planificas lo que quieres lograr este mes siguiendo la metodologia FASE (Focus, Atencion, Sistemas, Energia).",
+    "step1Content": "Los Big Rocks son tus objetivos mensuales principales. Aqui planificas lo que quieres lograr este mes.",
     "step2Title": "Crear un Big Rock",
-    "step2Content": "Haz clic aqui para crear un nuevo objetivo mensual. Define el titulo, descripcion, indicador de exito y categoria FASE.",
+    "step2Content": "Haz clic aqui para crear un nuevo objetivo mensual. Define el titulo, descripcion e indicador de exito.",
     "step3Title": "Confirmar Big Rocks",
     "step3Content": "Una vez creado, debes confirmar tu Big Rock. Al confirmarlo, podras gestionar TARs, reuniones y personas clave.",
     "step4Title": "TARs - Tareas de Alto Rendimiento",

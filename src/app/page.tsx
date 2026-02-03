@@ -24,38 +24,8 @@ export default async function Home() {
             <h1 className="text-4xl font-bold">Plataforma FASE</h1>
           </div>
           <p className="text-xl text-muted-foreground">
-            Metodologia de gestion de objetivos por Agustin Peralt
+            Plataforma de metodologia de gestio Estrategica - Ametller Origen
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2 text-blue-600">Focus</h2>
-            <p className="text-muted-foreground">
-              Objetivos de enfoque y priorizacion
-            </p>
-          </div>
-
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2 text-green-600">Atencion</h2>
-            <p className="text-muted-foreground">
-              Objetivos de presencia y conciencia
-            </p>
-          </div>
-
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2 text-purple-600">Sistemas</h2>
-            <p className="text-muted-foreground">
-              Objetivos de procesos y estructuras
-            </p>
-          </div>
-
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2 text-orange-600">Energia</h2>
-            <p className="text-muted-foreground">
-              Objetivos de vitalidad y bienestar
-            </p>
-          </div>
         </div>
 
         <div className="text-center">

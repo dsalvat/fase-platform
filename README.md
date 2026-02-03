@@ -1,10 +1,10 @@
 # Plataforma FASE
 
-Plataforma de gestión de objetivos basada en la metodología FASE (Focus, Atención, Sistemas, Energía) creada por Agustín Peralt.
+Plataforma de metodologia de gestio Estrategica - Ametller Origen.
 
 ## Sobre el Proyecto
 
-FASE es una metodología de gestión de objetivos que ayuda a los usuarios a planificar, ejecutar y hacer seguimiento de sus objetivos mensuales (Big Rocks) con foco en tareas de alto rendimiento.
+Plataforma de gestion de objetivos que ayuda a los usuarios a planificar, ejecutar y hacer seguimiento de sus objetivos mensuales (Big Rocks) con foco en tareas de alto rendimiento.
 
 ## Stack Tecnológico
 
@@ -250,7 +250,7 @@ Para más información sobre la metodología FASE, consulta [claude.md](claude.m
 
 ## Contribución
 
-Este proyecto sigue la metodología FASE creada por Agustín Peralt.
+Este proyecto es una plataforma de gestio estrategica para Ametller Origen.
 
 ## Licencia
 

@@ -207,7 +207,7 @@ export default async function DashboardLayout({
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-gray-500">
             <p>
-              Metodología FASE para el equipo de Ametller Origen | © {new Date().getFullYear()}
+              Plataforma de metodologia de gestio Estrategica - Ametller Origen | © {new Date().getFullYear()}
             </p>
           </div>
         </div>

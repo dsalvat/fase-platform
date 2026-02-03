@@ -1,5 +1,5 @@
-# Plataforma Metodología FASE
-## Por Agustín Peralt
+# Plataforma FASE
+## Plataforma de metodologia de gestio Estrategica - Ametller Origen
 
 ---
 
@@ -21,12 +21,7 @@
 
 ## 1. Objetivo del Sistema
 
-La aplicación tiene como objetivo ayudar al usuario a **planificar, ejecutar y hacer seguimiento** de sus objetivos mensuales (Big Rocks) siguiendo la metodología FASE:
-
-- **F**ocus
-- **A**tención
-- **S**istemas
-- **E**nergía
+La aplicación tiene como objetivo ayudar al usuario a **planificar, ejecutar y hacer seguimiento** de sus objetivos mensuales (Big Rocks).
 
 ### Características principales
 - **Plataforma web y móvil** para acceso multiplataforma
@@ -59,20 +54,12 @@ Cada Big Rock contiene:
 | **Identificador único** | ID del objetivo |
 | **Título** | Nombre descriptivo del objetivo |
 | **Descripción** | Detalle completo del objetivo |
-| **Categoría FASE** | Focus / Atención / Sistemas / Energía |
 | **Indicador** | Métrica para medir el éxito |
 | **Número de TAR** | Cantidad de Tareas de Alto Rendimiento |
 | **Lista de TAR** | Tareas asociadas al objetivo |
 | **Key People** | Personas clave para el logro |
 | **Key Meetings** | Reuniones críticas necesarias |
 | **Estado** | Planificado / En progreso / Finalizado |
-
-#### Categorías FASE
-
-- **Focus**: Objetivos relacionados con enfoque y priorización
-- **Atención**: Objetivos de presencia y conciencia
-- **Sistemas**: Objetivos de procesos y estructuras
-- **Energía**: Objetivos de vitalidad y bienestar
 
 ---
 
