@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import Image from "next/image";
@@ -66,8 +66,16 @@ export default async function DashboardLayout({
     currentCompanyLogo = companies[0].logo;
   }
 
-  // Get current app info
-  const currentAppCode = user.currentAppCode || AppType.FASE;
+  // Detect current app from URL path (more reliable than session)
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname")
+    || headersList.get("x-invoke-path")
+    || headersList.get("x-matched-path")
+    || "";
+
+  // Determine current app based on URL path
+  const isOkrRoute = pathname.startsWith("/okr");
+  const currentAppCode = isOkrRoute ? AppType.OKR : (user.currentAppCode || AppType.FASE);
   const showAppSwitcher = user.apps && user.apps.length > 1;
 
   // Get current locale from cookie
