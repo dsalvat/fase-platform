@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2 } from "lucide-react";
-import { removeTeamMember } from "@/app/actions/okr";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Loader2, ChevronDown } from "lucide-react";
+import { removeTeamMember, updateTeamMemberRole } from "@/app/actions/okr";
+import { TeamMemberRole } from "@prisma/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +17,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TeamMember {
   id: string;
-  role: string | null;
+  role: TeamMemberRole;
   user: {
     id: string;
     name: string | null;
@@ -30,93 +38,179 @@ interface TeamMember {
 interface TeamMemberListProps {
   teamId: string;
   members: TeamMember[];
-  isAdmin: boolean;
+  canManageMembers: boolean;
 }
 
-export function TeamMemberList({ teamId, members, isAdmin }: TeamMemberListProps) {
+const ROLE_LABELS: Record<TeamMemberRole, string> = {
+  RESPONSABLE: "Responsable",
+  EDITOR: "Editor",
+  VISUALIZADOR: "Visualizador",
+  DIRECTOR: "Director",
+};
+
+const ROLE_DESCRIPTIONS: Record<TeamMemberRole, string> = {
+  RESPONSABLE: "Crea, edita y elimina objetivos",
+  EDITOR: "Puede editar objetivos existentes",
+  VISUALIZADOR: "Solo puede ver objetivos",
+  DIRECTOR: "Supervisor, solo visualiza",
+};
+
+const ROLE_COLORS: Record<TeamMemberRole, string> = {
+  RESPONSABLE: "bg-blue-100 text-blue-800 border-blue-200",
+  EDITOR: "bg-green-100 text-green-800 border-green-200",
+  VISUALIZADOR: "bg-gray-100 text-gray-800 border-gray-200",
+  DIRECTOR: "bg-purple-100 text-purple-800 border-purple-200",
+};
+
+export function TeamMemberList({ teamId, members, canManageMembers }: TeamMemberListProps) {
   const [isPending, startTransition] = useTransition();
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRemove = (userId: string) => {
     setRemovingId(userId);
+    setError(null);
     startTransition(async () => {
-      await removeTeamMember(teamId, userId);
+      const result = await removeTeamMember(teamId, userId);
+      if (!result.success) {
+        setError(result.error || "Error al eliminar miembro");
+      }
       setRemovingId(null);
     });
   };
 
+  const handleRoleChange = (userId: string, newRole: TeamMemberRole) => {
+    setUpdatingId(userId);
+    setError(null);
+    startTransition(async () => {
+      const result = await updateTeamMemberRole(teamId, userId, newRole);
+      if (!result.success) {
+        setError(result.error || "Error al cambiar rol");
+      }
+      setUpdatingId(null);
+    });
+  };
+
+  // Count responsables to prevent removing the last one
+  const responsableCount = members.filter(m => m.role === TeamMemberRole.RESPONSABLE).length;
+
   return (
     <div className="space-y-2">
-      {members.map((member) => (
-        <div
-          key={member.id}
-          className="flex items-center justify-between p-3 border rounded-lg"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              {member.user.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={member.user.image}
-                  alt={member.user.name || ""}
-                  className="w-full h-full object-cover"
-                />
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+          <p className="text-sm text-red-800">{error}</p>
+        </div>
+      )}
+      {members.map((member) => {
+        const isLastResponsable = member.role === TeamMemberRole.RESPONSABLE && responsableCount <= 1;
+
+        return (
+          <div
+            key={member.id}
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {member.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={member.user.image}
+                    alt={member.user.name || ""}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-gray-600">
+                    {member.user.name?.charAt(0).toUpperCase() || "?"}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="font-medium">{member.user.name || "Sin nombre"}</p>
+                <p className="text-sm text-muted-foreground">{member.user.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {canManageMembers ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`${ROLE_COLORS[member.role]} border`}
+                      disabled={isPending && updatingId === member.user.id}
+                    >
+                      {isPending && updatingId === member.user.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : null}
+                      {ROLE_LABELS[member.role]}
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {Object.values(TeamMemberRole).map((role) => (
+                      <DropdownMenuItem
+                        key={role}
+                        onClick={() => handleRoleChange(member.user.id, role)}
+                        disabled={
+                          role === member.role ||
+                          (isLastResponsable && role !== TeamMemberRole.RESPONSABLE)
+                        }
+                        className="flex flex-col items-start"
+                      >
+                        <span className="font-medium">{ROLE_LABELS[role]}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {ROLE_DESCRIPTIONS[role]}
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <span className="text-sm font-medium text-gray-600">
-                  {member.user.name?.charAt(0).toUpperCase() || "?"}
-                </span>
+                <Badge variant="outline" className={ROLE_COLORS[member.role]}>
+                  {ROLE_LABELS[member.role]}
+                </Badge>
+              )}
+              {canManageMembers && !isLastResponsable && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      disabled={isPending && removingId === member.user.id}
+                    >
+                      {isPending && removingId === member.user.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Eliminar miembro</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        ¿Estás seguro de que quieres eliminar a {member.user.name} del equipo?
+                        Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleRemove(member.user.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
-            <div>
-              <p className="font-medium">{member.user.name || "Sin nombre"}</p>
-              <p className="text-sm text-muted-foreground">{member.user.email}</p>
-            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {member.role && (
-              <span className="text-sm text-muted-foreground px-2 py-1 bg-gray-100 rounded">
-                {member.role}
-              </span>
-            )}
-            {isAdmin && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    disabled={isPending && removingId === member.user.id}
-                  >
-                    {isPending && removingId === member.user.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Eliminar miembro</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      ¿Estás seguro de que quieres eliminar a {member.user.name} del equipo?
-                      Esta acción no se puede deshacer.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleRemove(member.user.id)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Eliminar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

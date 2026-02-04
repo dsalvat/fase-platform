@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowLeft, Target, BarChart3, Settings, Plus } from "lucide-react";
-import { UserRole } from "@prisma/client";
+import { ArrowLeft, Target, BarChart3, Settings } from "lucide-react";
+import { UserRole, TeamMemberRole } from "@prisma/client";
 import { KeyResultsList } from "./key-results-list";
 import { AddKeyResultDialog } from "./add-key-result-dialog";
 import { ObjectiveStatusBadge } from "./objective-status-badge";
@@ -51,25 +51,26 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
     notFound();
   }
 
-  // Check if current user can edit
-  const isOwner = objective.ownerId === user.id;
-  const isTeamMember = await prisma.teamMember.findUnique({
-    where: {
-      userId_teamId: {
-        userId: user.id,
-        teamId: objective.teamId,
-      },
-    },
-  });
-  const canEdit = isAdmin || isOwner || !!isTeamMember;
-
-  // Get team members for key result assignment
+  // Get team members for key result assignment and permission check
   const teamMembers = await prisma.teamMember.findMany({
     where: { teamId: objective.teamId },
     include: {
       user: { select: { id: true, name: true, image: true } },
     },
   });
+
+  // Check user's role in the team
+  const userTeamMember = teamMembers.find((tm) => tm.user.id === user.id);
+  const userTeamRole = userTeamMember?.role ?? null;
+
+  // Permission calculations based on team role
+  const canEdit = isAdmin ||
+    userTeamRole === TeamMemberRole.RESPONSABLE ||
+    userTeamRole === TeamMemberRole.EDITOR;
+  const canDelete = isAdmin || userTeamRole === TeamMemberRole.RESPONSABLE;
+  const canAddKeyResults = isAdmin ||
+    userTeamRole === TeamMemberRole.RESPONSABLE ||
+    userTeamRole === TeamMemberRole.EDITOR;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -83,13 +84,35 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
             </Button>
           </Link>
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <Badge variant="outline">{objective.team.name}</Badge>
               <ObjectiveStatusBadge
                 objectiveId={objective.id}
                 status={objective.status}
                 canEdit={canEdit}
               />
+              {userTeamRole && (
+                <Badge
+                  variant="outline"
+                  className={
+                    userTeamRole === TeamMemberRole.RESPONSABLE
+                      ? "bg-blue-100 text-blue-800 border-blue-200"
+                      : userTeamRole === TeamMemberRole.EDITOR
+                      ? "bg-green-100 text-green-800 border-green-200"
+                      : userTeamRole === TeamMemberRole.DIRECTOR
+                      ? "bg-purple-100 text-purple-800 border-purple-200"
+                      : "bg-gray-100 text-gray-800 border-gray-200"
+                  }
+                >
+                  Tu rol: {userTeamRole === TeamMemberRole.RESPONSABLE
+                    ? "Responsable"
+                    : userTeamRole === TeamMemberRole.EDITOR
+                    ? "Editor"
+                    : userTeamRole === TeamMemberRole.DIRECTOR
+                    ? "Director"
+                    : "Visualizador"}
+                </Badge>
+              )}
             </div>
             <h1 className="text-2xl font-bold text-gray-900">{objective.title}</h1>
             <p className="text-muted-foreground">
@@ -209,7 +232,7 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
               <BarChart3 className="h-5 w-5" />
               {t("keyResults")} ({objective.keyResults.length})
             </CardTitle>
-            {canEdit && (
+            {canAddKeyResults && (
               <AddKeyResultDialog
                 objectiveId={objective.id}
                 teamMembers={teamMembers.map((tm) => tm.user)}

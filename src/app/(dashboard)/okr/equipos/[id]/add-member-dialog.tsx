@@ -13,8 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UserPlus, Loader2, Search } from "lucide-react";
 import { addTeamMember } from "@/app/actions/okr";
+import { TeamMemberRole } from "@prisma/client";
 
 interface AvailableUser {
   id: string;
@@ -28,11 +36,25 @@ interface AddMemberDialogProps {
   availableUsers: AvailableUser[];
 }
 
+const ROLE_LABELS: Record<TeamMemberRole, string> = {
+  RESPONSABLE: "Responsable",
+  EDITOR: "Editor",
+  VISUALIZADOR: "Visualizador",
+  DIRECTOR: "Director",
+};
+
+const ROLE_DESCRIPTIONS: Record<TeamMemberRole, string> = {
+  RESPONSABLE: "Crea, edita y elimina objetivos",
+  EDITOR: "Puede editar objetivos existentes",
+  VISUALIZADOR: "Solo puede ver objetivos",
+  DIRECTOR: "Supervisor, solo visualiza",
+};
+
 export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<AvailableUser | null>(null);
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState<TeamMemberRole>(TeamMemberRole.VISUALIZADOR);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -47,11 +69,11 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
 
     setError(null);
     startTransition(async () => {
-      const result = await addTeamMember(teamId, selectedUser.id, role || undefined);
+      const result = await addTeamMember(teamId, selectedUser.id, role);
       if (result.success) {
         setOpen(false);
         setSelectedUser(null);
-        setRole("");
+        setRole(TeamMemberRole.VISUALIZADOR);
         setSearch("");
       } else {
         setError(result.error || "Error al añadir miembro");
@@ -138,15 +160,29 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
             </div>
           )}
 
-          {/* Role (optional) */}
+          {/* Role Selection */}
           <div className="space-y-2">
-            <Label htmlFor="role">Rol en el equipo (opcional)</Label>
-            <Input
-              id="role"
-              placeholder="Ej: Product Manager, Developer..."
+            <Label htmlFor="role">Rol en el equipo</Label>
+            <Select
               value={role}
-              onChange={(e) => setRole(e.target.value)}
-            />
+              onValueChange={(value) => setRole(value as TeamMemberRole)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un rol" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(TeamMemberRole).map((roleOption) => (
+                  <SelectItem key={roleOption} value={roleOption}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{ROLE_LABELS[roleOption]}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {ROLE_DESCRIPTIONS[roleOption]}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Error */}

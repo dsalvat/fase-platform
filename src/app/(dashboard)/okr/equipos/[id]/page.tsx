@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowLeft, Users, Target, Settings, UserPlus } from "lucide-react";
-import { UserRole } from "@prisma/client";
+import { ArrowLeft, Users, Target, Settings } from "lucide-react";
+import { UserRole, TeamMemberRole } from "@prisma/client";
 import { TeamMemberList } from "./team-member-list";
 import { AddMemberDialog } from "./add-member-dialog";
 
@@ -54,8 +54,17 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     notFound();
   }
 
+  // Get user's role in this team
+  const userTeamMember = team.members.find(m => m.user.id === user.id);
+  const userTeamRole = userTeamMember?.role ?? null;
+
+  // Calculate permissions
+  const canManageMembers = isAdmin || userTeamRole === TeamMemberRole.RESPONSABLE;
+  const canCreateObjectives = isAdmin || userTeamRole === TeamMemberRole.RESPONSABLE;
+  const canEditTeam = isAdmin || userTeamRole === TeamMemberRole.RESPONSABLE;
+
   // Get available users to add (users in the same company not already in team)
-  const availableUsers = isAdmin
+  const availableUsers = canManageMembers
     ? await prisma.user.findMany({
         where: {
           companies: {
@@ -90,7 +99,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             )}
           </div>
         </div>
-        {isAdmin && (
+        {canEditTeam && (
           <Link href={`/okr/equipos/${id}/editar`}>
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
@@ -100,6 +109,33 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         )}
       </div>
 
+      {/* User's Role Info */}
+      {userTeamRole && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Tu rol en este equipo:</span>
+          <Badge
+            variant="outline"
+            className={
+              userTeamRole === TeamMemberRole.RESPONSABLE
+                ? "bg-blue-100 text-blue-800 border-blue-200"
+                : userTeamRole === TeamMemberRole.EDITOR
+                ? "bg-green-100 text-green-800 border-green-200"
+                : userTeamRole === TeamMemberRole.DIRECTOR
+                ? "bg-purple-100 text-purple-800 border-purple-200"
+                : "bg-gray-100 text-gray-800 border-gray-200"
+            }
+          >
+            {userTeamRole === TeamMemberRole.RESPONSABLE
+              ? "Responsable"
+              : userTeamRole === TeamMemberRole.EDITOR
+              ? "Editor"
+              : userTeamRole === TeamMemberRole.DIRECTOR
+              ? "Director"
+              : "Visualizador"}
+          </Badge>
+        </div>
+      )}
+
       {/* Team Members */}
       <Card>
         <CardHeader>
@@ -108,7 +144,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               <Users className="h-5 w-5" />
               {t("members")} ({team.members.length})
             </CardTitle>
-            {isAdmin && availableUsers.length > 0 && (
+            {canManageMembers && availableUsers.length > 0 && (
               <AddMemberDialog teamId={id} availableUsers={availableUsers} />
             )}
           </div>
@@ -118,7 +154,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay miembros en este equipo</p>
-              {isAdmin && availableUsers.length > 0 && (
+              {canManageMembers && availableUsers.length > 0 && (
                 <p className="text-sm mt-2">Añade miembros usando el botón de arriba</p>
               )}
             </div>
@@ -126,7 +162,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <TeamMemberList
               teamId={id}
               members={team.members}
-              isAdmin={isAdmin}
+              canManageMembers={canManageMembers}
             />
           )}
         </CardContent>
@@ -140,12 +176,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               <Target className="h-5 w-5" />
               {tOkr("objectives")} ({team.objectives.length})
             </CardTitle>
-            <Link href={`/okr/objetivos/nuevo?teamId=${id}`}>
-              <Button size="sm">
-                <Target className="h-4 w-4 mr-2" />
-                {tOkr("newObjective")}
-              </Button>
-            </Link>
+            {canCreateObjectives && (
+              <Link href={`/okr/objetivos/nuevo?teamId=${id}`}>
+                <Button size="sm">
+                  <Target className="h-4 w-4 mr-2" />
+                  {tOkr("newObjective")}
+                </Button>
+              </Link>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -153,6 +191,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <div className="text-center py-8 text-muted-foreground">
               <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{tOkr("noObjectives")}</p>
+              {canCreateObjectives && (
+                <Link href={`/okr/objetivos/nuevo?teamId=${id}`}>
+                  <Button variant="outline" className="mt-4">
+                    <Target className="h-4 w-4 mr-2" />
+                    {tOkr("newObjective")}
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

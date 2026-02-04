@@ -4,7 +4,45 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { getCurrentCompanyId } from "@/lib/company-context";
-import { UserRole, QuarterPeriod, OKRObjectiveStatus, OKRKeyResultStatus } from "@prisma/client";
+import { UserRole, QuarterPeriod, OKRObjectiveStatus, OKRKeyResultStatus, TeamMemberRole } from "@prisma/client";
+
+// ============================================
+// PERMISSION HELPERS
+// ============================================
+
+// Get user's role in a specific team
+async function getTeamMemberRole(userId: string, teamId: string): Promise<TeamMemberRole | null> {
+  const member = await prisma.teamMember.findUnique({
+    where: {
+      userId_teamId: {
+        userId,
+        teamId,
+      },
+    },
+    select: { role: true },
+  });
+  return member?.role ?? null;
+}
+
+// Check if user can create objectives (RESPONSABLE only)
+function canCreateObjectives(role: TeamMemberRole | null): boolean {
+  return role === TeamMemberRole.RESPONSABLE;
+}
+
+// Check if user can edit objectives (RESPONSABLE or EDITOR)
+function canEditObjectives(role: TeamMemberRole | null): boolean {
+  return role === TeamMemberRole.RESPONSABLE || role === TeamMemberRole.EDITOR;
+}
+
+// Check if user can view objectives (all roles)
+function canViewObjectives(role: TeamMemberRole | null): boolean {
+  return role !== null;
+}
+
+// Check if user can manage team members (RESPONSABLE only)
+function canManageTeamMembers(role: TeamMemberRole | null): boolean {
+  return role === TeamMemberRole.RESPONSABLE;
+}
 
 // ============================================
 // QUARTER ACTIONS
@@ -108,12 +146,12 @@ export async function createTeam(data: {
         },
       });
 
-      // Add creator as team member
+      // Add creator as RESPONSABLE (team leader)
       await tx.teamMember.create({
         data: {
           teamId: newTeam.id,
           userId: user.id,
-          role: "Creador",
+          role: TeamMemberRole.RESPONSABLE,
         },
       });
 
@@ -164,16 +202,19 @@ export async function updateTeam(
   }
 }
 
-export async function addTeamMember(teamId: string, userId: string, role?: string) {
+export async function addTeamMember(teamId: string, userId: string, role: TeamMemberRole = TeamMemberRole.VISUALIZADOR) {
   const user = await requireAuth();
 
-  // Check if user is admin
+  // Check if user is admin or RESPONSABLE of the team
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { role: true },
   });
 
-  if (dbUser?.role !== UserRole.ADMIN && dbUser?.role !== UserRole.SUPERADMIN) {
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, teamId);
+
+  if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -197,14 +238,33 @@ export async function addTeamMember(teamId: string, userId: string, role?: strin
 export async function removeTeamMember(teamId: string, userId: string) {
   const user = await requireAuth();
 
-  // Check if user is admin
+  // Check if user is admin or RESPONSABLE of the team
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { role: true },
   });
 
-  if (dbUser?.role !== UserRole.ADMIN && dbUser?.role !== UserRole.SUPERADMIN) {
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, teamId);
+
+  if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
     return { success: false, error: "Not authorized" };
+  }
+
+  // Prevent removing the last RESPONSABLE
+  const memberToRemove = await prisma.teamMember.findUnique({
+    where: { userId_teamId: { userId, teamId } },
+    select: { role: true },
+  });
+
+  if (memberToRemove?.role === TeamMemberRole.RESPONSABLE) {
+    const responsableCount = await prisma.teamMember.count({
+      where: { teamId, role: TeamMemberRole.RESPONSABLE },
+    });
+
+    if (responsableCount <= 1) {
+      return { success: false, error: "Cannot remove the last RESPONSABLE from the team" };
+    }
   }
 
   try {
@@ -225,6 +285,52 @@ export async function removeTeamMember(teamId: string, userId: string) {
   }
 }
 
+export async function updateTeamMemberRole(teamId: string, userId: string, newRole: TeamMemberRole) {
+  const user = await requireAuth();
+
+  // Check if user is admin or RESPONSABLE of the team
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, teamId);
+
+  if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
+    return { success: false, error: "Not authorized" };
+  }
+
+  // Prevent changing the last RESPONSABLE to another role
+  const currentMember = await prisma.teamMember.findUnique({
+    where: { userId_teamId: { userId, teamId } },
+    select: { role: true },
+  });
+
+  if (currentMember?.role === TeamMemberRole.RESPONSABLE && newRole !== TeamMemberRole.RESPONSABLE) {
+    const responsableCount = await prisma.teamMember.count({
+      where: { teamId, role: TeamMemberRole.RESPONSABLE },
+    });
+
+    if (responsableCount <= 1) {
+      return { success: false, error: "Cannot change the role of the last RESPONSABLE" };
+    }
+  }
+
+  try {
+    const member = await prisma.teamMember.update({
+      where: { userId_teamId: { userId, teamId } },
+      data: { role: newRole },
+    });
+
+    revalidatePath(`/okr/equipos/${teamId}`);
+    return { success: true, data: member };
+  } catch (error) {
+    console.error("Error updating team member role:", error);
+    return { success: false, error: "Failed to update team member role" };
+  }
+}
+
 // ============================================
 // OBJECTIVE ACTIONS
 // ============================================
@@ -237,6 +343,19 @@ export async function createObjective(data: {
   quarterId: string;
 }) {
   const user = await requireAuth();
+
+  // Check if user is admin or RESPONSABLE of the team
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, data.teamId);
+
+  if (!isAdmin && !canCreateObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE can create objectives." };
+  }
 
   try {
     const objective = await prisma.oKRObjective.create({
@@ -272,10 +391,10 @@ export async function updateObjective(
 ) {
   const user = await requireAuth();
 
-  // Check if user is owner or admin
+  // Get objective with team info
   const objective = await prisma.oKRObjective.findUnique({
     where: { id: objectiveId },
-    select: { ownerId: true },
+    select: { ownerId: true, teamId: true },
   });
 
   if (!objective) {
@@ -288,10 +407,11 @@ export async function updateObjective(
   });
 
   const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
-  const isOwner = objective.ownerId === user.id;
+  const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
 
-  if (!isAdmin && !isOwner) {
-    return { success: false, error: "Not authorized" };
+  // RESPONSABLE and EDITOR can edit objectives
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can edit objectives." };
   }
 
   try {
@@ -313,10 +433,10 @@ export async function updateObjective(
 export async function deleteObjective(objectiveId: string) {
   const user = await requireAuth();
 
-  // Check if user is owner or admin
+  // Get objective with team info
   const objective = await prisma.oKRObjective.findUnique({
     where: { id: objectiveId },
-    select: { ownerId: true },
+    select: { ownerId: true, teamId: true },
   });
 
   if (!objective) {
@@ -329,10 +449,11 @@ export async function deleteObjective(objectiveId: string) {
   });
 
   const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
-  const isOwner = objective.ownerId === user.id;
+  const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
 
-  if (!isAdmin && !isOwner) {
-    return { success: false, error: "Not authorized" };
+  // Only RESPONSABLE can delete objectives
+  if (!isAdmin && !canCreateObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE can delete objectives." };
   }
 
   try {
@@ -361,8 +482,32 @@ export async function createKeyResult(data: {
   targetValue: number;
   startValue?: number;
   unit?: string;
+  responsibleId?: string;
 }) {
   const user = await requireAuth();
+
+  // Get the objective to check team membership
+  const objective = await prisma.oKRObjective.findUnique({
+    where: { id: data.objectiveId },
+    select: { teamId: true },
+  });
+
+  if (!objective) {
+    return { success: false, error: "Objective not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
+
+  // RESPONSABLE and EDITOR can create key results
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can create key results." };
+  }
 
   try {
     const keyResult = await prisma.oKRKeyResult.create({
@@ -375,7 +520,7 @@ export async function createKeyResult(data: {
         startValue: data.startValue || 0,
         currentValue: data.startValue || 0,
         unit: data.unit || "%",
-        responsibleId: user.id,
+        responsibleId: data.responsibleId || user.id,
         status: OKRKeyResultStatus.NOT_STARTED,
       },
     });
@@ -405,10 +550,14 @@ export async function updateKeyResult(
 ) {
   const user = await requireAuth();
 
-  // Get the key result to check ownership and get objectiveId
+  // Get the key result with objective and team info
   const keyResult = await prisma.oKRKeyResult.findUnique({
     where: { id: keyResultId },
-    select: { responsibleId: true, objectiveId: true },
+    select: {
+      responsibleId: true,
+      objectiveId: true,
+      objective: { select: { teamId: true } },
+    },
   });
 
   if (!keyResult) {
@@ -421,10 +570,11 @@ export async function updateKeyResult(
   });
 
   const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
-  const isResponsible = keyResult.responsibleId === user.id;
+  const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
-  if (!isAdmin && !isResponsible) {
-    return { success: false, error: "Not authorized" };
+  // RESPONSABLE and EDITOR can update key results
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can update key results." };
   }
 
   try {
@@ -447,10 +597,14 @@ export async function updateKeyResult(
 export async function deleteKeyResult(keyResultId: string) {
   const user = await requireAuth();
 
-  // Get the key result to check ownership
+  // Get the key result with objective and team info
   const keyResult = await prisma.oKRKeyResult.findUnique({
     where: { id: keyResultId },
-    select: { responsibleId: true, objectiveId: true },
+    select: {
+      responsibleId: true,
+      objectiveId: true,
+      objective: { select: { teamId: true } },
+    },
   });
 
   if (!keyResult) {
@@ -463,10 +617,11 @@ export async function deleteKeyResult(keyResultId: string) {
   });
 
   const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
-  const isResponsible = keyResult.responsibleId === user.id;
+  const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
-  if (!isAdmin && !isResponsible) {
-    return { success: false, error: "Not authorized" };
+  // Only RESPONSABLE can delete key results
+  if (!isAdmin && !canCreateObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE can delete key results." };
   }
 
   try {
@@ -527,7 +682,33 @@ export async function createKeyActivity(data: {
   dueDate?: Date;
   assigneeId?: string;
 }) {
-  await requireAuth();
+  const user = await requireAuth();
+
+  // Get key result with objective and team info
+  const keyResult = await prisma.oKRKeyResult.findUnique({
+    where: { id: data.keyResultId },
+    select: {
+      objectiveId: true,
+      objective: { select: { teamId: true } },
+    },
+  });
+
+  if (!keyResult) {
+    return { success: false, error: "Key result not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
+
+  // RESPONSABLE and EDITOR can create activities
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can create activities." };
+  }
 
   try {
     const activity = await prisma.oKRKeyActivity.create({
@@ -540,15 +721,7 @@ export async function createKeyActivity(data: {
       },
     });
 
-    // Get objectiveId for revalidation
-    const keyResult = await prisma.oKRKeyResult.findUnique({
-      where: { id: data.keyResultId },
-      select: { objectiveId: true },
-    });
-
-    if (keyResult) {
-      revalidatePath(`/okr/objetivos/${keyResult.objectiveId}`);
-    }
+    revalidatePath(`/okr/objetivos/${keyResult.objectiveId}`);
 
     return { success: true, data: activity };
   } catch (error) {
@@ -558,18 +731,41 @@ export async function createKeyActivity(data: {
 }
 
 export async function toggleKeyActivityComplete(activityId: string) {
-  await requireAuth();
+  const user = await requireAuth();
+
+  // Get activity with key result, objective and team info
+  const activity = await prisma.oKRKeyActivity.findUnique({
+    where: { id: activityId },
+    select: {
+      completed: true,
+      keyResultId: true,
+      keyResult: {
+        select: {
+          objectiveId: true,
+          objective: { select: { teamId: true } },
+        },
+      },
+    },
+  });
+
+  if (!activity) {
+    return { success: false, error: "Activity not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, activity.keyResult.objective.teamId);
+
+  // RESPONSABLE and EDITOR can toggle activities
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can update activities." };
+  }
 
   try {
-    const activity = await prisma.oKRKeyActivity.findUnique({
-      where: { id: activityId },
-      select: { completed: true, keyResultId: true },
-    });
-
-    if (!activity) {
-      return { success: false, error: "Activity not found" };
-    }
-
     const updated = await prisma.oKRKeyActivity.update({
       where: { id: activityId },
       data: {
@@ -578,15 +774,7 @@ export async function toggleKeyActivityComplete(activityId: string) {
       },
     });
 
-    // Get objectiveId for revalidation
-    const keyResult = await prisma.oKRKeyResult.findUnique({
-      where: { id: activity.keyResultId },
-      select: { objectiveId: true },
-    });
-
-    if (keyResult) {
-      revalidatePath(`/okr/objetivos/${keyResult.objectiveId}`);
-    }
+    revalidatePath(`/okr/objetivos/${activity.keyResult.objectiveId}`);
 
     return { success: true, data: updated };
   } catch (error) {
@@ -596,35 +784,98 @@ export async function toggleKeyActivityComplete(activityId: string) {
 }
 
 export async function deleteKeyActivity(activityId: string) {
-  await requireAuth();
+  const user = await requireAuth();
+
+  // Get activity with key result, objective and team info
+  const activity = await prisma.oKRKeyActivity.findUnique({
+    where: { id: activityId },
+    select: {
+      keyResultId: true,
+      keyResult: {
+        select: {
+          objectiveId: true,
+          objective: { select: { teamId: true } },
+        },
+      },
+    },
+  });
+
+  if (!activity) {
+    return { success: false, error: "Activity not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, activity.keyResult.objective.teamId);
+
+  // Only RESPONSABLE can delete activities
+  if (!isAdmin && !canCreateObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE can delete activities." };
+  }
 
   try {
-    const activity = await prisma.oKRKeyActivity.findUnique({
-      where: { id: activityId },
-      select: { keyResultId: true },
-    });
-
-    if (!activity) {
-      return { success: false, error: "Activity not found" };
-    }
-
     await prisma.oKRKeyActivity.delete({
       where: { id: activityId },
     });
 
-    // Get objectiveId for revalidation
-    const keyResult = await prisma.oKRKeyResult.findUnique({
-      where: { id: activity.keyResultId },
-      select: { objectiveId: true },
-    });
-
-    if (keyResult) {
-      revalidatePath(`/okr/objetivos/${keyResult.objectiveId}`);
-    }
+    revalidatePath(`/okr/objetivos/${activity.keyResult.objectiveId}`);
 
     return { success: true };
   } catch (error) {
     console.error("Error deleting activity:", error);
     return { success: false, error: "Failed to delete activity" };
   }
+}
+
+// ============================================
+// PERMISSION QUERY ACTIONS
+// ============================================
+
+// Get user's permissions for a team (for UI)
+export async function getUserTeamPermissions(teamId: string) {
+  const user = await requireAuth();
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, teamId);
+
+  return {
+    isAdmin,
+    role: userTeamRole,
+    canCreateObjectives: isAdmin || canCreateObjectives(userTeamRole),
+    canEditObjectives: isAdmin || canEditObjectives(userTeamRole),
+    canViewObjectives: isAdmin || canViewObjectives(userTeamRole),
+    canManageTeamMembers: isAdmin || canManageTeamMembers(userTeamRole),
+  };
+}
+
+// Get user's permissions for an objective (for UI)
+export async function getUserObjectivePermissions(objectiveId: string) {
+  const user = await requireAuth();
+
+  const objective = await prisma.oKRObjective.findUnique({
+    where: { id: objectiveId },
+    select: { teamId: true },
+  });
+
+  if (!objective) {
+    return {
+      isAdmin: false,
+      role: null,
+      canCreateObjectives: false,
+      canEditObjectives: false,
+      canViewObjectives: false,
+      canManageTeamMembers: false,
+    };
+  }
+
+  return getUserTeamPermissions(objective.teamId);
 }
