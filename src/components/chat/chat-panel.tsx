@@ -229,7 +229,7 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
               <MessageCircle className="w-5 h-5 text-blue-600" />
               <SheetTitle>{t.title}</SheetTitle>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-6">
               {creditsRemaining < 3 && (
                 <Badge variant={noCredits ? "destructive" : "secondary"} className="text-xs">
                   {creditsRemaining}/10 {t.credits}
