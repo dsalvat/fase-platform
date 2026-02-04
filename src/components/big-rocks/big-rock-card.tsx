@@ -50,10 +50,11 @@ export function BigRockCard({
   const statusInfo = statusConfig[bigRock.status];
   const StatusIcon = statusInfo.icon;
 
-  // Calculate TAR completion
+  // Calculate Big Rock progress based on average TAR progress
   const completedTars = bigRock.tars.filter((tar) => tar.status === "COMPLETADA").length;
-  const totalTars = bigRock.numTars;
-  const tarProgress = totalTars > 0 ? Math.round((completedTars / totalTars) * 100) : 0;
+  const totalTars = bigRock.tars.length;
+  const totalProgress = bigRock.tars.reduce((sum, tar) => sum + tar.progress, 0);
+  const bigRockProgress = totalTars > 0 ? Math.round(totalProgress / totalTars) : 0;
 
   return (
     <Link href={`/big-rocks/${bigRock.id}`} className="block group">
@@ -101,16 +102,16 @@ export function BigRockCard({
           {totalTars > 0 && (
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                <span>Progreso TARs</span>
-                <span className="font-medium">{tarProgress}%</span>
+                <span>Progreso</span>
+                <span className="font-medium">{bigRockProgress}%</span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full transition-all",
-                    tarProgress === 100 ? "bg-green-500" : "bg-blue-500"
+                    bigRockProgress === 100 ? "bg-green-500" : "bg-blue-500"
                   )}
-                  style={{ width: `${tarProgress}%` }}
+                  style={{ width: `${bigRockProgress}%` }}
                 />
               </div>
             </div>

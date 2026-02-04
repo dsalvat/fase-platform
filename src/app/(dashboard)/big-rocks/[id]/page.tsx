@@ -110,6 +110,10 @@ export default async function BigRockDetailPage({ params }: PageProps) {
   // A Big Rock is "confirmed" when status is not CREADO
   const isConfirmed = bigRock.status !== "CREADO";
 
+  // Calculate Big Rock progress based on average TAR progress
+  const totalProgress = bigRock.tars.reduce((sum, tar) => sum + tar.progress, 0);
+  const bigRockProgress = bigRock.tars.length > 0 ? Math.round(totalProgress / bigRock.tars.length) : 0;
+
   // Get supervisor feedback for the Big Rock (only visible to owner)
   const feedback = isOwner ? await getBigRockFeedback(id) : null;
 
@@ -217,6 +221,31 @@ export default async function BigRockDetailPage({ params }: PageProps) {
               </div>
             )}
           </div>
+
+          {/* Progress bar */}
+          {bigRock.tars.length > 0 && (
+            <div className="pt-4 border-t">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-gray-900">Progreso General</h3>
+                <span className={`text-lg font-bold ${
+                  bigRockProgress === 100 ? "text-green-600" : bigRockProgress > 0 ? "text-blue-600" : "text-gray-500"
+                }`}>
+                  {bigRockProgress}%
+                </span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    bigRockProgress === 100 ? "bg-green-500" : "bg-blue-500"
+                  }`}
+                  style={{ width: `${bigRockProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Basado en el progreso promedio de las {bigRock.tars.length} TAR{bigRock.tars.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          )}
 
           {/* AI Feedback */}
           {(bigRock.aiObservations || bigRock.aiRecommendations) && (

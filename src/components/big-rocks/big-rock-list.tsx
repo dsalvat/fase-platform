@@ -55,6 +55,7 @@ export async function BigRockList({ month, userId }: BigRockListProps) {
         select: {
           id: true,
           status: true,
+          progress: true,
         },
       },
       _count: {

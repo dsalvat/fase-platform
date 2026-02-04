@@ -15,7 +15,7 @@ export type BigRockWithRelations = BigRock & {
  */
 export type BigRockWithCounts = BigRock & {
   user: Pick<User, 'id' | 'name'>;
-  tars: Pick<TAR, 'id' | 'status'>[];
+  tars: Pick<TAR, 'id' | 'status' | 'progress'>[];
   keyPeople?: KeyPerson[];
   keyMeetings?: KeyMeeting[];
   _count: {
