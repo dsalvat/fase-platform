@@ -1,15 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { Activity } from "@prisma/client";
 import { ActivityTypeBadge } from "./activity-type-badge";
 import { ActivityCompletionToggle } from "./activity-completion-toggle";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, isBefore } from "date-fns";
 import { es } from "date-fns/locale";
+import { Pencil } from "lucide-react";
 
 interface ActivityCardProps {
   activity: Activity;
+  bigRockId: string;
+  tarId: string;
   isReadOnly?: boolean;
   canEdit?: boolean;
   onToggleComplete?: (id: string, completed: boolean) => void;
@@ -20,6 +25,8 @@ interface ActivityCardProps {
  */
 export function ActivityCard({
   activity,
+  bigRockId,
+  tarId,
   isReadOnly = false,
   canEdit = true,
 }: ActivityCardProps) {
@@ -69,12 +76,19 @@ export function ActivityCard({
             )}
           </div>
 
-          {/* Completion toggle - only for today or future activities */}
+          {/* Actions - only for today or future activities */}
           {isActivityEditable && (
-            <ActivityCompletionToggle
-              activityId={activity.id}
-              initialCompleted={activity.completed}
-            />
+            <div className="flex items-center gap-1">
+              <Link href={`/big-rocks/${bigRockId}/tars/${tarId}/activities/${activity.id}/edit`}>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </Link>
+              <ActivityCompletionToggle
+                activityId={activity.id}
+                initialCompleted={activity.completed}
+              />
+            </div>
           )}
         </div>
       </CardContent>

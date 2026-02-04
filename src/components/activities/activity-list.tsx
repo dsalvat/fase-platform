@@ -3,6 +3,8 @@ import { ActivityCard } from "./activity-card";
 
 interface ActivityListProps {
   activities: Activity[];
+  bigRockId: string;
+  tarId: string;
   isReadOnly?: boolean;
   canEdit?: boolean;
 }
@@ -13,6 +15,8 @@ interface ActivityListProps {
  */
 export function ActivityList({
   activities,
+  bigRockId,
+  tarId,
   isReadOnly = false,
   canEdit = true,
 }: ActivityListProps) {
@@ -53,6 +57,8 @@ export function ActivityList({
               <ActivityCard
                 key={activity.id}
                 activity={activity}
+                bigRockId={bigRockId}
+                tarId={tarId}
                 isReadOnly={isReadOnly}
                 canEdit={canEdit}
               />

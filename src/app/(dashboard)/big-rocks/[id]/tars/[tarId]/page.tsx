@@ -201,6 +201,8 @@ export default async function TARDetailPage({ params }: PageProps) {
         <CardContent>
           <ActivityList
             activities={tar.activities}
+            bigRockId={bigRockId}
+            tarId={tarId}
             isReadOnly={isReadOnly}
             canEdit={canModify}
           />
