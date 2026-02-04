@@ -13,6 +13,7 @@ import { NavigationProgress } from "@/components/navigation-progress";
 import { OnboardingProvider } from "@/components/onboarding";
 import { ChatButton } from "@/components/chat";
 import { AppSwitcher } from "@/components/app-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole, AppType } from "@prisma/client";
@@ -153,14 +154,14 @@ export default async function DashboardLayout({
       translations={onboardingTranslations}
       onboardingCompleted={onboardingCompleted}
     >
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Navigation progress indicator */}
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
 
       {/* Navigation */}
-      <nav className="bg-white border-b shadow-sm">
+      <nav className="bg-card border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo and main nav */}
@@ -182,7 +183,7 @@ export default async function DashboardLayout({
                     </span>
                   </div>
                 )}
-                <span className="font-bold text-xl text-gray-900">
+                <span className="font-bold text-xl text-foreground">
                   {currentCompanyName ? currentCompanyName.toUpperCase() : "FASE"}
                 </span>
               </Link>
@@ -199,9 +200,6 @@ export default async function DashboardLayout({
                     </Link>
                     <Link href="/gamificacion">
                       <Button variant="ghost">{t("gamification")}</Button>
-                    </Link>
-                    <Link href="/actividad">
-                      <Button variant="ghost">{t("activity")}</Button>
                     </Link>
                   </>
                 )}
@@ -226,22 +224,6 @@ export default async function DashboardLayout({
                     </Link>
                   </>
                 )}
-
-                {/* Shared navigation */}
-                {isSupervisor && (
-                  <Link href="/supervisor">
-                    <Button variant="ghost" className="text-teal-600">
-                      {t("supervisor")}
-                    </Button>
-                  </Link>
-                )}
-                {isAdmin && (
-                  <Link href="/admin/usuarios">
-                    <Button variant="ghost" className="text-purple-600">
-                      {t("admin")}
-                    </Button>
-                  </Link>
-                )}
               </div>
             </div>
 
@@ -265,6 +247,7 @@ export default async function DashboardLayout({
                   translations={companySwitcherTranslations}
                 />
               )}
+              <ThemeToggle />
               <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
               <UserMenu
                 user={{
@@ -275,7 +258,13 @@ export default async function DashboardLayout({
                 translations={{
                   myProfile: t("myProfile"),
                   signOut: t("signOut"),
+                  admin: t("admin"),
+                  supervisor: t("supervisor"),
+                  activity: t("activity"),
                 }}
+                isAdmin={isAdmin}
+                isSupervisor={isSupervisor}
+                showActivity={currentAppCode === AppType.FASE}
               />
             </div>
           </div>
@@ -286,9 +275,9 @@ export default async function DashboardLayout({
       <main className="container mx-auto px-4 py-8">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-auto">
+      <footer className="border-t bg-card mt-auto">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-sm text-muted-foreground">
             <p>
               Plataforma de metodologia de gestio Estrategica - Ametller Origen | © {new Date().getFullYear()}
             </p>

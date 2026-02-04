@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Shield, Users, Activity } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +22,16 @@ interface UserMenuProps {
   translations: {
     myProfile: string;
     signOut: string;
+    admin?: string;
+    supervisor?: string;
+    activity?: string;
   };
+  isAdmin?: boolean;
+  isSupervisor?: boolean;
+  showActivity?: boolean;
 }
 
-export function UserMenu({ user, translations }: UserMenuProps) {
+export function UserMenu({ user, translations, isAdmin, isSupervisor, showActivity }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,22 +45,22 @@ export function UserMenu({ user, translations }: UserMenuProps) {
               className="rounded-full"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <User className="w-4 h-4 text-gray-500" />
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+              <User className="w-4 h-4 text-muted-foreground" />
             </div>
           )}
           <div className="hidden sm:block text-left">
-            <p className="text-sm font-medium text-gray-900">{user.name || "Usuario"}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-sm font-medium text-foreground">{user.name || "Usuario"}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
-          <ChevronDown className="h-4 w-4 text-gray-500" />
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-gray-500">{user.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -64,6 +70,30 @@ export function UserMenu({ user, translations }: UserMenuProps) {
             {translations.myProfile}
           </Link>
         </DropdownMenuItem>
+        {showActivity && (
+          <DropdownMenuItem asChild>
+            <Link href="/actividad" className="flex items-center gap-2 cursor-pointer">
+              <Activity className="h-4 w-4" />
+              {translations.activity || "Actividad"}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isSupervisor && (
+          <DropdownMenuItem asChild>
+            <Link href="/supervisor" className="flex items-center gap-2 cursor-pointer text-teal-600">
+              <Users className="h-4 w-4" />
+              {translations.supervisor || "Supervisor"}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/admin/usuarios" className="flex items-center gap-2 cursor-pointer text-purple-600">
+              <Shield className="h-4 w-4" />
+              {translations.admin || "Admin"}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/auth/signout" className="flex items-center gap-2 cursor-pointer text-red-600">
