@@ -1,9 +1,36 @@
-import { PrismaClient, UserRole, UserStatus } from '@prisma/client';
+import { PrismaClient, UserRole, UserStatus, AppType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
+
+  // 0. Create Apps (FASE and OKR)
+  const faseApp = await prisma.app.upsert({
+    where: { code: AppType.FASE },
+    update: {},
+    create: {
+      code: AppType.FASE,
+      name: 'FASE',
+      description: 'Objetivos mensuales Big Rocks - Focus, Atención, Sistemas, Energía',
+      icon: 'Target',
+      isActive: true,
+    },
+  });
+  console.log(`Created/Found FASE app: ${faseApp.name} (${faseApp.id})`);
+
+  const okrApp = await prisma.app.upsert({
+    where: { code: AppType.OKR },
+    update: {},
+    create: {
+      code: AppType.OKR,
+      name: 'OKRs',
+      description: 'Objetivos y Resultados Clave trimestrales',
+      icon: 'BarChart3',
+      isActive: true,
+    },
+  });
+  console.log(`Created/Found OKR app: ${okrApp.name} (${okrApp.id})`);
 
   // 1. Create default company
   const defaultCompany = await prisma.company.upsert({
@@ -80,6 +107,37 @@ async function main() {
 
   if (usersWithoutCompanies.length > 0) {
     console.log(`Assigned ${usersWithoutCompanies.length} users to default company`);
+  }
+
+  // 4. Assign FASE app to all existing users who don't have it
+  const usersWithoutFaseApp = await prisma.user.findMany({
+    where: {
+      apps: {
+        none: {
+          appId: faseApp.id,
+        },
+      },
+    },
+  });
+
+  for (const user of usersWithoutFaseApp) {
+    await prisma.userApp.create({
+      data: {
+        userId: user.id,
+        appId: faseApp.id,
+      },
+    });
+    // Set currentAppId to FASE if not set
+    if (!user.currentAppId) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { currentAppId: faseApp.id },
+      });
+    }
+  }
+
+  if (usersWithoutFaseApp.length > 0) {
+    console.log(`Assigned FASE app to ${usersWithoutFaseApp.length} users`);
   }
 
   console.log('Seeding completed!');

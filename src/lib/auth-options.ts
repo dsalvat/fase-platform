@@ -1,6 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { UserRole, UserStatus } from "@prisma/client";
+import { UserRole, UserStatus, AppType } from "@prisma/client";
 import { prisma } from "./db";
 
 export const authOptions: NextAuthOptions = {
@@ -85,6 +85,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             status: true,
             currentCompanyId: true,
+            currentAppId: true,
             onboardingCompletedAt: true,
             companies: {
               select: {
@@ -93,6 +94,17 @@ export const authOptions: NextAuthOptions = {
                     id: true,
                     name: true,
                     logo: true,
+                  },
+                },
+              },
+            },
+            apps: {
+              select: {
+                app: {
+                  select: {
+                    id: true,
+                    code: true,
+                    name: true,
                   },
                 },
               },
@@ -106,12 +118,24 @@ export const authOptions: NextAuthOptions = {
           token.status = dbUser.status;
           token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
           token.companies = dbUser.companies.map((uc) => uc.company);
+          token.apps = dbUser.apps.map((ua) => ua.app);
 
           // Solo inicializar currentCompanyId en signIn o si no existe
           if (trigger === "signIn" || token.currentCompanyId === undefined) {
             // Usar currentCompanyId de la BD, o la primera empresa del usuario
             token.currentCompanyId = dbUser.currentCompanyId || (dbUser.companies[0]?.company.id ?? null);
           }
+
+          // Solo inicializar currentAppId en signIn o si no existe
+          if (trigger === "signIn" || token.currentAppId === undefined) {
+            // Usar currentAppId de la BD, o la primera app del usuario (preferir FASE)
+            const faseApp = dbUser.apps.find((ua) => ua.app.code === AppType.FASE);
+            token.currentAppId = dbUser.currentAppId || faseApp?.app.id || (dbUser.apps[0]?.app.id ?? null);
+          }
+
+          // Determinar el código de la app actual
+          const currentApp = dbUser.apps.find((ua) => ua.app.id === token.currentAppId);
+          token.currentAppCode = currentApp?.app.code || null;
         }
       }
 
@@ -134,6 +158,30 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      // Permitir cambio de app
+      if (trigger === "update" && session?.currentAppId !== undefined) {
+        const userAppIds = (token.apps as { id: string }[])?.map((a) => a.id) || [];
+        const canSwitchApp = userAppIds.includes(session.currentAppId as string);
+
+        if (canSwitchApp) {
+          token.currentAppId = session.currentAppId;
+
+          // Determinar el código de la app actual
+          const currentApp = (token.apps as { id: string; code: AppType }[])?.find(
+            (a) => a.id === session.currentAppId
+          );
+          token.currentAppCode = currentApp?.code || null;
+
+          // Actualizar currentAppId en la BD para persistir la selección
+          if (token.id) {
+            await prisma.user.update({
+              where: { id: token.id as string },
+              data: { currentAppId: session.currentAppId },
+            });
+          }
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -144,6 +192,10 @@ export const authOptions: NextAuthOptions = {
         session.user.currentCompanyId = token.currentCompanyId as string | null;
         session.user.companies = (token.companies as { id: string; name: string; logo: string | null }[]) || [];
         session.user.onboardingCompletedAt = token.onboardingCompletedAt as Date | null;
+        // Multi-app support
+        session.user.currentAppId = token.currentAppId as string | null;
+        session.user.currentAppCode = token.currentAppCode as AppType | null;
+        session.user.apps = (token.apps as { id: string; code: AppType; name: string }[]) || [];
       }
       return session;
     },

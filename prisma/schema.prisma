@@ -92,6 +92,77 @@ enum FeedbackTargetType {
   MONTH_PLANNING
 }
 
+// ============================================
+// MULTI-APP ARCHITECTURE
+// ============================================
+
+// Tipos de aplicación disponibles
+enum AppType {
+  FASE  // Objetivos mensuales Big Rocks
+  OKR   // OKRs trimestrales
+}
+
+// Periodos trimestrales
+enum QuarterPeriod {
+  Q1
+  Q2
+  Q3
+  Q4
+}
+
+// Estados de OKR Objective
+enum OKRObjectiveStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+// Estados de OKR Key Result
+enum OKRKeyResultStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  AT_RISK
+  COMPLETED
+}
+
+// ============================================
+// MULTI-APP MODELS
+// ============================================
+
+// Modelo App (Aplicaciones disponibles)
+model App {
+  id          String    @id @default(cuid())
+  code        AppType   @unique
+  name        String
+  description String?
+  icon        String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relaciones
+  userApps    UserApp[]
+}
+
+// Tabla de unión User-App (M:N permisos de apps por usuario)
+model UserApp {
+  id        String   @id @default(cuid())
+  userId    String
+  appId     String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, appId])
+  @@index([userId])
+  @@index([appId])
+}
+
+// ============================================
+// COMPANY & ORGANIZATION MODELS
+// ============================================
+
 // Modelo Company (Empresa)
 model Company {
   id          String   @id @default(cuid())
@@ -105,6 +176,8 @@ model Company {
   userCompanies UserCompany[]
   bigRocks      BigRock[]
   keyPeople     KeyPerson[]
+  teams         Team[]
+  okrQuarters   OKRQuarter[]
 
   @@index([slug])
 }
@@ -121,6 +194,42 @@ model UserCompany {
   @@unique([userId, companyId])
   @@index([userId])
   @@index([companyId])
+}
+
+// ============================================
+// OKR TEAM MODELS
+// ============================================
+
+// Modelo Team (Equipos para OKRs)
+model Team {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relaciones
+  members     TeamMember[]
+  objectives  OKRObjective[]
+
+  @@index([companyId])
+}
+
+// Miembros del equipo
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    String
+  role      String?  // Rol dentro del equipo (opcional)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, teamId])
+  @@index([userId])
+  @@index([teamId])
 }
 
 // Modelo User
@@ -141,6 +250,9 @@ model User {
 
   // Empresa actual seleccionada (para navegación)
   currentCompanyId String?
+
+  // App actual seleccionada (para multi-app)
+  currentAppId String?
 
   // Relación supervisor (1:1)
   supervisorId  String?
@@ -163,11 +275,22 @@ model User {
   chatConversations ChatConversation[]
   chatCredits       UserChatCredits?
 
+  // Relaciones multi-app
+  apps              UserApp[]
+
+  // Relaciones OKR
+  teamMemberships   TeamMember[]
+  ownedObjectives   OKRObjective[]    @relation("OKRObjectiveOwner")
+  keyResults        OKRKeyResult[]    @relation("OKRKeyResultResponsible")
+  okrActivities     OKRKeyActivity[]  @relation("OKRKeyActivityAssignee")
+  okrGamification   OKRGamification?
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@index([email])
   @@index([currentCompanyId])
+  @@index([currentAppId])
   @@index([supervisorId])
   @@index([status])
 }
@@ -448,4 +571,124 @@ model UserChatCredits {
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ============================================
+// OKR MODELS
+// ============================================
+
+// Modelo OKRQuarter (Trimestres para OKRs)
+model OKRQuarter {
+  id         String         @id @default(cuid())
+  year       Int
+  quarter    QuarterPeriod
+  companyId  String
+  company    Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  isActive   Boolean        @default(true)
+  startDate  DateTime
+  endDate    DateTime
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  // Relaciones
+  objectives OKRObjective[]
+
+  @@unique([year, quarter, companyId])
+  @@index([companyId])
+  @@index([year, quarter])
+}
+
+// Modelo OKRObjective (Objetivos OKR)
+model OKRObjective {
+  id          String              @id @default(cuid())
+  title       String
+  description String?             @db.Text
+  indicator   String              // Métrica para medir éxito del objetivo
+  status      OKRObjectiveStatus  @default(DRAFT)
+  progress    Float               @default(0) // Porcentaje 0-100, calculado de Key Results
+
+  // Relaciones
+  quarterId   String
+  quarter     OKRQuarter          @relation(fields: [quarterId], references: [id], onDelete: Cascade)
+  teamId      String
+  team        Team                @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       User                @relation("OKRObjectiveOwner", fields: [ownerId], references: [id])
+
+  keyResults  OKRKeyResult[]
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([quarterId])
+  @@index([teamId])
+  @@index([ownerId])
+  @@index([status])
+}
+
+// Modelo OKRKeyResult (Resultados Clave)
+model OKRKeyResult {
+  id            String              @id @default(cuid())
+  title         String
+  description   String?             @db.Text
+  indicator     String              // Descripción de la métrica
+  targetValue   Float               // Valor objetivo
+  currentValue  Float               @default(0) // Valor actual
+  startValue    Float               @default(0) // Valor inicial
+  unit          String              @default("%") // Unidad de medida (%, €, #, etc.)
+  status        OKRKeyResultStatus  @default(NOT_STARTED)
+
+  // Relaciones
+  objectiveId   String
+  objective     OKRObjective        @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  responsibleId String
+  responsible   User                @relation("OKRKeyResultResponsible", fields: [responsibleId], references: [id])
+
+  activities    OKRKeyActivity[]
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([objectiveId])
+  @@index([responsibleId])
+  @@index([status])
+}
+
+// Modelo OKRKeyActivity (Actividades para Key Results)
+model OKRKeyActivity {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean       @default(false)
+  completedAt DateTime?
+
+  // Relaciones
+  keyResultId String
+  keyResult   OKRKeyResult  @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?         @relation("OKRKeyActivityAssignee", fields: [assigneeId], references: [id])
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([keyResultId])
+  @@index([assigneeId])
+  @@index([dueDate])
+}
+
+// Modelo OKRGamification (Gamificación específica de OKRs)
+model OKRGamification {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points              Int      @default(0)
+  objectivesCreated   Int      @default(0)
+  keyResultsCompleted Int      @default(0)
+  activitiesCompleted Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([points])
 }

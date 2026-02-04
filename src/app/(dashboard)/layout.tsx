@@ -12,9 +12,10 @@ import { UserMenu } from "@/components/user-menu";
 import { NavigationProgress } from "@/components/navigation-progress";
 import { OnboardingProvider } from "@/components/onboarding";
 import { ChatButton } from "@/components/chat";
+import { AppSwitcher } from "@/components/app-switcher";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { UserRole, AppType } from "@prisma/client";
 import { locales, Locale, defaultLocale } from "@/i18n/config";
 
 export default async function DashboardLayout({
@@ -65,6 +66,10 @@ export default async function DashboardLayout({
     currentCompanyLogo = companies[0].logo;
   }
 
+  // Get current app info
+  const currentAppCode = user.currentAppCode || AppType.FASE;
+  const showAppSwitcher = user.apps && user.apps.length > 1;
+
   // Get current locale from cookie
   const cookieStore = await cookies();
   const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
@@ -77,6 +82,8 @@ export default async function DashboardLayout({
   const tCompanies = await getTranslations("companies");
   const tOnboarding = await getTranslations("onboarding");
   const tChat = await getTranslations("chat");
+  const tApps = await getTranslations("apps");
+  const tOkr = await getTranslations("okr");
 
   // Translations for company switcher
   const companySwitcherTranslations = {
@@ -121,6 +128,20 @@ export default async function DashboardLayout({
     welcome: tChat("welcome"),
   };
 
+  // Translations for app switcher
+  const appTranslations = {
+    switchApp: tApps("switchApp"),
+  };
+
+  // Translations for OKR navigation
+  const okrNavTranslations = {
+    dashboard: tOkr("dashboard"),
+    objectives: tOkr("objectives"),
+    teams: tOkr("teams"),
+    quarters: tOkr("quarters"),
+    gamification: tOkr("gamification"),
+  };
+
   return (
     <OnboardingProvider
       translations={onboardingTranslations}
@@ -161,21 +182,49 @@ export default async function DashboardLayout({
               </Link>
 
               <div className="hidden md:flex items-center gap-1">
-                <Link href="/big-rocks" data-tour="nav-big-rocks">
-                  <Button variant="ghost">{t("bigRocks")}</Button>
-                </Link>
-                <Link href="/key-people" data-tour="nav-key-people">
-                  <Button variant="ghost">{t("keyPeople")}</Button>
-                </Link>
-                <Link href="/calendario">
-                  <Button variant="ghost">{t("calendar")}</Button>
-                </Link>
-                <Link href="/gamificacion">
-                  <Button variant="ghost">{t("gamification")}</Button>
-                </Link>
-                <Link href="/actividad">
-                  <Button variant="ghost">{t("activity")}</Button>
-                </Link>
+                {/* FASE Navigation */}
+                {currentAppCode === AppType.FASE && (
+                  <>
+                    <Link href="/big-rocks" data-tour="nav-big-rocks">
+                      <Button variant="ghost">{t("bigRocks")}</Button>
+                    </Link>
+                    <Link href="/key-people" data-tour="nav-key-people">
+                      <Button variant="ghost">{t("keyPeople")}</Button>
+                    </Link>
+                    <Link href="/calendario">
+                      <Button variant="ghost">{t("calendar")}</Button>
+                    </Link>
+                    <Link href="/gamificacion">
+                      <Button variant="ghost">{t("gamification")}</Button>
+                    </Link>
+                    <Link href="/actividad">
+                      <Button variant="ghost">{t("activity")}</Button>
+                    </Link>
+                  </>
+                )}
+
+                {/* OKR Navigation */}
+                {currentAppCode === AppType.OKR && (
+                  <>
+                    <Link href="/okr">
+                      <Button variant="ghost">{okrNavTranslations.dashboard}</Button>
+                    </Link>
+                    <Link href="/okr/objetivos">
+                      <Button variant="ghost">{okrNavTranslations.objectives}</Button>
+                    </Link>
+                    <Link href="/okr/equipos">
+                      <Button variant="ghost">{okrNavTranslations.teams}</Button>
+                    </Link>
+                    <Link href="/okr/trimestres">
+                      <Button variant="ghost">{okrNavTranslations.quarters}</Button>
+                    </Link>
+                    <Link href="/okr/gamificacion">
+                      <Button variant="ghost">{okrNavTranslations.gamification}</Button>
+                    </Link>
+                  </>
+                )}
+
+                {/* Shared navigation */}
                 {isSupervisor && (
                   <Link href="/supervisor">
                     <Button variant="ghost" className="text-teal-600">
@@ -195,6 +244,9 @@ export default async function DashboardLayout({
 
             {/* User menu */}
             <div className="flex items-center gap-4">
+              {showAppSwitcher && (
+                <AppSwitcher translations={appTranslations} />
+              )}
               {showCompanySwitcher && (
                 <CompanySwitcherWrapper
                   companies={companies}
