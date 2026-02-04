@@ -884,7 +884,8 @@ export async function getUserObjectivePermissions(objectiveId: string) {
 // ============================================
 
 // Helper function to calculate current week number in the quarter
-export function calculateQuarterWeekNumber(quarterStartDate: Date): number {
+// Note: Not exported because "use server" requires all exports to be async
+function calculateQuarterWeekNumber(quarterStartDate: Date): number {
   const now = new Date();
   const diffInMs = now.getTime() - quarterStartDate.getTime();
   const diffInWeeks = Math.floor(diffInMs / (7 * 24 * 60 * 60 * 1000));
