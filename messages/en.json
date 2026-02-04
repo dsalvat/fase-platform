@@ -231,7 +231,9 @@
     "showingUsers": "Showing {count} of {total} users",
     "showingUsersTemplate": "Showing '{count}' of '{total}' users",
     "noName": "No name",
-    "companies": "Companies"
+    "companies": "Companies",
+    "apps": "Applications",
+    "noApp": "No applications"
   },
   "companies": {
     "title": "Companies",

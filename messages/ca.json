@@ -231,7 +231,9 @@
     "showingUsers": "Mostrant {count} de {total} usuaris",
     "showingUsersTemplate": "Mostrant '{count}' de '{total}' usuaris",
     "noName": "Sense nom",
-    "companies": "Empreses"
+    "companies": "Empreses",
+    "apps": "Aplicacions",
+    "noApp": "Sense aplicacions"
   },
   "companies": {
     "title": "Empreses",

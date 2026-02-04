@@ -42,6 +42,18 @@ async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
           },
         },
       },
+      apps: {
+        select: {
+          appId: true,
+          app: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+            },
+          },
+        },
+      },
       supervisor: {
         select: {
           id: true,
@@ -69,6 +81,10 @@ async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
       companyId: uc.company.id,
       company: uc.company,
     })),
+    apps: user.apps.map((ua) => ({
+      appId: ua.app.id,
+      app: ua.app,
+    })),
   }));
 }
 
@@ -78,6 +94,18 @@ async function getCompanies() {
       id: true,
       name: true,
       logo: true,
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
+async function getApps() {
+  return prisma.app.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      code: true,
+      name: true,
     },
     orderBy: { name: "asc" },
   });
@@ -121,10 +149,11 @@ export default async function AdminUsuariosPage() {
   const companyId = await getCurrentCompanyId();
   const superAdmin = await isSuperAdmin();
 
-  const [users, allUsers, companies] = await Promise.all([
+  const [users, allUsers, companies, apps] = await Promise.all([
     getUsers(companyId, superAdmin),
     getAllUsersForSelector(companyId, superAdmin),
     superAdmin ? getCompanies() : Promise.resolve([]),
+    getApps(),
   ]);
 
   const stats = {
@@ -170,6 +199,7 @@ export default async function AdminUsuariosPage() {
         allUsers={allUsers}
         currentUserId={userId || ""}
         companies={companies}
+        apps={apps}
         isSuperAdmin={superAdmin}
         translations={{
           hideDeactivated: t("hideDeactivated"),
@@ -181,12 +211,14 @@ export default async function AdminUsuariosPage() {
           status: t("status"),
           supervisor: t("supervisor"),
           company: tCompanies("name"),
+          apps: t("apps"),
           cannotChangeOwnRole: t("cannotChangeOwnRole"),
           cannotChangeOwnStatus: t("cannotChangeOwnStatus"),
           registeredOn: t("registeredOn"),
           edit: tCommon("edit"),
           close: tCommon("close"),
           noCompany: tCompanies("noCompanySelected"),
+          noApp: t("noApp"),
           saving: tCommon("loading"),
           viewBigRocks: t("viewBigRocks"),
         }}

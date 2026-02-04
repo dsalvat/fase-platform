@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { getCurrentCompanyId, isSuperAdmin } from "@/lib/company-context";
 import { updateUserSchema, inviteUserSchema } from "@/lib/validations/user";
-import { UserRole, UserStatus } from "@prisma/client";
+import { UserRole, UserStatus, AppType } from "@prisma/client";
 
 /**
  * Server action to update a user's role
@@ -491,6 +491,144 @@ export async function removeUserFromCompany(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Error al eliminar usuario de la empresa",
+    };
+  }
+}
+
+/**
+ * Server action to add an app to a user (ADMIN/SUPERADMIN only)
+ */
+export async function addUserToApp(
+  userId: string,
+  appId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole([UserRole.ADMIN, UserRole.SUPERADMIN]);
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Usuario no encontrado",
+      };
+    }
+
+    // Verify the app exists
+    const app = await prisma.app.findUnique({
+      where: { id: appId },
+    });
+
+    if (!app) {
+      return {
+        success: false,
+        error: "Aplicación no encontrada",
+      };
+    }
+
+    // Check if user already has this app
+    const existingRelation = await prisma.userApp.findUnique({
+      where: {
+        userId_appId: { userId, appId },
+      },
+    });
+
+    if (existingRelation) {
+      return {
+        success: false,
+        error: "El usuario ya tiene acceso a esta aplicación",
+      };
+    }
+
+    // Create UserApp relation
+    await prisma.userApp.create({
+      data: { userId, appId },
+    });
+
+    // If user has no current app, set this as current
+    if (!user.currentAppId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { currentAppId: appId },
+      });
+    }
+
+    revalidatePath("/admin/usuarios");
+    revalidatePath(`/admin/usuarios/${userId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error adding app to user:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al agregar aplicación al usuario",
+    };
+  }
+}
+
+/**
+ * Server action to remove an app from a user (ADMIN/SUPERADMIN only)
+ */
+export async function removeUserFromApp(
+  userId: string,
+  appId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole([UserRole.ADMIN, UserRole.SUPERADMIN]);
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        apps: true,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Usuario no encontrado",
+      };
+    }
+
+    // Check user has more than one app
+    if (user.apps.length <= 1) {
+      return {
+        success: false,
+        error: "El usuario debe tener acceso al menos a una aplicación",
+      };
+    }
+
+    // Delete UserApp relation
+    await prisma.userApp.delete({
+      where: {
+        userId_appId: { userId, appId },
+      },
+    });
+
+    // If this was the current app, switch to another
+    if (user.currentAppId === appId) {
+      const remainingApp = user.apps.find(ua => ua.appId !== appId);
+      if (remainingApp) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { currentAppId: remainingApp.appId },
+        });
+      }
+    }
+
+    revalidatePath("/admin/usuarios");
+    revalidatePath(`/admin/usuarios/${userId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error removing app from user:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al eliminar aplicación del usuario",
     };
   }
 }

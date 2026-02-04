@@ -13,12 +13,19 @@ import { UserRoleSelect } from "./user-role-select";
 import { UserSupervisorSelect } from "./user-supervisor-select";
 import { UserStatusSelect } from "./user-status-select";
 import { UserCompanySelect } from "./user-company-select";
-import { UserStatus } from "@prisma/client";
+import { UserAppSelect } from "./user-app-select";
+import { UserStatus, AppType } from "@prisma/client";
 
 interface Company {
   id: string;
   name: string;
   logo: string | null;
+}
+
+interface App {
+  id: string;
+  code: AppType;
+  name: string;
 }
 
 interface UserListTranslations {
@@ -31,12 +38,14 @@ interface UserListTranslations {
   status: string;
   supervisor: string;
   company: string;
+  apps: string;
   cannotChangeOwnRole: string;
   cannotChangeOwnStatus: string;
   registeredOn: string;
   edit: string;
   close: string;
   noCompany: string;
+  noApp: string;
   saving: string;
   viewBigRocks: string;
 }
@@ -46,6 +55,7 @@ interface UserListProps {
   allUsers: { id: string; name: string | null; email: string }[];
   currentUserId: string;
   companies?: Company[];
+  apps?: App[];
   isSuperAdmin?: boolean;
   translations?: UserListTranslations;
 }
@@ -74,12 +84,14 @@ const defaultTranslations: UserListTranslations = {
   status: "Estado",
   supervisor: "Supervisor",
   company: "Empresa",
+  apps: "Aplicaciones",
   cannotChangeOwnRole: "No puedes cambiar tu propio rol",
   cannotChangeOwnStatus: "No puedes cambiar tu propio estado",
   registeredOn: "Registrado el",
   edit: "Editar",
   close: "Cerrar",
   noCompany: "Sin empresa",
+  noApp: "Sin aplicaciones",
   saving: "Guardando...",
   viewBigRocks: "Ver Big Rocks",
 };
@@ -94,6 +106,7 @@ export function UserList({
   allUsers,
   currentUserId,
   companies = [],
+  apps = [],
   isSuperAdmin = false,
   translations: t = defaultTranslations,
 }: UserListProps) {
@@ -134,6 +147,7 @@ export function UserList({
             allUsers={allUsers}
             isCurrentUser={user.id === currentUserId}
             companies={companies}
+            apps={apps}
             isSuperAdmin={isSuperAdmin}
             translations={t}
           />
@@ -148,6 +162,7 @@ interface UserCardProps {
   allUsers: { id: string; name: string | null; email: string }[];
   isCurrentUser: boolean;
   companies: Company[];
+  apps: App[];
   isSuperAdmin: boolean;
   translations: UserListTranslations;
 }
@@ -157,6 +172,7 @@ function UserCard({
   allUsers,
   isCurrentUser,
   companies,
+  apps,
   isSuperAdmin,
   translations: t,
 }: UserCardProps) {
@@ -364,6 +380,24 @@ function UserCard({
                 </div>
               )}
             </div>
+
+            {/* Apps selector */}
+            {apps.length > 0 && (
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.apps}
+                </Label>
+                <UserAppSelect
+                  userId={user.id}
+                  userApps={user.apps?.map(ua => ({ appId: ua.appId })) || []}
+                  apps={apps}
+                  translations={{
+                    noApp: t.noApp,
+                    saving: t.saving,
+                  }}
+                />
+              </div>
+            )}
 
             <div className="text-xs text-gray-500">
               {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}

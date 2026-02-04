@@ -1,4 +1,4 @@
-import { User, UserRole, UserStatus } from "@prisma/client";
+import { User, UserRole, UserStatus, AppType } from "@prisma/client";
 
 /**
  * User with supervisor info
@@ -15,6 +15,7 @@ export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'role'
   supervisor: Pick<User, 'id' | 'name' | 'email'> | null;
   company: { id: string; name: string; logo: string | null } | null; // First/current company for display
   companies: { companyId: string; company: { id: string; name: string; logo: string | null } }[]; // All companies via UserCompany
+  apps?: { appId: string; app: { id: string; code: AppType; name: string } }[]; // All apps via UserApp
   _count: {
     supervisees: number;
   };
