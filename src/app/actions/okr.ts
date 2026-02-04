@@ -98,12 +98,26 @@ export async function createTeam(data: {
   }
 
   try {
-    const team = await prisma.team.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        companyId,
-      },
+    // Create team and add creator as member in a transaction
+    const team = await prisma.$transaction(async (tx) => {
+      const newTeam = await tx.team.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          companyId,
+        },
+      });
+
+      // Add creator as team member
+      await tx.teamMember.create({
+        data: {
+          teamId: newTeam.id,
+          userId: user.id,
+          role: "Creador",
+        },
+      });
+
+      return newTeam;
     });
 
     revalidatePath("/okr");

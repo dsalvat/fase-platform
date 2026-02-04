@@ -7,12 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Target, Users, Calendar, Plus, TrendingUp } from "lucide-react";
+import { UserRole } from "@prisma/client";
 
 export default async function OKRDashboardPage() {
   const user = await requireAuth();
   const companyId = await getCurrentCompanyId();
   const t = await getTranslations("okr");
   const tTeams = await getTranslations("teams");
+
+  // Get user role
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
 
   // Get current quarter
   const now = new Date();
@@ -30,19 +36,35 @@ export default async function OKRDashboardPage() {
       })
     : null;
 
-  // Get user's teams
-  const userTeams = await prisma.teamMember.findMany({
-    where: { userId: user.id },
-    include: {
-      team: {
-        include: {
-          _count: {
-            select: { objectives: true, members: true },
+  // Get teams - admins see all company teams, others see only their teams
+  let userTeams: { team: { id: string; name: string; description: string | null; _count: { objectives: number; members: number } } }[];
+
+  if (isAdmin && companyId) {
+    // Admins see all company teams
+    const allTeams = await prisma.team.findMany({
+      where: { companyId },
+      include: {
+        _count: {
+          select: { objectives: true, members: true },
+        },
+      },
+    });
+    userTeams = allTeams.map(team => ({ team }));
+  } else {
+    // Regular users see only teams where they are members
+    userTeams = await prisma.teamMember.findMany({
+      where: { userId: user.id },
+      include: {
+        team: {
+          include: {
+            _count: {
+              select: { objectives: true, members: true },
+            },
           },
         },
       },
-    },
-  });
+    });
+  }
 
   // Get objectives for user's teams in active quarter
   const objectives = activeQuarter
