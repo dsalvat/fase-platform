@@ -58,10 +58,10 @@ const STATUS_CONFIG: Record<
   OKRKeyResultStatus,
   { label: string; color: string }
 > = {
-  NOT_STARTED: { label: "No iniciado", color: "bg-gray-100 text-gray-700" },
-  IN_PROGRESS: { label: "En progreso", color: "bg-blue-100 text-blue-700" },
-  AT_RISK: { label: "En riesgo", color: "bg-red-100 text-red-700" },
-  COMPLETED: { label: "Completado", color: "bg-green-100 text-green-700" },
+  NOT_STARTED: { label: "No iniciado", color: "bg-muted text-muted-foreground" },
+  IN_PROGRESS: { label: "En progreso", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  AT_RISK: { label: "En riesgo", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
+  COMPLETED: { label: "Completado", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
 };
 
 export function KeyResultsList({
@@ -132,7 +132,7 @@ function KeyResultItem({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="border rounded-lg">
         <CollapsibleTrigger asChild>
-          <button className="w-full p-4 text-left hover:bg-gray-50 transition-colors">
+          <button className="w-full p-4 text-left hover:bg-muted/50 transition-colors">
             <div className="flex items-start gap-3">
               {isOpen ? (
                 <ChevronDown className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -154,7 +154,7 @@ function KeyResultItem({
                     </span>
                     <span className="font-medium">{Math.round(progress)}%</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                  <div className="w-full h-2 bg-muted rounded-full">
                     <div
                       className={`h-full rounded-full transition-all ${
                         progress >= 70
@@ -170,7 +170,7 @@ function KeyResultItem({
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <div
-                  className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden"
+                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden"
                   title={keyResult.responsible.name || ""}
                 >
                   {keyResult.responsible.image ? (
@@ -192,7 +192,7 @@ function KeyResultItem({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="px-4 pb-4 pt-2 border-t bg-gray-50 space-y-4">
+          <div className="px-4 pb-4 pt-2 border-t bg-muted/50 space-y-4">
             {/* Description */}
             {keyResult.description && (
               <div>
@@ -274,7 +274,7 @@ function KeyResultItem({
                         {activity.completed ? (
                           <Check className="h-5 w-5 text-green-600" />
                         ) : (
-                          <Circle className="h-5 w-5 text-gray-400" />
+                          <Circle className="h-5 w-5 text-muted-foreground" />
                         )}
                       </button>
                       <span
