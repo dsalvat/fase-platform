@@ -101,7 +101,7 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
                       ? "bg-green-100 text-green-800 border-green-200"
                       : userTeamRole === TeamMemberRole.DIRECTOR
                       ? "bg-purple-100 text-purple-800 border-purple-200"
-                      : "bg-gray-100 text-gray-800 border-gray-200"
+                      : "bg-muted text-muted-foreground border-muted"
                   }
                 >
                   Tu rol: {userTeamRole === TeamMemberRole.RESPONSABLE
@@ -143,20 +143,20 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
                       ? "text-green-600"
                       : objective.progress >= 30
                       ? "text-amber-600"
-                      : "text-gray-400"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {Math.round(objective.progress)}%
                 </span>
               </div>
-              <div className="w-full h-3 bg-gray-200 rounded-full">
+              <div className="w-full h-3 bg-muted rounded-full">
                 <div
                   className={`h-full rounded-full transition-all ${
                     objective.progress >= 70
                       ? "bg-green-500"
                       : objective.progress >= 30
                       ? "bg-amber-500"
-                      : "bg-gray-400"
+                      : "bg-muted-foreground"
                   }`}
                   style={{ width: `${Math.min(100, objective.progress)}%` }}
                 />
@@ -199,7 +199,7 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Owner</p>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                   {objective.owner.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

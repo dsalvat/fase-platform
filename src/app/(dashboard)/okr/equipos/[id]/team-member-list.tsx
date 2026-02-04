@@ -56,10 +56,10 @@ const ROLE_DESCRIPTIONS: Record<TeamMemberRole, string> = {
 };
 
 const ROLE_COLORS: Record<TeamMemberRole, string> = {
-  RESPONSABLE: "bg-blue-100 text-blue-800 border-blue-200",
-  EDITOR: "bg-green-100 text-green-800 border-green-200",
-  VISUALIZADOR: "bg-gray-100 text-gray-800 border-gray-200",
-  DIRECTOR: "bg-purple-100 text-purple-800 border-purple-200",
+  RESPONSABLE: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+  EDITOR: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
+  VISUALIZADOR: "bg-muted text-muted-foreground border-muted",
+  DIRECTOR: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
 };
 
 export function TeamMemberList({ teamId, members, canManageMembers }: TeamMemberListProps) {
@@ -98,8 +98,8 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
   return (
     <div className="space-y-2">
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
       {members.map((member) => {
@@ -111,7 +111,7 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
             className="flex items-center justify-between p-3 border rounded-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                 {member.user.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -120,7 +120,7 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-sm font-medium text-gray-600">
+                  <span className="text-sm font-medium text-muted-foreground">
                     {member.user.name?.charAt(0).toUpperCase() || "?"}
                   </span>
                 )}

@@ -141,7 +141,7 @@ export default async function OKRGamificationPage() {
               <span>{gamification.points} puntos</span>
               <span>{pointsForNextLevel} puntos para nivel {level + 1}</span>
             </div>
-            <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-4 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-400 to-amber-600 transition-all"
                 style={{ width: `${pointsProgress}%` }}

@@ -161,7 +161,7 @@ function KeyResultItem({
                           ? "bg-green-500"
                           : progress >= 30
                           ? "bg-amber-500"
-                          : "bg-gray-400"
+                          : "bg-muted-foreground"
                       }`}
                       style={{ width: `${progress}%` }}
                     />

@@ -90,7 +90,7 @@ export default async function TeamsPage() {
                   href={`/okr/equipos/${team.id}`}
                   className="block"
                 >
-                  <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <h3 className="font-medium text-lg">{team.name}</h3>
                     {team.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -108,7 +108,7 @@ export default async function TeamsPage() {
                         {team.members.map(({ user: member }) => (
                           <div
                             key={member.id}
-                            className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-medium"
+                            className="w-8 h-8 rounded-full bg-muted border-2 border-card flex items-center justify-center text-xs font-medium"
                             title={member.name || ""}
                           >
                             {member.image ? (
@@ -124,7 +124,7 @@ export default async function TeamsPage() {
                           </div>
                         ))}
                         {team._count.members > 5 && (
-                          <div className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-xs font-medium">
+                          <div className="w-8 h-8 rounded-full bg-muted border-2 border-card flex items-center justify-center text-xs font-medium text-muted-foreground">
                             +{team._count.members - 5}
                           </div>
                         )}

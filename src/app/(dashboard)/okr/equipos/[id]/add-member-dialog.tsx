@@ -122,11 +122,11 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
                     key={user.id}
                     type="button"
                     onClick={() => setSelectedUser(user)}
-                    className={`w-full p-3 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors ${
-                      selectedUser?.id === user.id ? "bg-blue-50" : ""
+                    className={`w-full p-3 text-left flex items-center gap-3 hover:bg-muted/50 transition-colors ${
+                      selectedUser?.id === user.id ? "bg-blue-50 dark:bg-blue-950/50" : ""
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                       {user.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -135,7 +135,7 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {user.name?.charAt(0).toUpperCase() || "?"}
                         </span>
                       )}
@@ -155,7 +155,7 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
 
           {/* Selected User */}
           {selectedUser && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg">
               <p className="text-sm font-medium">Seleccionado: {selectedUser.name}</p>
             </div>
           )}
@@ -187,8 +187,8 @@ export function AddMemberDialog({ teamId, availableUsers }: AddMemberDialogProps
 
           {/* Error */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
             </div>
           )}
         </div>

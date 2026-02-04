@@ -122,7 +122,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                 ? "bg-green-100 text-green-800 border-green-200"
                 : userTeamRole === TeamMemberRole.DIRECTOR
                 ? "bg-purple-100 text-purple-800 border-purple-200"
-                : "bg-gray-100 text-gray-800 border-gray-200"
+                : "bg-muted text-muted-foreground border-muted"
             }
           >
             {userTeamRole === TeamMemberRole.RESPONSABLE
@@ -208,7 +208,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                   href={`/okr/objetivos/${objective.id}`}
                   className="block"
                 >
-                  <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -242,7 +242,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                               ? "text-green-600"
                               : objective.progress >= 30
                               ? "text-amber-600"
-                              : "text-gray-400"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {Math.round(objective.progress)}%

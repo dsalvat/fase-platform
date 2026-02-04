@@ -188,15 +188,15 @@ export default async function OKRDashboardPage() {
 
       {/* No active quarter warning */}
       {!activeQuarter && companyId && (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <Calendar className="h-8 w-8 text-amber-600" />
+              <Calendar className="h-8 w-8 text-amber-600 dark:text-amber-500" />
               <div>
-                <h3 className="font-semibold text-amber-900">
+                <h3 className="font-semibold text-amber-900 dark:text-amber-200">
                   No hay trimestre activo
                 </h3>
-                <p className="text-sm text-amber-700">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
                   Activa un trimestre para comenzar a crear objetivos OKR.
                 </p>
                 <Link href="/okr/trimestres">
@@ -238,7 +238,7 @@ export default async function OKRDashboardPage() {
                   href={`/okr/objetivos/${objective.id}`}
                   className="block"
                 >
-                  <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -275,19 +275,19 @@ export default async function OKRDashboardPage() {
                               ? "text-green-600"
                               : objective.progress >= 30
                               ? "text-amber-600"
-                              : "text-gray-400"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {Math.round(objective.progress)}%
                         </p>
-                        <div className="w-24 h-2 bg-gray-200 rounded-full mt-1">
+                        <div className="w-24 h-2 bg-muted rounded-full mt-1">
                           <div
                             className={`h-full rounded-full transition-all ${
                               objective.progress >= 70
                                 ? "bg-green-500"
                                 : objective.progress >= 30
                                 ? "bg-amber-500"
-                                : "bg-gray-400"
+                                : "bg-muted-foreground"
                             }`}
                             style={{ width: `${objective.progress}%` }}
                           />
@@ -338,7 +338,7 @@ export default async function OKRDashboardPage() {
                   href={`/okr/equipos/${team.id}`}
                   className="block"
                 >
-                  <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <h3 className="font-medium">{team.name}</h3>
                     {team.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">

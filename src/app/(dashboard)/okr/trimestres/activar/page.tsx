@@ -120,11 +120,11 @@ export default function ActivateQuarterPage() {
                     onClick={() => setSelectedQuarter(quarter.value)}
                     className={`p-4 border rounded-lg text-left transition-colors ${
                       selectedQuarter === quarter.value
-                        ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                        : "hover:border-gray-300 hover:bg-gray-50"
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/50 ring-2 ring-blue-200 dark:ring-blue-800"
+                        : "hover:border-muted-foreground/30 hover:bg-muted/50"
                     } ${
                       quarter.value === suggestedQuarter && !selectedQuarter
-                        ? "border-amber-200 bg-amber-50"
+                        ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50"
                         : ""
                     }`}
                   >
@@ -143,8 +143,8 @@ export default function ActivateQuarterPage() {
             </div>
 
             {/* Info box */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
                 <strong>Nota:</strong> Al activar un trimestre, se desactivarán
                 los demás trimestres. Solo puede haber un trimestre activo a la vez.
               </p>
@@ -152,8 +152,8 @@ export default function ActivateQuarterPage() {
 
             {/* Error message */}
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="p-4 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
               </div>
             )}
 
