@@ -47,7 +47,7 @@ export function ActivityLogFilters({
   const hasFilters = entityType !== null || action !== null || userId !== null;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-50 rounded-lg">
+    <div className="flex flex-wrap items-center gap-3 p-4 bg-muted rounded-lg">
       {/* Entity Type Filter */}
       <div className="flex-shrink-0">
         <Select
@@ -56,7 +56,7 @@ export function ActivityLogFilters({
             onEntityTypeChange(value === "all" ? null : (value as LogEntityType))
           }
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[180px] bg-background">
             <SelectValue placeholder="Tipo de entidad" />
           </SelectTrigger>
           <SelectContent>
@@ -78,7 +78,7 @@ export function ActivityLogFilters({
             onActionChange(value === "all" ? null : (value as LogActionType))
           }
         >
-          <SelectTrigger className="w-[150px] bg-white">
+          <SelectTrigger className="w-[150px] bg-background">
             <SelectValue placeholder="Accion" />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +101,7 @@ export function ActivityLogFilters({
               onUserIdChange(value === "all" ? null : value)
             }
           >
-            <SelectTrigger className="w-[200px] bg-white">
+            <SelectTrigger className="w-[200px] bg-background">
               <SelectValue placeholder="Usuario" />
             </SelectTrigger>
             <SelectContent>
@@ -122,7 +122,7 @@ export function ActivityLogFilters({
           variant="ghost"
           size="sm"
           onClick={onClearFilters}
-          className="flex items-center gap-1 text-gray-500 hover:text-gray-700"
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
         >
           <X className="w-4 h-4" />
           Limpiar filtros

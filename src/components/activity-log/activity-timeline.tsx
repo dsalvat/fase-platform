@@ -145,13 +145,13 @@ export function ActivityTimeline({
         </CardHeader>
         <CardContent>
           {error && (
-            <div className="p-4 bg-red-50 text-red-700 rounded-lg mb-4">
+            <div className="p-4 bg-destructive/10 text-destructive rounded-lg mb-4">
               {error}
             </div>
           )}
 
           {logs.length === 0 && !isLoading ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               No hay actividades registradas
               {(entityType || action || userId) && " con los filtros seleccionados"}
             </div>
@@ -166,7 +166,7 @@ export function ActivityTimeline({
           {/* Loading indicator */}
           {isLoading && (
             <div className="flex justify-center py-4">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           )}
 
@@ -177,7 +177,7 @@ export function ActivityTimeline({
 
           {/* End of list indicator */}
           {!hasMore && logs.length > 0 && (
-            <div className="text-center py-4 text-sm text-gray-400">
+            <div className="text-center py-4 text-sm text-muted-foreground">
               No hay mas registros
             </div>
           )}

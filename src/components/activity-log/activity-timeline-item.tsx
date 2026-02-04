@@ -55,15 +55,15 @@ export function ActivityTimelineItem({ log }: ActivityTimelineItemProps) {
                   className="rounded-full"
                 />
               ) : (
-                <User className="w-5 h-5 text-gray-400" />
+                <User className="w-5 h-5 text-muted-foreground" />
               )}
-              <span className="font-medium text-sm text-gray-900">
+              <span className="font-medium text-sm text-foreground">
                 {log.user.name || log.user.email}
               </span>
             </div>
 
             {/* Description */}
-            <p className="text-sm text-gray-700">{log.description}</p>
+            <p className="text-sm text-foreground/80">{log.description}</p>
 
             {/* Tags */}
             <div className="flex items-center gap-2 mt-2">
@@ -89,7 +89,7 @@ export function ActivityTimelineItem({ log }: ActivityTimelineItemProps) {
           </div>
 
           {/* Timestamp */}
-          <span className="flex-shrink-0 text-xs text-gray-500 whitespace-nowrap">
+          <span className="flex-shrink-0 text-xs text-muted-foreground whitespace-nowrap">
             {timeAgo}
           </span>
         </div>
