@@ -16,6 +16,14 @@ interface ObjectiveDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+// Calculate current week number in the quarter (1-12)
+function calculateQuarterWeekNumber(quarterStartDate: Date): number {
+  const now = new Date();
+  const diffInMs = now.getTime() - quarterStartDate.getTime();
+  const diffInWeeks = Math.floor(diffInMs / (7 * 24 * 60 * 60 * 1000));
+  return Math.min(12, Math.max(1, diffInWeeks + 1)); // Clamp between 1-12
+}
+
 export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPageProps) {
   const { id } = await params;
   const user = await requireAuth();
@@ -71,6 +79,9 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
   const canAddKeyResults = isAdmin ||
     userTeamRole === TeamMemberRole.RESPONSABLE ||
     userTeamRole === TeamMemberRole.EDITOR;
+
+  // Calculate current week number in the quarter
+  const currentWeekNumber = calculateQuarterWeekNumber(new Date(objective.quarter.startDate));
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -254,6 +265,7 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
               keyResults={objective.keyResults}
               canEdit={canEdit}
               teamMembers={teamMembers.map((tm) => tm.user)}
+              currentWeekNumber={currentWeekNumber}
             />
           )}
         </CardContent>

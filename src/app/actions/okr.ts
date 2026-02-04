@@ -521,7 +521,6 @@ export async function createKeyResult(data: {
         currentValue: data.startValue || 0,
         unit: data.unit || "%",
         responsibleId: data.responsibleId || user.id,
-        status: OKRKeyResultStatus.NOT_STARTED,
       },
     });
 
@@ -878,4 +877,222 @@ export async function getUserObjectivePermissions(objectiveId: string) {
   }
 
   return getUserTeamPermissions(objective.teamId);
+}
+
+// ============================================
+// KEY RESULT UPDATE ACTIONS (Weekly Updates)
+// ============================================
+
+// Helper function to calculate current week number in the quarter
+export function calculateQuarterWeekNumber(quarterStartDate: Date): number {
+  const now = new Date();
+  const diffInMs = now.getTime() - quarterStartDate.getTime();
+  const diffInWeeks = Math.floor(diffInMs / (7 * 24 * 60 * 60 * 1000));
+  return Math.min(12, Math.max(1, diffInWeeks + 1)); // Clamp between 1-12
+}
+
+export async function createKeyResultUpdate(data: {
+  keyResultId: string;
+  weekNumber: number;
+  newValue: number;
+  comment: string;
+}) {
+  const user = await requireAuth();
+
+  // Get key result with objective and team info
+  const keyResult = await prisma.oKRKeyResult.findUnique({
+    where: { id: data.keyResultId },
+    select: {
+      currentValue: true,
+      objectiveId: true,
+      objective: { select: { teamId: true } },
+    },
+  });
+
+  if (!keyResult) {
+    return { success: false, error: "Key result not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
+
+  // RESPONSABLE and EDITOR can create updates
+  if (!isAdmin && !canEditObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE or EDITOR can create updates." };
+  }
+
+  try {
+    // Create the update and update the key result's current value in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Check if an update already exists for this week
+      const existingUpdate = await tx.oKRKeyResultUpdate.findUnique({
+        where: {
+          keyResultId_weekNumber: {
+            keyResultId: data.keyResultId,
+            weekNumber: data.weekNumber,
+          },
+        },
+      });
+
+      if (existingUpdate) {
+        // Update existing
+        const update = await tx.oKRKeyResultUpdate.update({
+          where: { id: existingUpdate.id },
+          data: {
+            previousValue: keyResult.currentValue,
+            newValue: data.newValue,
+            comment: data.comment,
+          },
+        });
+
+        // Update the key result's current value
+        await tx.oKRKeyResult.update({
+          where: { id: data.keyResultId },
+          data: { currentValue: data.newValue },
+        });
+
+        return update;
+      } else {
+        // Create new update
+        const update = await tx.oKRKeyResultUpdate.create({
+          data: {
+            keyResultId: data.keyResultId,
+            weekNumber: data.weekNumber,
+            previousValue: keyResult.currentValue,
+            newValue: data.newValue,
+            comment: data.comment,
+          },
+        });
+
+        // Update the key result's current value
+        await tx.oKRKeyResult.update({
+          where: { id: data.keyResultId },
+          data: { currentValue: data.newValue },
+        });
+
+        return update;
+      }
+    });
+
+    // Update objective progress
+    await updateObjectiveProgress(keyResult.objectiveId);
+
+    revalidatePath(`/okr/objetivos/${keyResult.objectiveId}`);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Error creating key result update:", error);
+    return { success: false, error: "Failed to create key result update" };
+  }
+}
+
+export async function getKeyResultUpdates(keyResultId: string) {
+  const user = await requireAuth();
+
+  // Get key result with objective and team info
+  const keyResult = await prisma.oKRKeyResult.findUnique({
+    where: { id: keyResultId },
+    select: {
+      objective: { select: { teamId: true } },
+    },
+  });
+
+  if (!keyResult) {
+    return { success: false, error: "Key result not found", data: [] };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
+
+  // All team members can view updates
+  if (!isAdmin && !canViewObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized", data: [] };
+  }
+
+  try {
+    const updates = await prisma.oKRKeyResultUpdate.findMany({
+      where: { keyResultId },
+      orderBy: { weekNumber: "asc" },
+    });
+
+    return { success: true, data: updates };
+  } catch (error) {
+    console.error("Error getting key result updates:", error);
+    return { success: false, error: "Failed to get updates", data: [] };
+  }
+}
+
+export async function deleteKeyResultUpdate(updateId: string) {
+  const user = await requireAuth();
+
+  // Get update with key result, objective and team info
+  const update = await prisma.oKRKeyResultUpdate.findUnique({
+    where: { id: updateId },
+    select: {
+      keyResultId: true,
+      keyResult: {
+        select: {
+          objectiveId: true,
+          objective: { select: { teamId: true } },
+        },
+      },
+    },
+  });
+
+  if (!update) {
+    return { success: false, error: "Update not found" };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  const userTeamRole = await getTeamMemberRole(user.id, update.keyResult.objective.teamId);
+
+  // Only RESPONSABLE can delete updates
+  if (!isAdmin && !canCreateObjectives(userTeamRole)) {
+    return { success: false, error: "Not authorized. Only RESPONSABLE can delete updates." };
+  }
+
+  try {
+    await prisma.oKRKeyResultUpdate.delete({
+      where: { id: updateId },
+    });
+
+    // Recalculate the key result's current value based on the latest remaining update
+    const latestUpdate = await prisma.oKRKeyResultUpdate.findFirst({
+      where: { keyResultId: update.keyResultId },
+      orderBy: { weekNumber: "desc" },
+    });
+
+    const keyResultData = await prisma.oKRKeyResult.findUnique({
+      where: { id: update.keyResultId },
+      select: { startValue: true },
+    });
+
+    await prisma.oKRKeyResult.update({
+      where: { id: update.keyResultId },
+      data: { currentValue: latestUpdate?.newValue ?? keyResultData?.startValue ?? 0 },
+    });
+
+    // Update objective progress
+    await updateObjectiveProgress(update.keyResult.objectiveId);
+
+    revalidatePath(`/okr/objetivos/${update.keyResult.objectiveId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting key result update:", error);
+    return { success: false, error: "Failed to delete update" };
+  }
 }

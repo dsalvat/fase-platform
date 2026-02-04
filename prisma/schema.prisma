@@ -117,7 +117,8 @@ enum OKRObjectiveStatus {
   CANCELLED
 }
 
-// Estados de OKR Key Result
+// Estados de OKR Key Result (DEPRECATED - usar actualizaciones semanales)
+// Se mantiene por compatibilidad pero no se usa en nuevas funcionalidades
 enum OKRKeyResultStatus {
   NOT_STARTED
   IN_PROGRESS
@@ -632,10 +633,9 @@ model OKRKeyResult {
   description   String?             @db.Text
   indicator     String              // Descripción de la métrica
   targetValue   Float               // Valor objetivo
-  currentValue  Float               @default(0) // Valor actual
+  currentValue  Float               @default(0) // Valor actual (se actualiza con cada update semanal)
   startValue    Float               @default(0) // Valor inicial
   unit          String              @default("%") // Unidad de medida (%, €, #, etc.)
-  status        OKRKeyResultStatus  @default(NOT_STARTED)
 
   // Relaciones
   objectiveId   String
@@ -644,13 +644,31 @@ model OKRKeyResult {
   responsible   User                @relation("OKRKeyResultResponsible", fields: [responsibleId], references: [id])
 
   activities    OKRKeyActivity[]
+  updates       OKRKeyResultUpdate[]  // Actualizaciones semanales (historial)
 
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
   @@index([objectiveId])
   @@index([responsibleId])
-  @@index([status])
+}
+
+// Modelo OKRKeyResultUpdate (Actualizaciones Semanales de Resultados Clave)
+model OKRKeyResultUpdate {
+  id            String        @id @default(cuid())
+  keyResultId   String
+  keyResult     OKRKeyResult  @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+  weekNumber    Int           // Número de semana del trimestre (1-12)
+  previousValue Float         // Valor antes de la actualización
+  newValue      Float         // Nuevo valor del indicador
+  comment       String        @db.Text  // Comentario sobre el progreso
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([keyResultId, weekNumber])  // Solo una actualización por semana por Key Result
+  @@index([keyResultId])
+  @@index([weekNumber])
+  @@index([createdAt])
 }
 
 // Modelo OKRKeyActivity (Actividades para Key Results)

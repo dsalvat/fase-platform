@@ -1,15 +1,24 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { OKRKeyResultStatus } from "@prisma/client";
+import { useState, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   ChevronDown,
   ChevronRight,
@@ -17,8 +26,13 @@ import {
   Check,
   Circle,
   Trash2,
+  Plus,
+  History,
+  CalendarClock,
 } from "lucide-react";
-import { updateKeyResult, deleteKeyResult, toggleKeyActivityComplete } from "@/app/actions/okr";
+import { deleteKeyResult, toggleKeyActivityComplete, createKeyResultUpdate, getKeyResultUpdates } from "@/app/actions/okr";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface KeyActivity {
   id: string;
@@ -26,6 +40,15 @@ interface KeyActivity {
   completed: boolean;
   dueDate: Date | null;
   assignee: { id: string; name: string | null } | null;
+}
+
+interface KeyResultUpdate {
+  id: string;
+  weekNumber: number;
+  previousValue: number;
+  newValue: number;
+  comment: string;
+  createdAt: Date;
 }
 
 interface KeyResult {
@@ -37,9 +60,9 @@ interface KeyResult {
   currentValue: number;
   startValue: number;
   unit: string;
-  status: OKRKeyResultStatus;
   responsible: { id: string; name: string | null; image: string | null };
   activities: KeyActivity[];
+  updates?: KeyResultUpdate[];
 }
 
 interface TeamMember {
@@ -52,26 +75,23 @@ interface KeyResultsListProps {
   keyResults: KeyResult[];
   canEdit: boolean;
   teamMembers: TeamMember[];
+  currentWeekNumber: number;
 }
-
-const STATUS_CONFIG: Record<
-  OKRKeyResultStatus,
-  { label: string; color: string }
-> = {
-  NOT_STARTED: { label: "No iniciado", color: "bg-muted text-muted-foreground" },
-  IN_PROGRESS: { label: "En progreso", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  AT_RISK: { label: "En riesgo", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  COMPLETED: { label: "Completado", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-};
 
 export function KeyResultsList({
   keyResults,
   canEdit,
+  currentWeekNumber,
 }: KeyResultsListProps) {
   return (
     <div className="space-y-4">
       {keyResults.map((kr) => (
-        <KeyResultItem key={kr.id} keyResult={kr} canEdit={canEdit} />
+        <KeyResultItem
+          key={kr.id}
+          keyResult={kr}
+          canEdit={canEdit}
+          currentWeekNumber={currentWeekNumber}
+        />
       ))}
     </div>
   );
@@ -80,14 +100,19 @@ export function KeyResultsList({
 function KeyResultItem({
   keyResult,
   canEdit,
+  currentWeekNumber,
 }: {
   keyResult: KeyResult;
   canEdit: boolean;
+  currentWeekNumber: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [currentValue, setCurrentValue] = useState(keyResult.currentValue.toString());
-  const [isEditing, setIsEditing] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [updates, setUpdates] = useState<KeyResultUpdate[]>(keyResult.updates || []);
+  const [newValue, setNewValue] = useState(keyResult.currentValue.toString());
+  const [comment, setComment] = useState("");
 
   // Calculate progress
   const range = keyResult.targetValue - keyResult.startValue;
@@ -102,17 +127,11 @@ function KeyResultItem({
           )
         );
 
-  const statusConfig = STATUS_CONFIG[keyResult.status];
-
-  const handleUpdateValue = () => {
-    const newValue = parseFloat(currentValue);
-    if (isNaN(newValue)) return;
-
-    startTransition(async () => {
-      await updateKeyResult(keyResult.id, { currentValue: newValue });
-      setIsEditing(false);
-    });
-  };
+  // Check if current week has an update
+  const currentWeekUpdate = updates.find(u => u.weekNumber === currentWeekNumber);
+  const lastUpdate = updates.length > 0
+    ? updates.reduce((latest, u) => u.weekNumber > latest.weekNumber ? u : latest, updates[0])
+    : null;
 
   const handleDelete = () => {
     if (!confirm("¿Estás seguro de eliminar este Key Result?")) return;
@@ -128,6 +147,41 @@ function KeyResultItem({
     });
   };
 
+  const handleSubmitUpdate = () => {
+    const value = parseFloat(newValue);
+    if (isNaN(value) || !comment.trim()) return;
+
+    startTransition(async () => {
+      const result = await createKeyResultUpdate({
+        keyResultId: keyResult.id,
+        weekNumber: currentWeekNumber,
+        newValue: value,
+        comment: comment.trim(),
+      });
+
+      if (result.success) {
+        setShowUpdateDialog(false);
+        setComment("");
+        // Refresh updates
+        const updatesResult = await getKeyResultUpdates(keyResult.id);
+        if (updatesResult.success) {
+          setUpdates(updatesResult.data as KeyResultUpdate[]);
+        }
+      }
+    });
+  };
+
+  // Load updates when expanding
+  useEffect(() => {
+    if (isOpen && updates.length === 0) {
+      getKeyResultUpdates(keyResult.id).then((result) => {
+        if (result.success) {
+          setUpdates(result.data as KeyResultUpdate[]);
+        }
+      });
+    }
+  }, [isOpen, keyResult.id, updates.length]);
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="border rounded-lg">
@@ -142,9 +196,18 @@ function KeyResultItem({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h4 className="font-medium">{keyResult.title}</h4>
-                  <span className={`px-2 py-0.5 rounded text-xs ${statusConfig.color}`}>
-                    {statusConfig.label}
+                  <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    Semana {currentWeekNumber}/12
                   </span>
+                  {currentWeekUpdate ? (
+                    <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      ✓ Actualizado
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      Pendiente actualización
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground">{keyResult.indicator}</p>
                 <div className="mt-2">
@@ -203,53 +266,155 @@ function KeyResultItem({
               </div>
             )}
 
-            {/* Update Value */}
+            {/* Weekly Update Actions */}
             {canEdit && (
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium">Valor actual:</span>
-                {isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      value={currentValue}
-                      onChange={(e) => setCurrentValue(e.target.value)}
-                      className="w-24 h-8"
-                      step="any"
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {keyResult.unit}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={handleUpdateValue}
-                      disabled={isPending}
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant={currentWeekUpdate ? "outline" : "default"}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      {currentWeekUpdate ? "Editar actualización semanal" : "Añadir actualización semanal"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        Actualización Semana {currentWeekNumber}
+                      </DialogTitle>
+                      <DialogDescription>
+                        Registra el progreso de este resultado clave para la semana actual.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newValue">Nuevo valor del indicador</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="newValue"
+                            type="number"
+                            value={newValue}
+                            onChange={(e) => setNewValue(e.target.value)}
+                            step="any"
+                            className="w-32"
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {keyResult.unit} (Objetivo: {keyResult.targetValue})
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="comment">Comentario sobre el progreso</Label>
+                        <Textarea
+                          id="comment"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          placeholder="Describe el progreso, obstáculos o logros de esta semana..."
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={handleSubmitUpdate}
+                        disabled={isPending || !comment.trim()}
+                      >
+                        {isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                        ) : null}
+                        Guardar actualización
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <History className="h-4 w-4 mr-1" />
+                      Ver historial ({updates.length}/12)
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Historial de Actualizaciones</DialogTitle>
+                      <DialogDescription>
+                        Todas las actualizaciones semanales de este resultado clave.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 py-4">
+                      {updates.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          No hay actualizaciones registradas todavía.
+                        </p>
                       ) : (
-                        "Guardar"
+                        updates
+                          .sort((a, b) => b.weekNumber - a.weekNumber)
+                          .map((update) => (
+                            <div
+                              key={update.id}
+                              className="p-4 border rounded-lg space-y-2"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                                  <span className="font-medium">
+                                    Semana {update.weekNumber}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatDistanceToNow(new Date(update.createdAt), {
+                                    addSuffix: true,
+                                    locale: es,
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  {update.previousValue} → {update.newValue} {keyResult.unit}
+                                </span>
+                                <span
+                                  className={`text-xs px-2 py-0.5 rounded ${
+                                    update.newValue > update.previousValue
+                                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                      : update.newValue < update.previousValue
+                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
+                                >
+                                  {update.newValue > update.previousValue
+                                    ? `+${(update.newValue - update.previousValue).toFixed(1)}`
+                                    : update.newValue < update.previousValue
+                                    ? `${(update.newValue - update.previousValue).toFixed(1)}`
+                                    : "Sin cambio"}
+                                </span>
+                              </div>
+                              <p className="text-sm text-foreground/80">
+                                {update.comment}
+                              </p>
+                            </div>
+                          ))
                       )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setCurrentValue(keyResult.currentValue.toString());
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    {keyResult.currentValue} {keyResult.unit} - Actualizar
-                  </Button>
-                )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+
+            {/* Last Update Summary */}
+            {lastUpdate && (
+              <div className="p-3 bg-card border rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    Última actualización (Semana {lastUpdate.weekNumber})
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {lastUpdate.comment}
+                </p>
               </div>
             )}
 
@@ -294,7 +459,7 @@ function KeyResultItem({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
                   onClick={handleDelete}
                   disabled={isPending}
                 >
