@@ -50,9 +50,9 @@ export function AppSwitcher({ apps, currentAppId, currentAppCode, translations }
     return null;
   }
 
-  // Find current app by ID first, then by code as fallback
-  const currentApp = apps.find((app) => app.id === currentAppId)
-    || (currentAppCode && apps.find((app) => app.code === currentAppCode))
+  // Find current app by code first (from URL), then by ID (from session) as fallback
+  const currentApp = (currentAppCode && apps.find((app) => app.code === currentAppCode))
+    || apps.find((app) => app.id === currentAppId)
     || apps[0]; // Default to first app if nothing matches
 
   const handleSwitchApp = async (appId: string, appCode: AppType) => {
