@@ -69,10 +69,12 @@
   "home": {
     "myBigRocks": "Mis Big Rocks",
     "superviseesBigRocks": "Big Rocks de mis supervisados",
+    "allUsersBigRocks": "Big Rocks de todos los usuarios",
     "viewAll": "Ver todos",
     "noBigRocks": "No hay Big Rocks",
     "noBigRocksDescription": "Crea tu primer Big Rock para este mes",
     "noSupervisees": "No tienes supervisados asignados",
+    "noUsers": "No hay usuarios en la empresa",
     "confirmed": "Confirmado",
     "inProgress": "En progreso",
     "more": "mas",

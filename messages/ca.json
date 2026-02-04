@@ -69,10 +69,12 @@
   "home": {
     "myBigRocks": "Els meus Big Rocks",
     "superviseesBigRocks": "Big Rocks dels meus supervisats",
+    "allUsersBigRocks": "Big Rocks de tots els usuaris",
     "viewAll": "Veure tots",
     "noBigRocks": "No hi ha Big Rocks",
     "noBigRocksDescription": "Crea el teu primer Big Rock per aquest mes",
     "noSupervisees": "No tens supervisats assignats",
+    "noUsers": "No hi ha usuaris a l'empresa",
     "confirmed": "Confirmat",
     "inProgress": "En progres",
     "more": "mes",
