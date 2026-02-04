@@ -29,7 +29,7 @@ const statusConfig: Record<BigRockStatus, {
   CREADO: {
     label: "Creado",
     icon: Circle,
-    color: "text-gray-500",
+    color: "text-muted-foreground",
   },
   CONFIRMADO: {
     label: "Confirmado",
@@ -199,35 +199,35 @@ export default async function BigRockDetailPage({ params }: PageProps) {
         <CardContent className="space-y-6">
           {/* Description */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Descripción</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">{bigRock.description}</p>
+            <h3 className="font-semibold text-foreground mb-2">Descripción</h3>
+            <p className="text-foreground whitespace-pre-wrap">{bigRock.description}</p>
           </div>
 
           {/* Indicator */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Indicador de Éxito</h3>
-            <p className="text-gray-700">{bigRock.indicator}</p>
+            <h3 className="font-semibold text-foreground mb-2">Indicador de Éxito</h3>
+            <p className="text-foreground">{bigRock.indicator}</p>
           </div>
 
           {/* Metadata */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
             <div>
-              <p className="text-sm text-gray-500">Mes</p>
+              <p className="text-sm text-muted-foreground">Mes</p>
               <p className="font-medium">{formatMonthLabel(bigRock.month)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">TARs Planificadas</p>
+              <p className="text-sm text-muted-foreground">TARs Planificadas</p>
               <p className="font-medium">{bigRock.numTars}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">TARs Completadas</p>
+              <p className="text-sm text-muted-foreground">TARs Completadas</p>
               <p className="font-medium">
                 {bigRock.tars.filter((t) => t.status === "COMPLETADA").length}
               </p>
             </div>
             {bigRock.aiScore !== null && (
               <div>
-                <p className="text-sm text-gray-500">Score IA</p>
+                <p className="text-sm text-muted-foreground">Score IA</p>
                 <p className="font-medium">{bigRock.aiScore}/100</p>
               </div>
             )}
@@ -237,14 +237,14 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           {bigRock.tars.length > 0 && (
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-gray-900">Progreso General</h3>
+                <h3 className="font-semibold text-foreground">Progreso General</h3>
                 <span className={`text-lg font-bold ${
-                  bigRockProgress === 100 ? "text-green-600" : bigRockProgress > 0 ? "text-blue-600" : "text-gray-500"
+                  bigRockProgress === 100 ? "text-green-600" : bigRockProgress > 0 ? "text-blue-600" : "text-muted-foreground"
                 }`}>
                   {bigRockProgress}%
                 </span>
               </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
                     bigRockProgress === 100 ? "bg-green-500" : "bg-blue-500"
@@ -261,23 +261,23 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           {/* AI Feedback */}
           {(bigRock.aiObservations || bigRock.aiRecommendations) && (
             <div className="space-y-4 pt-4 border-t">
-              <h3 className="font-semibold text-gray-900">Feedback de IA</h3>
+              <h3 className="font-semibold text-foreground">Feedback de IA</h3>
 
               {bigRock.aiObservations && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">
+                  <p className="text-sm font-medium text-foreground mb-1">
                     Observaciones
                   </p>
-                  <p className="text-sm text-gray-600">{bigRock.aiObservations}</p>
+                  <p className="text-sm text-muted-foreground">{bigRock.aiObservations}</p>
                 </div>
               )}
 
               {bigRock.aiRecommendations && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">
+                  <p className="text-sm font-medium text-foreground mb-1">
                     Recomendaciones
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {bigRock.aiRecommendations}
                   </p>
                 </div>

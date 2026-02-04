@@ -175,8 +175,8 @@ export default async function AdminUsuariosPage() {
             <Shield className="w-6 h-6 text-purple-700" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-            <p className="text-gray-500">{t("subtitle")}</p>
+            <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+            <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
         </div>
         <InviteUserDialog potentialSupervisors={allUsers} />
@@ -249,7 +249,7 @@ function StatCard({
   return (
     <div className={`p-4 rounded-lg border ${colors[color]}`}>
       <p className="text-2xl font-bold">{value}</p>
-      <p className="text-sm text-gray-600">{label}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
     </div>
   );
 }

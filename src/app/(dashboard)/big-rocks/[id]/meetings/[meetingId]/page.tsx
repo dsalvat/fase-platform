@@ -138,15 +138,15 @@ export default async function KeyMeetingDetailPage({ params }: PageProps) {
         <CardContent className="space-y-6">
           {/* Date */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Fecha y hora</h3>
-            <p className="text-gray-700">{formatDate(meetingDate)}</p>
+            <h3 className="font-semibold text-foreground mb-2">Fecha y hora</h3>
+            <p className="text-foreground">{formatDate(meetingDate)}</p>
           </div>
 
           {/* Description */}
           {keyMeeting.description && (
             <div className="pt-4 border-t">
-              <h3 className="font-semibold text-gray-900 mb-2">Descripcion</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">
+              <h3 className="font-semibold text-foreground mb-2">Descripcion</h3>
+              <p className="text-foreground whitespace-pre-wrap">
                 {keyMeeting.description}
               </p>
             </div>
@@ -155,9 +155,9 @@ export default async function KeyMeetingDetailPage({ params }: PageProps) {
           {/* Outcome */}
           {keyMeeting.outcome && (
             <div className="pt-4 border-t">
-              <h3 className="font-semibold text-gray-900 mb-2">Resultado</h3>
+              <h3 className="font-semibold text-foreground mb-2">Resultado</h3>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-foreground whitespace-pre-wrap">
                   {keyMeeting.outcome}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export default async function KeyMeetingDetailPage({ params }: PageProps) {
           {/* Completion toggle */}
           {canModify && !isReadOnly && (
             <div className="pt-4 border-t">
-              <h3 className="font-semibold text-gray-900 mb-3">Estado</h3>
+              <h3 className="font-semibold text-foreground mb-3">Estado</h3>
               <KeyMeetingCompletionToggle
                 keyMeetingId={meetingId}
                 completed={keyMeeting.completed}
@@ -179,13 +179,13 @@ export default async function KeyMeetingDetailPage({ params }: PageProps) {
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
             <div>
-              <p className="text-sm text-gray-500">Mes</p>
+              <p className="text-sm text-muted-foreground">Mes</p>
               <p className="font-medium">
                 {formatMonthLabel(keyMeeting.bigRock.month)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Creada</p>
+              <p className="text-sm text-muted-foreground">Creada</p>
               <p className="font-medium">
                 {new Date(keyMeeting.createdAt).toLocaleDateString("es-ES", {
                   day: "numeric",

@@ -35,7 +35,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Circle; color: 
   CREADO: {
     label: "Creado",
     icon: Circle,
-    color: "text-gray-500",
+    color: "text-muted-foreground",
   },
   CONFIRMADO: {
     label: "Confirmado",
@@ -112,21 +112,21 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                 className="w-16 h-16 rounded-full"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-500" />
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <User className="h-8 w-8 text-muted-foreground" />
               </div>
             )}
             <div>
               <CardTitle className="text-2xl">
                 {planningData.user.name || planningData.user.email}
               </CardTitle>
-              <p className="text-gray-500">{planningData.user.email}</p>
+              <p className="text-muted-foreground">{planningData.user.email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge className="bg-green-100 text-green-800">
                   <ShieldCheck className="h-3 w-3 mr-1" />
                   Planificacion Confirmada
                 </Badge>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   {formatMonthLabel(month)}
                 </span>
               </div>
@@ -173,25 +173,25 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
               <CardContent className="space-y-4">
                 {/* Description */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-1">
+                  <h4 className="text-sm font-medium text-foreground mb-1">
                     {tBigRocks("description")}
                   </h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {bigRock.description}
                   </p>
                 </div>
 
                 {/* Indicator */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-1">
+                  <h4 className="text-sm font-medium text-foreground mb-1">
                     {tBigRocks("indicator")}
                   </h4>
-                  <p className="text-sm text-gray-600">{bigRock.indicator}</p>
+                  <p className="text-sm text-muted-foreground">{bigRock.indicator}</p>
                 </div>
 
                 {/* TARs */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                     TARs ({completedTars}/{bigRock.tars.length})
                   </h4>
                   {bigRock.tars.length > 0 ? (
@@ -206,21 +206,21 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                           ) : tar.status === "EN_PROGRESO" ? (
                             <Clock className="h-4 w-4 text-blue-500" />
                           ) : (
-                            <Circle className="h-4 w-4 text-gray-400" />
+                            <Circle className="h-4 w-4 text-muted-foreground" />
                           )}
-                          <span className="text-gray-600">{tar.description}</span>
+                          <span className="text-muted-foreground">{tar.description}</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-gray-500">Sin TARs creadas</p>
+                    <p className="text-sm text-muted-foreground">Sin TARs creadas</p>
                   )}
                 </div>
 
                 {/* Key Meetings */}
                 {bigRock.keyMeetings.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       Reuniones Clave ({bigRock.keyMeetings.length})
                     </h4>
@@ -233,10 +233,10 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                           {meeting.completed ? (
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
                           ) : (
-                            <Circle className="h-4 w-4 text-gray-400" />
+                            <Circle className="h-4 w-4 text-muted-foreground" />
                           )}
-                          <span className="text-gray-600">{meeting.title}</span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-muted-foreground">{meeting.title}</span>
+                          <span className="text-xs text-muted-foreground">
                             ({new Date(meeting.date).toLocaleDateString()})
                           </span>
                         </li>
@@ -248,7 +248,7 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                 {/* Key People */}
                 {bigRock.keyPeople.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       Personas Clave ({bigRock.keyPeople.length})
                     </h4>
@@ -264,7 +264,7 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
 
                 {/* Feedback section */}
                 <div className="pt-4 border-t">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
                     {tFeedback("bigRockFeedback")}
                   </h4>

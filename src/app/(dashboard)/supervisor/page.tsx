@@ -41,8 +41,8 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-600 mt-1">{t("supervisees")}</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("supervisees")}</p>
         </div>
       </div>
 
@@ -53,7 +53,7 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
       {supervisees.length === 0 ? (
         <Card>
           <CardContent className="py-12">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium">{t("noSupervisees")}</p>
             </div>
@@ -77,15 +77,15 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
                           className="w-10 h-10 rounded-full"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <User className="h-5 w-5 text-gray-500" />
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <User className="h-5 w-5 text-muted-foreground" />
                         </div>
                       )}
                       <div>
                         <CardTitle className="text-base">
                           {supervisee.name || supervisee.email}
                         </CardTitle>
-                        <p className="text-xs text-gray-500">{supervisee.email}</p>
+                        <p className="text-xs text-muted-foreground">{supervisee.email}</p>
                       </div>
                     </div>
                   </div>
@@ -106,14 +106,14 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
                         </Badge>
                       )}
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {planningStatus.confirmedBigRocks}/{planningStatus.totalBigRocks} Big Rocks
                     </span>
                   </div>
 
                   {/* Progress bar */}
                   {planningStatus.totalBigRocks > 0 && (
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all ${
                           canView ? "bg-green-500" : "bg-yellow-500"
@@ -139,7 +139,7 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
                     </Link>
                   ) : (
                     <div className="text-center py-2">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {t("awaitingConfirmation")}
                       </p>
                     </div>

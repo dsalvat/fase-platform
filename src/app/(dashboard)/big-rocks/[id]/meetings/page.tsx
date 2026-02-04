@@ -90,7 +90,7 @@ export default async function KeyMeetingsPage({ params }: PageProps) {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="flex items-center justify-center gap-2">
-                <Calendar className="h-5 w-5 text-gray-500" />
+                <Calendar className="h-5 w-5 text-muted-foreground" />
                 <p className="text-2xl font-bold">{totalMeetings}</p>
               </div>
               <p className="text-sm text-muted-foreground">Total</p>

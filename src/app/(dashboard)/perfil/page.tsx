@@ -81,8 +81,8 @@ export default async function ProfilePage() {
           <User className="w-6 h-6 text-blue-700" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-500">{t("subtitle")}</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -94,29 +94,29 @@ export default async function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Email (read-only) */}
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <Mail className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+            <Mail className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="text-xs text-gray-500">{t("email")}</p>
+              <p className="text-xs text-muted-foreground">{t("email")}</p>
               <p className="font-medium">{user.email}</p>
             </div>
           </div>
 
           {/* Role (read-only) */}
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <Shield className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+            <Shield className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="text-xs text-gray-500">{t("role")}</p>
+              <p className="text-xs text-muted-foreground">{t("role")}</p>
               <p className="font-medium">{roleLabels[user.role]}</p>
             </div>
           </div>
 
           {/* Companies (read-only) */}
           {user.companies.length > 0 && (
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+              <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div>
-                <p className="text-xs text-gray-500">{t("companies")}</p>
+                <p className="text-xs text-muted-foreground">{t("companies")}</p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {user.companies.map((uc) => (
                     <span

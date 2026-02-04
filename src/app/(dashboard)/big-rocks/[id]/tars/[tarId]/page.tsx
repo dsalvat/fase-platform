@@ -124,8 +124,8 @@ export default async function TARDetailPage({ params }: PageProps) {
         <CardContent className="space-y-6">
           {/* Description */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Descripcion</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">{tar.description}</p>
+            <h3 className="font-semibold text-foreground mb-2">Descripcion</h3>
+            <p className="text-foreground whitespace-pre-wrap">{tar.description}</p>
           </div>
 
           {/* Progress */}
@@ -139,12 +139,12 @@ export default async function TARDetailPage({ params }: PageProps) {
             ) : (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Progreso
                   </span>
                   <span className="text-lg font-semibold">{tar.progress}%</span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className={`h-full ${
                       tar.progress === 100 ? "bg-green-500" : "bg-blue-500"
@@ -159,11 +159,11 @@ export default async function TARDetailPage({ params }: PageProps) {
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
             <div>
-              <p className="text-sm text-gray-500">Mes</p>
+              <p className="text-sm text-muted-foreground">Mes</p>
               <p className="font-medium">{formatMonthLabel(tar.bigRock.month)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Creada</p>
+              <p className="text-sm text-muted-foreground">Creada</p>
               <p className="font-medium">
                 {new Date(tar.createdAt).toLocaleDateString("es-ES", {
                   day: "numeric",

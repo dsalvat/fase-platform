@@ -66,8 +66,8 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">
             {t("subtitle")}
           </p>
         </div>
@@ -129,7 +129,7 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         fallback={
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">{tCommon("loading")}</span>
+            <span className="ml-3 text-muted-foreground">{tCommon("loading")}</span>
           </div>
         }
       >

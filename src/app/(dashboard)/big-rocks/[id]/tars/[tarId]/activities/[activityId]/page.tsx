@@ -134,7 +134,7 @@ export default async function ActivityDetailPage({ params }: PageProps) {
               className={`text-sm px-2 py-1 rounded ${
                 activity.completed
                   ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-700"
+                  : "bg-muted text-foreground"
               }`}
             >
               {activity.completed ? "Completada" : "Pendiente"}
@@ -144,8 +144,8 @@ export default async function ActivityDetailPage({ params }: PageProps) {
           {/* Description */}
           {activity.description && (
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Descripcion</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{activity.description}</p>
+              <h3 className="font-semibold text-foreground mb-2">Descripcion</h3>
+              <p className="text-foreground whitespace-pre-wrap">{activity.description}</p>
             </div>
           )}
 
@@ -160,11 +160,11 @@ export default async function ActivityDetailPage({ params }: PageProps) {
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
             <div>
-              <p className="text-sm text-gray-500">Semana</p>
+              <p className="text-sm text-muted-foreground">Semana</p>
               <p className="font-medium">{activity.week || "No asignada"}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Creada</p>
+              <p className="text-sm text-muted-foreground">Creada</p>
               <p className="font-medium">
                 {format(new Date(activity.createdAt), "d MMM yyyy", { locale: es })}
               </p>

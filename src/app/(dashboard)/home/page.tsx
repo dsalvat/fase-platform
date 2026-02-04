@@ -144,8 +144,8 @@ export default async function HomePage() {
               <Target className="w-5 h-5 text-blue-700" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{t("myBigRocks")}</h2>
-              <p className="text-sm text-gray-500">{formatMonthLabel(currentMonth)}</p>
+              <h2 className="text-xl font-bold text-foreground">{t("myBigRocks")}</h2>
+              <p className="text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export default async function HomePage() {
         {myBigRocks.length === 0 ? (
           <Card>
             <CardContent className="py-8">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Target className="h-10 w-10 mx-auto mb-3 opacity-50" />
                 <p className="font-medium">{t("noBigRocks")}</p>
                 <p className="text-sm mt-1">{t("noBigRocksDescription")}</p>
@@ -197,8 +197,8 @@ export default async function HomePage() {
                 <Users className="w-5 h-5 text-teal-700" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{t("superviseesBigRocks")}</h2>
-                <p className="text-sm text-gray-500">{formatMonthLabel(currentMonth)}</p>
+                <h2 className="text-xl font-bold text-foreground">{t("superviseesBigRocks")}</h2>
+                <p className="text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
               </div>
             </div>
             <Link href="/supervisor">
@@ -212,7 +212,7 @@ export default async function HomePage() {
           {supervisees.length === 0 ? (
             <Card>
               <CardContent className="py-8">
-                <div className="text-center text-gray-500">
+                <div className="text-center text-muted-foreground">
                   <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">{t("noSupervisees")}</p>
                 </div>
@@ -237,15 +237,15 @@ export default async function HomePage() {
                             className="w-10 h-10 rounded-full"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User className="h-5 w-5 text-gray-500" />
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <User className="h-5 w-5 text-muted-foreground" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-base truncate">
                             {supervisee.name || supervisee.email}
                           </CardTitle>
-                          <p className="text-xs text-gray-500 truncate">{supervisee.email}</p>
+                          <p className="text-xs text-muted-foreground truncate">{supervisee.email}</p>
                         </div>
                       </div>
                     </CardHeader>
@@ -264,7 +264,7 @@ export default async function HomePage() {
                             <><Clock className="h-3 w-3 mr-1" /> {t("inProgress")}</>
                           )}
                         </Badge>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {confirmedCount}/{totalCount} Big Rocks
                         </span>
                       </div>
@@ -279,17 +279,17 @@ export default async function HomePage() {
                               ) : (
                                 <Clock className="h-3 w-3 text-yellow-500 flex-shrink-0" />
                               )}
-                              <span className="truncate text-gray-600">{br.title}</span>
+                              <span className="truncate text-foreground/80">{br.title}</span>
                             </li>
                           ))}
                           {supervisee.bigRocks.length > 3 && (
-                            <li className="text-xs text-gray-400">
+                            <li className="text-xs text-muted-foreground">
                               +{supervisee.bigRocks.length - 3} {t("more")}
                             </li>
                           )}
                         </ul>
                       ) : (
-                        <p className="text-sm text-gray-500 italic">{t("noBigRocksYet")}</p>
+                        <p className="text-sm text-muted-foreground italic">{t("noBigRocksYet")}</p>
                       )}
 
                       {/* View button */}
