@@ -140,6 +140,30 @@ async function main() {
     console.log(`Assigned FASE app to ${usersWithoutFaseApp.length} users`);
   }
 
+  // 5. Assign OKR app to all existing users who don't have it
+  const usersWithoutOkrApp = await prisma.user.findMany({
+    where: {
+      apps: {
+        none: {
+          appId: okrApp.id,
+        },
+      },
+    },
+  });
+
+  for (const user of usersWithoutOkrApp) {
+    await prisma.userApp.create({
+      data: {
+        userId: user.id,
+        appId: okrApp.id,
+      },
+    });
+  }
+
+  if (usersWithoutOkrApp.length > 0) {
+    console.log(`Assigned OKR app to ${usersWithoutOkrApp.length} users`);
+  }
+
   console.log('Seeding completed!');
 }
 
