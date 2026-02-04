@@ -18,6 +18,7 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 
 async function getUserBigRocks(userId: string, month: string) {
@@ -113,6 +114,20 @@ async function getAllUsersWithBigRocks(currentUserId: string, month: string) {
   return allUsers;
 }
 
+async function isMonthPlanningConfirmed(userId: string, month: string): Promise<boolean> {
+  const openMonth = await prisma.openMonth.findFirst({
+    where: {
+      userId,
+      month,
+    },
+    select: {
+      isPlanningConfirmed: true,
+    },
+  });
+
+  return openMonth?.isPlanningConfirmed ?? false;
+}
+
 export default async function HomePage() {
   const user = await requireAuth();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,6 +156,9 @@ export default async function HomePage() {
     allUsers = await getAllUsersWithBigRocks(user.id, currentMonth);
   }
 
+  // Check if the month planning is confirmed
+  const planningConfirmed = await isMonthPlanningConfirmed(user.id, currentMonth);
+
   return (
     <div className="space-y-8">
       {/* My Big Rocks Section */}
@@ -156,12 +174,19 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href={`/big-rocks/new?month=${currentMonth}`}>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                {tBigRocks("new")}
-              </Button>
-            </Link>
+            {planningConfirmed ? (
+              <Badge variant="outline" className="text-muted-foreground">
+                <Lock className="h-3 w-3 mr-1" />
+                {t("confirmed")}
+              </Badge>
+            ) : (
+              <Link href={`/big-rocks/new?month=${currentMonth}`}>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-1" />
+                  {tBigRocks("new")}
+                </Button>
+              </Link>
+            )}
             <Link href="/big-rocks">
               <Button variant="outline" size="sm">
                 {t("viewAll")}
