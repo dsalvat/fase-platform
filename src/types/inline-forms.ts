@@ -3,13 +3,11 @@
  */
 
 /**
- * Inline Key Person data (for creating new KeyPerson during BigRock form)
+ * Key Person selection (User ID with optional role in context of Big Rock)
  */
-export interface InlineKeyPerson {
-  firstName: string;
-  lastName: string;
+export interface KeyPersonSelection {
+  userId: string;
   role?: string | null;
-  contact?: string | null;
 }
 
 /**
@@ -27,7 +25,6 @@ export interface InlineKeyMeeting {
  * Data passed to BigRock form for key people and meetings
  */
 export interface BigRockKeyDataInput {
-  selectedKeyPeopleIds: string[];
-  newKeyPeople: InlineKeyPerson[];
+  selectedKeyPeopleIds: string[];  // User IDs selected as key people
   keyMeetings: InlineKeyMeeting[];
 }

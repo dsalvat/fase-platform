@@ -108,8 +108,6 @@ export default async function DashboardLayout({
     step4Content: tOnboarding("step4Content"),
     step5Title: tOnboarding("step5Title"),
     step5Content: tOnboarding("step5Content"),
-    step6Title: tOnboarding("step6Title"),
-    step6Content: tOnboarding("step6Content"),
   };
 
   // Check if onboarding is completed (null = not completed, Date = completed)
@@ -187,9 +185,6 @@ export default async function DashboardLayout({
                   <>
                     <Link href="/big-rocks" data-tour="nav-big-rocks">
                       <Button variant="ghost">{t("bigRocks")}</Button>
-                    </Link>
-                    <Link href="/key-people" data-tour="nav-key-people">
-                      <Button variant="ghost">{t("keyPeople")}</Button>
                     </Link>
                     <Link href="/calendario">
                       <Button variant="ghost">{t("calendar")}</Button>

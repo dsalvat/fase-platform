@@ -75,7 +75,6 @@ enum LogEntityType {
   BIG_ROCK
   TAR
   ACTIVITY
-  KEY_PERSON
   KEY_MEETING
 }
 
@@ -175,7 +174,6 @@ model Company {
   // Relaciones
   userCompanies UserCompany[]
   bigRocks      BigRock[]
-  keyPeople     KeyPerson[]
   teams         Team[]
   okrQuarters   OKRQuarter[]
 
@@ -262,10 +260,10 @@ model User {
   // Relaciones
   companies     UserCompany[]  // Empresas a las que pertenece el usuario
   bigRocks      BigRock[]
-  keyPeople     KeyPerson[]
   gamification  Gamification?
   openMonths    OpenMonth[]
   activityLogs  ActivityLog[]
+  keyPersonFor  BigRockKeyPerson[]  // Big Rocks donde es persona clave
 
   // Relaciones de feedback
   givenFeedback     Feedback[]  @relation("GivenFeedback")
@@ -337,7 +335,7 @@ model BigRock {
   company         Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   tars            TAR[]
   keyMeetings     KeyMeeting[]
-  keyPeople       KeyPerson[]    // Personas clave asociadas al Big Rock
+  keyPeople       BigRockKeyPerson[]  // Usuarios como personas clave
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -346,6 +344,21 @@ model BigRock {
   @@index([companyId])
   @@index([month])
   @@index([userId, companyId])
+}
+
+// Tabla de unión BigRock-User para Personas Clave
+model BigRockKeyPerson {
+  id         String   @id @default(uuid())
+  bigRockId  String
+  bigRock    BigRock  @relation(fields: [bigRockId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       String?  // Rol de la persona en el Big Rock (opcional)
+  createdAt  DateTime @default(now())
+
+  @@unique([bigRockId, userId])
+  @@index([bigRockId])
+  @@index([userId])
 }
 
 // Modelo TAR (Tareas de Alto Rendimiento)
@@ -390,29 +403,6 @@ model Activity {
   @@index([tarId])
   @@index([date])
   @@index([week])
-}
-
-// Modelo KeyPerson (Personas Clave)
-// Las personas clave son compartidas a nivel de empresa
-model KeyPerson {
-  id              String         @id @default(uuid())
-  firstName       String
-  lastName        String
-  role            String?        // Rol de la persona
-  contact         String?        // Email o teléfono
-
-  // Relaciones
-  userId          String         // Usuario que creó la persona clave
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId       String?        // Empresa a la que pertenece (compartida entre usuarios de la empresa)
-  company         Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  bigRocks        BigRock[]      // Big Rocks asociados a esta persona
-
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  @@index([userId])
-  @@index([companyId])
 }
 
 // Modelo KeyMeeting (Reuniones Clave)

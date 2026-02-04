@@ -28,7 +28,6 @@ const entityTypes: LogEntityType[] = [
   "BIG_ROCK",
   "TAR",
   "ACTIVITY",
-  "KEY_PERSON",
   "KEY_MEETING",
 ];
 

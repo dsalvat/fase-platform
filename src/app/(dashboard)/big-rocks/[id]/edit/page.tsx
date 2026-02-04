@@ -29,7 +29,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
     redirect(`/big-rocks/${id}`);
   }
 
-  // Fetch Big Rock with keyPeople and keyMeetings
+  // Fetch Big Rock with keyPeople (users) and keyMeetings
   const bigRock = await prisma.bigRock.findUnique({
     where: { id },
     include: {
@@ -46,7 +46,18 @@ export default async function EditBigRockPage({ params }: PageProps) {
           progress: true,
         },
       },
-      keyPeople: true,
+      keyPeople: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+      },
       keyMeetings: true,
       _count: {
         select: {
@@ -64,11 +75,29 @@ export default async function EditBigRockPage({ params }: PageProps) {
   // Get current company
   const companyId = await getCurrentCompanyId();
 
-  // Fetch all available key people for the company (shared across all users)
-  const availableKeyPeople = await prisma.keyPerson.findMany({
-    where: companyId ? { companyId } : {},
-    orderBy: { firstName: "asc" },
-  });
+  // Fetch all users with FASE app access in the same company (for key people selection)
+  const availableUsers = companyId
+    ? await prisma.user.findMany({
+        where: {
+          companies: {
+            some: { companyId },
+          },
+          apps: {
+            some: {
+              app: { code: "FASE" },
+            },
+          },
+          status: "ACTIVE",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+        orderBy: { name: "asc" },
+      })
+    : [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -86,7 +115,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
       <BigRockForm
         mode="edit"
         bigRock={bigRock}
-        availableKeyPeople={availableKeyPeople}
+        availableUsers={availableUsers}
         isConfirmed={bigRock.status !== "CREADO"}
         canResetStatus={userRole === "ADMIN" || userRole === "SUPERADMIN"}
       />

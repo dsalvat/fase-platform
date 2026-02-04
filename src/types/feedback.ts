@@ -67,8 +67,12 @@ export interface SuperviseePlanningData {
     }>;
     keyPeople: Array<{
       id: string;
-      firstName: string;
-      lastName: string;
+      role: string | null;
+      user: {
+        id: string;
+        name: string | null;
+        email: string;
+      };
     }>;
     feedback: FeedbackWithSupervisor | null;
   }>;

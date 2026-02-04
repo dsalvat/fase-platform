@@ -11,8 +11,6 @@ export interface OnboardingStepTranslations {
   step4Content: string;
   step5Title: string;
   step5Content: string;
-  step6Title: string;
-  step6Content: string;
 }
 
 // Store translations for use in tooltip
@@ -55,11 +53,6 @@ export function getOnboardingSteps(t: OnboardingStepTranslations): StepType[] {
       selector: '[data-tour="activities-section"]',
       content: `**${t.step5Title}**\n\n${t.step5Content}`,
       position: "top",
-    },
-    {
-      selector: '[data-tour="nav-key-people"]',
-      content: `**${t.step6Title}**\n\n${t.step6Content}`,
-      position: "bottom",
     },
   ];
 }

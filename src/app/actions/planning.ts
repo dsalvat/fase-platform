@@ -368,12 +368,16 @@ export async function getSuperviseeMonthPlanning(
         orderBy: { date: "asc" },
       },
       keyPeople: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
-        orderBy: { firstName: "asc" },
+        orderBy: { createdAt: "asc" },
       },
     },
     orderBy: { createdAt: "asc" },

@@ -9,18 +9,15 @@ import {
   createBigRockSchema,
   updateBigRockSchema,
 } from "@/lib/validations/big-rock";
-import { inlineKeyPersonSchema } from "@/lib/validations/key-person";
 import { BigRockStatus } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
 import {
   logBigRockCreated,
   logBigRockUpdated,
   logBigRockDeleted,
-  logKeyPersonCreated,
   logKeyMeetingCreated,
 } from "@/lib/activity-log";
-import { InlineKeyPerson, InlineKeyMeeting } from "@/types/inline-forms";
-import { z } from "zod";
+import { InlineKeyMeeting } from "@/types/inline-forms";
 
 /**
  * Server action to create a new Big Rock
@@ -57,34 +54,17 @@ export async function createBigRock(
       };
     }
 
-    // Extract key people and meetings data
-    let keyPeopleIds: string[] = [];
-    let newKeyPeople: InlineKeyPerson[] = [];
+    // Extract key people (user IDs) and meetings data
+    let keyPeopleUserIds: string[] = [];
     let keyMeetings: InlineKeyMeeting[] = [];
 
     try {
       const keyPeopleIdsStr = formData.get("keyPeopleIds") as string;
       if (keyPeopleIdsStr) {
-        keyPeopleIds = JSON.parse(keyPeopleIdsStr);
+        keyPeopleUserIds = JSON.parse(keyPeopleIdsStr);
       }
     } catch {
       // Ignore parsing errors
-    }
-
-    try {
-      const newKeyPeopleStr = formData.get("newKeyPeople") as string;
-      if (newKeyPeopleStr) {
-        const parsed = JSON.parse(newKeyPeopleStr);
-        // Validate each new key person
-        newKeyPeople = parsed.map((p: unknown) => inlineKeyPersonSchema.parse(p));
-      }
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        return {
-          success: false,
-          error: `Error en datos de persona clave: ${e.errors[0]?.message}`,
-        };
-      }
     }
 
     try {
@@ -96,56 +76,46 @@ export async function createBigRock(
       // Ignore parsing errors
     }
 
-    // Verify that all existing keyPeopleIds belong to the user
-    if (keyPeopleIds.length > 0) {
-      const existingPeople = await prisma.keyPerson.findMany({
+    // Verify that all keyPeopleUserIds are valid users with FASE app access in the same company
+    if (keyPeopleUserIds.length > 0 && companyId) {
+      const validUsers = await prisma.user.findMany({
         where: {
-          id: { in: keyPeopleIds },
-          userId: user.id,
+          id: { in: keyPeopleUserIds },
+          companies: {
+            some: { companyId: companyId },
+          },
+          apps: {
+            some: {
+              app: { code: "FASE" },
+            },
+          },
         },
         select: { id: true },
       });
-      const validIds = new Set(existingPeople.map(p => p.id));
-      keyPeopleIds = keyPeopleIds.filter(id => validIds.has(id));
+      const validIds = new Set(validUsers.map(u => u.id));
+      keyPeopleUserIds = keyPeopleUserIds.filter(id => validIds.has(id));
     }
 
     // Create BigRock with relations in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create new KeyPersons
-      const createdKeyPeopleIds: string[] = [];
-      for (const person of newKeyPeople) {
-        const newPerson = await tx.keyPerson.create({
-          data: {
-            firstName: person.firstName,
-            lastName: person.lastName,
-            role: person.role || null,
-            contact: person.contact || null,
-            userId: user.id,
-            companyId: companyId,
-          },
-        });
-        createdKeyPeopleIds.push(newPerson.id);
-
-        // Log key person creation
-        try {
-          await logKeyPersonCreated(user.id, newPerson.id, `${newPerson.firstName} ${newPerson.lastName}`);
-        } catch (logError) {
-          console.error("Error recording activity log:", logError);
-        }
-      }
-
-      // 2. Create BigRock with keyPeople connected
-      const allKeyPeopleIds = [...keyPeopleIds, ...createdKeyPeopleIds];
+      // 1. Create BigRock
       const bigRock = await tx.bigRock.create({
         data: {
           ...validated,
           userId: user.id,
           companyId: companyId,
-          keyPeople: allKeyPeopleIds.length > 0
-            ? { connect: allKeyPeopleIds.map(id => ({ id })) }
-            : undefined,
         },
       });
+
+      // 2. Create BigRockKeyPerson entries for selected users
+      if (keyPeopleUserIds.length > 0) {
+        await tx.bigRockKeyPerson.createMany({
+          data: keyPeopleUserIds.map(userId => ({
+            bigRockId: bigRock.id,
+            userId: userId,
+          })),
+        });
+      }
 
       // 3. Create KeyMeetings linked to the BigRock
       for (const meeting of keyMeetings) {
@@ -189,7 +159,6 @@ export async function createBigRock(
     // Revalidate relevant paths
     revalidatePath("/big-rocks");
     revalidatePath(`/big-rocks?month=${validated.month}`);
-    revalidatePath("/key-people");
 
     return {
       success: true,
@@ -255,33 +224,17 @@ export async function updateBigRock(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _, ...updateData } = validated;
 
-    // Extract key people and meetings data
-    let keyPeopleIds: string[] | null = null;
-    let newKeyPeople: InlineKeyPerson[] = [];
+    // Extract key people (user IDs) and meetings data
+    let keyPeopleUserIds: string[] | null = null;
     let keyMeetings: InlineKeyMeeting[] | null = null;
 
     // Check if keyPeopleIds field is present (indicates we should update keyPeople)
     if (formData.has("keyPeopleIds")) {
       try {
         const keyPeopleIdsStr = formData.get("keyPeopleIds") as string;
-        keyPeopleIds = keyPeopleIdsStr ? JSON.parse(keyPeopleIdsStr) : [];
+        keyPeopleUserIds = keyPeopleIdsStr ? JSON.parse(keyPeopleIdsStr) : [];
       } catch {
-        keyPeopleIds = [];
-      }
-    }
-
-    try {
-      const newKeyPeopleStr = formData.get("newKeyPeople") as string;
-      if (newKeyPeopleStr) {
-        const parsed = JSON.parse(newKeyPeopleStr);
-        newKeyPeople = parsed.map((p: unknown) => inlineKeyPersonSchema.parse(p));
-      }
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        return {
-          success: false,
-          error: `Error en datos de persona clave: ${e.errors[0]?.message}`,
-        };
+        keyPeopleUserIds = [];
       }
     }
 
@@ -295,64 +248,51 @@ export async function updateBigRock(
       }
     }
 
-    // Verify that all existing keyPeopleIds belong to the user
-    if (keyPeopleIds !== null && keyPeopleIds.length > 0) {
-      // Validate keyPeopleIds belong to the company
-      const existingPeople = await prisma.keyPerson.findMany({
+    // Verify that all keyPeopleUserIds are valid users with FASE app access in the same company
+    if (keyPeopleUserIds !== null && keyPeopleUserIds.length > 0 && companyId) {
+      const validUsers = await prisma.user.findMany({
         where: {
-          id: { in: keyPeopleIds },
-          companyId: companyId,
+          id: { in: keyPeopleUserIds },
+          companies: {
+            some: { companyId: companyId },
+          },
+          apps: {
+            some: {
+              app: { code: "FASE" },
+            },
+          },
         },
         select: { id: true },
       });
-      const validIds = new Set(existingPeople.map(p => p.id));
-      keyPeopleIds = keyPeopleIds.filter(id => validIds.has(id));
+      const validIds = new Set(validUsers.map(u => u.id));
+      keyPeopleUserIds = keyPeopleUserIds.filter(uid => validIds.has(uid));
     }
 
     // Update BigRock with relations in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create new KeyPersons
-      const createdKeyPeopleIds: string[] = [];
-      for (const person of newKeyPeople) {
-        const newPerson = await tx.keyPerson.create({
-          data: {
-            firstName: person.firstName,
-            lastName: person.lastName,
-            role: person.role || null,
-            contact: person.contact || null,
-            userId: user.id,
-            companyId: companyId,
-          },
-        });
-        createdKeyPeopleIds.push(newPerson.id);
-
-        // Log key person creation
-        try {
-          await logKeyPersonCreated(user.id, newPerson.id, `${newPerson.firstName} ${newPerson.lastName}`);
-        } catch (logError) {
-          console.error("Error recording activity log:", logError);
-        }
-      }
-
-      // 2. Update BigRock with keyPeople if specified
-      const allKeyPeopleIds = keyPeopleIds !== null
-        ? [...keyPeopleIds, ...createdKeyPeopleIds]
-        : createdKeyPeopleIds.length > 0
-          ? createdKeyPeopleIds
-          : null;
-
+      // 1. Update BigRock
       const bigRock = await tx.bigRock.update({
         where: { id },
-        data: {
-          ...updateData,
-          // Only update keyPeople if we have IDs to set
-          ...(allKeyPeopleIds !== null && {
-            keyPeople: {
-              set: allKeyPeopleIds.map(pid => ({ id: pid })),
-            },
-          }),
-        },
+        data: updateData,
       });
+
+      // 2. Handle key people (users) if specified
+      if (keyPeopleUserIds !== null) {
+        // Delete existing key people relations
+        await tx.bigRockKeyPerson.deleteMany({
+          where: { bigRockId: id },
+        });
+
+        // Create new key people relations
+        if (keyPeopleUserIds.length > 0) {
+          await tx.bigRockKeyPerson.createMany({
+            data: keyPeopleUserIds.map(userId => ({
+              bigRockId: bigRock.id,
+              userId: userId,
+            })),
+          });
+        }
+      }
 
       // 3. Handle KeyMeetings if provided
       if (keyMeetings !== null) {
@@ -397,7 +337,6 @@ export async function updateBigRock(
     revalidatePath("/big-rocks");
     revalidatePath(`/big-rocks?month=${result.month}`);
     revalidatePath(`/big-rocks/${id}`);
-    revalidatePath("/key-people");
 
     return {
       success: true,
@@ -457,7 +396,7 @@ export async function deleteBigRock(id: string): Promise<{
 
     const bigRockTitle = bigRock.title;
 
-    // Delete Big Rock (cascades to TARs and KeyMeetings)
+    // Delete Big Rock (cascades to TARs, KeyMeetings, and BigRockKeyPerson)
     await prisma.bigRock.delete({
       where: { id },
     });

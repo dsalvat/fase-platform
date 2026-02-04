@@ -37,7 +37,6 @@ export async function GET(
         _count: {
           select: {
             bigRocks: true,
-            keyPeople: true,
             activityLogs: true,
           },
         },

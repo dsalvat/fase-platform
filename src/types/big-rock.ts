@@ -1,4 +1,14 @@
-import { BigRock, TAR, KeyMeeting, KeyPerson, User, BigRockStatus } from "@prisma/client";
+import { BigRock, TAR, KeyMeeting, User, BigRockStatus } from "@prisma/client";
+
+/**
+ * Key Person (User) linked to Big Rock
+ */
+export type BigRockKeyPersonUser = {
+  id: string;
+  userId: string;
+  role: string | null;
+  user: Pick<User, 'id' | 'name' | 'email' | 'image'>;
+};
 
 /**
  * Big Rock with relations included
@@ -7,7 +17,7 @@ export type BigRockWithRelations = BigRock & {
   user: Pick<User, 'id' | 'name' | 'email'>;
   tars: TAR[];
   keyMeetings: KeyMeeting[];
-  keyPeople: KeyPerson[];
+  keyPeople: BigRockKeyPersonUser[];
 };
 
 /**
@@ -16,7 +26,7 @@ export type BigRockWithRelations = BigRock & {
 export type BigRockWithCounts = BigRock & {
   user: Pick<User, 'id' | 'name'>;
   tars: Pick<TAR, 'id' | 'status' | 'progress'>[];
-  keyPeople?: KeyPerson[];
+  keyPeople?: BigRockKeyPersonUser[];
   keyMeetings?: KeyMeeting[];
   _count: {
     keyMeetings: number;

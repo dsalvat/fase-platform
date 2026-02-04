@@ -325,54 +325,6 @@ export async function logActivityDeleted(
   });
 }
 
-// Key Person helpers
-export async function logKeyPersonCreated(
-  userId: string,
-  keyPersonId: string,
-  fullName: string
-): Promise<void> {
-  await recordActivityLog({
-    action: "CREATE",
-    entityType: "KEY_PERSON",
-    entityId: keyPersonId,
-    description: `Agrego la persona clave "${fullName}"`,
-    entityTitle: fullName,
-    userId,
-  });
-}
-
-export async function logKeyPersonUpdated(
-  userId: string,
-  keyPersonId: string,
-  fullName: string,
-  changes?: Record<string, unknown>
-): Promise<void> {
-  await recordActivityLog({
-    action: "UPDATE",
-    entityType: "KEY_PERSON",
-    entityId: keyPersonId,
-    description: `Actualizo la persona clave "${fullName}"`,
-    entityTitle: fullName,
-    metadata: changes,
-    userId,
-  });
-}
-
-export async function logKeyPersonDeleted(
-  userId: string,
-  keyPersonId: string,
-  fullName: string
-): Promise<void> {
-  await recordActivityLog({
-    action: "DELETE",
-    entityType: "KEY_PERSON",
-    entityId: keyPersonId,
-    description: `Elimino la persona clave "${fullName}"`,
-    entityTitle: fullName,
-    userId,
-  });
-}
-
 // Key Meeting helpers
 export async function logKeyMeetingCreated(
   userId: string,
@@ -561,9 +513,6 @@ async function buildEntityLink(
         }
         return `/big-rocks`;
       }
-
-      case "KEY_PERSON":
-        return `/key-people/${entityId}`;
 
       default:
         return `/big-rocks`;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BigRockStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -93,7 +94,17 @@ export default async function BigRockDetailPage({ params }: PageProps) {
         orderBy: { createdAt: "asc" },
       },
       keyPeople: {
-        orderBy: { firstName: "asc" },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" },
       },
     },
   });
@@ -391,18 +402,27 @@ export default async function BigRockDetailPage({ params }: PageProps) {
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {bigRock.keyPeople.map((person) => (
-                <Link
-                  key={person.id}
-                  href={`/key-people/${person.id}`}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition-colors"
+              {bigRock.keyPeople.map((keyPerson) => (
+                <div
+                  key={keyPerson.id}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm"
                 >
-                  <Users className="h-3 w-3" />
-                  <span>{person.firstName} {person.lastName}</span>
-                  {person.role && (
-                    <span className="text-xs text-blue-500">({person.role})</span>
+                  {keyPerson.user.image ? (
+                    <Image
+                      src={keyPerson.user.image}
+                      alt={keyPerson.user.name || keyPerson.user.email}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <Users className="h-4 w-4" />
                   )}
-                </Link>
+                  <span>{keyPerson.user.name || keyPerson.user.email}</span>
+                  {keyPerson.role && (
+                    <span className="text-xs text-blue-500">({keyPerson.role})</span>
+                  )}
+                </div>
               ))}
             </div>
           )}

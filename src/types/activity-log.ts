@@ -34,12 +34,6 @@ export const entityTypeConfig: Record<LogEntityType, {
     color: "text-green-700",
     bgColor: "bg-green-100",
   },
-  KEY_PERSON: {
-    label: "Persona Clave",
-    labelPlural: "Personas Clave",
-    color: "text-orange-700",
-    bgColor: "bg-orange-100",
-  },
   KEY_MEETING: {
     label: "Reunion Clave",
     labelPlural: "Reuniones Clave",

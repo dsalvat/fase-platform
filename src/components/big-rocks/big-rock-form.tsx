@@ -7,14 +7,21 @@ import { BigRockFormFields } from "./big-rock-form-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BigRockWithCounts } from "@/types/big-rock";
-import { KeyPerson, KeyMeeting } from "@prisma/client";
-import { InlineKeyPerson, InlineKeyMeeting } from "@/types/inline-forms";
+import { KeyMeeting } from "@prisma/client";
+import { InlineKeyMeeting } from "@/types/inline-forms";
+
+interface UserOption {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+}
 
 interface BigRockFormProps {
   bigRock?: BigRockWithCounts;
   mode: "create" | "edit";
   defaultMonth?: string;
-  availableKeyPeople?: KeyPerson[];
+  availableUsers?: UserOption[];
   isConfirmed?: boolean;
   canResetStatus?: boolean;
 }
@@ -37,14 +44,13 @@ function convertToInlineKeyMeetings(meetings: KeyMeeting[] | undefined): InlineK
  * Form component for creating/editing Big Rocks
  * Client Component - uses useActionState for progressive enhancement
  */
-export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = [], isConfirmed = false, canResetStatus = false }: BigRockFormProps) {
+export function BigRockForm({ bigRock, mode, defaultMonth, availableUsers = [], isConfirmed = false, canResetStatus = false }: BigRockFormProps) {
   const router = useRouter();
 
-  // State for key people
+  // State for key people (now just user IDs)
   const [selectedKeyPeopleIds, setSelectedKeyPeopleIds] = useState<string[]>(
-    bigRock?.keyPeople?.map((p) => p.id) || []
+    bigRock?.keyPeople?.map((p) => p.userId) || []
   );
-  const [newKeyPeople, setNewKeyPeople] = useState<InlineKeyPerson[]>([]);
 
   // State for key meetings
   const [keyMeetings, setKeyMeetings] = useState<InlineKeyMeeting[]>(
@@ -52,20 +58,12 @@ export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = 
   );
 
   // Key People handlers
-  const handleSelectKeyPerson = useCallback((id: string) => {
-    setSelectedKeyPeopleIds((prev) => [...prev, id]);
+  const handleSelectKeyPerson = useCallback((userId: string) => {
+    setSelectedKeyPeopleIds((prev) => [...prev, userId]);
   }, []);
 
-  const handleDeselectKeyPerson = useCallback((id: string) => {
-    setSelectedKeyPeopleIds((prev) => prev.filter((pid) => pid !== id));
-  }, []);
-
-  const handleAddNewKeyPerson = useCallback((person: InlineKeyPerson) => {
-    setNewKeyPeople((prev) => [...prev, person]);
-  }, []);
-
-  const handleRemoveNewKeyPerson = useCallback((index: number) => {
-    setNewKeyPeople((prev) => prev.filter((_, i) => i !== index));
+  const handleDeselectKeyPerson = useCallback((userId: string) => {
+    setSelectedKeyPeopleIds((prev) => prev.filter((id) => id !== userId));
   }, []);
 
   // Key Meetings handlers
@@ -118,11 +116,6 @@ export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = 
           />
           <input
             type="hidden"
-            name="newKeyPeople"
-            value={JSON.stringify(newKeyPeople)}
-          />
-          <input
-            type="hidden"
             name="keyMeetings"
             value={JSON.stringify(keyMeetings)}
           />
@@ -134,14 +127,11 @@ export function BigRockForm({ bigRock, mode, defaultMonth, availableKeyPeople = 
             mode={mode}
             isConfirmed={isConfirmed}
             canResetStatus={canResetStatus}
-            // Key People props
-            availableKeyPeople={availableKeyPeople}
+            // Key People (Users) props
+            availableUsers={availableUsers}
             selectedKeyPeopleIds={selectedKeyPeopleIds}
-            newKeyPeople={newKeyPeople}
             onSelectKeyPerson={handleSelectKeyPerson}
             onDeselectKeyPerson={handleDeselectKeyPerson}
-            onAddNewKeyPerson={handleAddNewKeyPerson}
-            onRemoveNewKeyPerson={handleRemoveNewKeyPerson}
             // Key Meetings props
             keyMeetings={keyMeetings}
             onAddKeyMeeting={handleAddKeyMeeting}

@@ -255,7 +255,7 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                     <div className="flex flex-wrap gap-2">
                       {bigRock.keyPeople.map((person) => (
                         <Badge key={person.id} variant="secondary">
-                          {person.firstName} {person.lastName}
+                          {person.user.name || person.user.email}
                         </Badge>
                       ))}
                     </div>

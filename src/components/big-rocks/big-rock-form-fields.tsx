@@ -11,11 +11,17 @@ import {
 } from "@/components/ui/select";
 import { BigRockWithCounts } from "@/types/big-rock";
 import { generateMonthOptions, getCurrentMonth, getNextMonth } from "@/lib/month-helpers";
-import { BigRockKeyPersonSelector } from "./big-rock-key-person-selector";
+import { BigRockUserSelector } from "./big-rock-user-selector";
 import { BigRockKeyMeetingInline } from "./big-rock-key-meeting-inline";
-import { KeyPerson } from "@prisma/client";
-import { InlineKeyPerson, InlineKeyMeeting } from "@/types/inline-forms";
+import { InlineKeyMeeting } from "@/types/inline-forms";
 import { Users, Calendar } from "lucide-react";
+
+interface UserOption {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+}
 
 interface BigRockFormFieldsProps {
   defaultValues?: Partial<BigRockWithCounts>;
@@ -24,14 +30,11 @@ interface BigRockFormFieldsProps {
   mode?: "create" | "edit";
   isConfirmed?: boolean;
   canResetStatus?: boolean;
-  // Key People props
-  availableKeyPeople?: KeyPerson[];
+  // Key People (Users) props
+  availableUsers?: UserOption[];
   selectedKeyPeopleIds?: string[];
-  newKeyPeople?: InlineKeyPerson[];
-  onSelectKeyPerson?: (id: string) => void;
-  onDeselectKeyPerson?: (id: string) => void;
-  onAddNewKeyPerson?: (person: InlineKeyPerson) => void;
-  onRemoveNewKeyPerson?: (index: number) => void;
+  onSelectKeyPerson?: (userId: string) => void;
+  onDeselectKeyPerson?: (userId: string) => void;
   // Key Meetings props
   keyMeetings?: InlineKeyMeeting[];
   onAddKeyMeeting?: (meeting: InlineKeyMeeting) => void;
@@ -67,14 +70,11 @@ export function BigRockFormFields({
   mode = "create",
   isConfirmed = false,
   canResetStatus = false,
-  // Key People props
-  availableKeyPeople = [],
+  // Key People (Users) props
+  availableUsers = [],
   selectedKeyPeopleIds = [],
-  newKeyPeople = [],
   onSelectKeyPerson,
   onDeselectKeyPerson,
-  onAddNewKeyPerson,
-  onRemoveNewKeyPerson,
   // Key Meetings props
   keyMeetings = [],
   onAddKeyMeeting,
@@ -246,23 +246,20 @@ export function BigRockFormFields({
       )}
 
       {/* Key People Section */}
-      {onSelectKeyPerson && onDeselectKeyPerson && onAddNewKeyPerson && onRemoveNewKeyPerson && (
+      {onSelectKeyPerson && onDeselectKeyPerson && (
         <div className="space-y-3 pt-4 border-t">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-muted-foreground" />
             <Label className="text-base font-semibold">Personas Clave</Label>
           </div>
           <p className="text-sm text-muted-foreground">
-            Selecciona personas existentes o crea nuevas que te ayudaran a lograr este objetivo.
+            Selecciona usuarios de tu empresa que te ayudaran a lograr este objetivo.
           </p>
-          <BigRockKeyPersonSelector
-            availableKeyPeople={availableKeyPeople}
-            selectedIds={selectedKeyPeopleIds}
-            newPeople={newKeyPeople}
+          <BigRockUserSelector
+            availableUsers={availableUsers}
+            selectedUserIds={selectedKeyPeopleIds}
             onSelect={onSelectKeyPerson}
             onDeselect={onDeselectKeyPerson}
-            onAddNew={onAddNewKeyPerson}
-            onRemoveNew={onRemoveNewKeyPerson}
             disabled={isPending}
           />
         </div>

@@ -27,11 +27,29 @@ export default async function NewBigRockPage({ searchParams }: PageProps) {
   // Get current company
   const companyId = await getCurrentCompanyId();
 
-  // Fetch available key people for the company (shared across all users)
-  const availableKeyPeople = await prisma.keyPerson.findMany({
-    where: companyId ? { companyId } : {},
-    orderBy: { firstName: "asc" },
-  });
+  // Fetch available users with FASE app access in the same company
+  const availableUsers = companyId
+    ? await prisma.user.findMany({
+        where: {
+          companies: {
+            some: { companyId },
+          },
+          apps: {
+            some: {
+              app: { code: "FASE" },
+            },
+          },
+          status: "ACTIVE",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+        orderBy: { name: "asc" },
+      })
+    : [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -49,7 +67,7 @@ export default async function NewBigRockPage({ searchParams }: PageProps) {
       <BigRockForm
         mode="create"
         defaultMonth={defaultMonth}
-        availableKeyPeople={availableKeyPeople}
+        availableUsers={availableUsers}
       />
     </div>
   );

@@ -14,8 +14,8 @@ interface BigRockContext {
     progress: number;
   }[];
   keyPeople: {
-    firstName: string;
-    lastName: string;
+    name: string | null;
+    email: string;
     role: string | null;
   }[];
   keyMeetings: {
@@ -70,10 +70,13 @@ export async function buildChatContext(
         },
       },
       keyPeople: {
-        select: {
-          firstName: true,
-          lastName: true,
-          role: true,
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       },
       keyMeetings: {
@@ -116,10 +119,13 @@ export async function buildChatContext(
               },
             },
             keyPeople: {
-              select: {
-                firstName: true,
-                lastName: true,
-                role: true,
+              include: {
+                user: {
+                  select: {
+                    name: true,
+                    email: true,
+                  },
+                },
               },
             },
             keyMeetings: {
@@ -157,7 +163,7 @@ function formatBigRock(bigRock: {
   status: string;
   month: string;
   tars: { description: string; status: string; progress: number }[];
-  keyPeople: { firstName: string; lastName: string; role: string | null }[];
+  keyPeople: { role: string | null; user: { name: string | null; email: string } }[];
   keyMeetings: { title: string; date: Date; completed: boolean; objective: string | null }[];
 }): BigRockContext {
   return {
@@ -168,7 +174,11 @@ function formatBigRock(bigRock: {
     status: bigRock.status,
     month: bigRock.month,
     tars: bigRock.tars,
-    keyPeople: bigRock.keyPeople,
+    keyPeople: bigRock.keyPeople.map((kp) => ({
+      name: kp.user.name,
+      email: kp.user.email,
+      role: kp.role,
+    })),
     keyMeetings: bigRock.keyMeetings,
   };
 }
@@ -229,7 +239,7 @@ function formatBigRockToString(bigRock: BigRockContext): string {
   if (bigRock.keyPeople.length > 0) {
     str += `- **Personas Clave**:\n`;
     for (const person of bigRock.keyPeople) {
-      str += `  - ${person.firstName} ${person.lastName}${person.role ? ` (${person.role})` : ""}\n`;
+      str += `  - ${person.name || person.email}${person.role ? ` (${person.role})` : ""}\n`;
     }
   }
 
