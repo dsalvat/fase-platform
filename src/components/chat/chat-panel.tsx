@@ -7,6 +7,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "./chat-message";
@@ -15,9 +23,11 @@ import {
   sendChatMessage,
   getCreditsRemaining,
   getConversationMessages,
-  markMessagesAsRead
+  getConversations,
+  markMessagesAsRead,
+  deleteConversation,
 } from "@/app/actions/chat";
-import { MessageCircle, Plus } from "lucide-react";
+import { MessageCircle, Plus, History, Trash2, ChevronDown } from "lucide-react";
 
 interface Message {
   id: string;
@@ -25,6 +35,14 @@ interface Message {
   messageType: "USER" | "ASSISTANT" | "SYSTEM";
   content: string;
   createdAt: Date;
+}
+
+interface Conversation {
+  id: string;
+  title: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  messageCount: number;
 }
 
 interface ChatPanelProps {
@@ -40,6 +58,9 @@ interface ChatPanelProps {
     error: string;
     newConversation: string;
     welcome: string;
+    conversationHistory?: string;
+    noConversations?: string;
+    deleteConversation?: string;
   };
   onMessagesRead?: () => void;
 }
@@ -47,15 +68,17 @@ interface ChatPanelProps {
 export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [creditsRemaining, setCreditsRemaining] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch credits on open
+  // Fetch credits and conversations on open
   useEffect(() => {
     if (open) {
       fetchCredits();
+      fetchConversations();
     }
   }, [open]);
 
@@ -68,6 +91,13 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
     const result = await getCreditsRemaining();
     if (result.success) {
       setCreditsRemaining(result.creditsRemaining);
+    }
+  };
+
+  const fetchConversations = async () => {
+    const result = await getConversations();
+    if (result.success && result.conversations) {
+      setConversations(result.conversations);
     }
   };
 
@@ -86,6 +116,19 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
       onMessagesRead?.();
     }
   }, [onMessagesRead]);
+
+  const handleDeleteConversation = async (convId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const result = await deleteConversation(convId);
+    if (result.success) {
+      // Refresh conversations list
+      fetchConversations();
+      // If we deleted the current conversation, clear it
+      if (convId === conversationId) {
+        handleNewConversation();
+      }
+    }
+  };
 
   const handleSend = async (content: string) => {
     if (creditsRemaining <= 0) {
@@ -112,6 +155,8 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
         // Update conversation ID if new conversation
         if (result.conversationId) {
           setConversationId(result.conversationId);
+          // Refresh conversations list
+          fetchConversations();
         }
 
         // Add assistant message
@@ -155,6 +200,23 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
     setError(null);
   };
 
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } else if (days === 1) {
+      return "Ayer";
+    } else if (days < 7) {
+      return d.toLocaleDateString([], { weekday: "short" });
+    } else {
+      return d.toLocaleDateString([], { day: "numeric", month: "short" });
+    }
+  };
+
   const noCredits = creditsRemaining <= 0;
 
   return (
@@ -173,6 +235,56 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
                   {creditsRemaining}/10 {t.credits}
                 </Badge>
               )}
+
+              {/* Conversation History Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" title={t.conversationHistory || "Historial"}>
+                    <History className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <History className="w-4 h-4" />
+                    {t.conversationHistory || "Conversaciones"}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {conversations.length === 0 ? (
+                    <div className="px-2 py-4 text-center text-sm text-gray-500">
+                      {t.noConversations || "No hay conversaciones"}
+                    </div>
+                  ) : (
+                    conversations.slice(0, 10).map((conv) => (
+                      <DropdownMenuItem
+                        key={conv.id}
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => loadConversation(conv.id)}
+                      >
+                        <div className="flex-1 min-w-0 pr-2">
+                          <div className="text-sm font-medium truncate">
+                            {conv.title || "Nueva conversación"}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center gap-2">
+                            <span>{formatDate(conv.updatedAt)}</span>
+                            <span>·</span>
+                            <span>{conv.messageCount} msgs</span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0 text-gray-400 hover:text-red-500"
+                          onClick={(e) => handleDeleteConversation(conv.id, e)}
+                          title={t.deleteConversation || "Eliminar"}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 variant="ghost"
                 size="icon"

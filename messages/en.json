@@ -361,6 +361,9 @@
     "thinking": "Thinking...",
     "error": "Error sending message",
     "newConversation": "New conversation",
-    "welcome": "Hello! I'm your platform assistant. I can help you with your Big Rocks, TARs and planning. How can I help you?"
+    "welcome": "Hello! I'm your platform assistant. I can help you with your Big Rocks, TARs and planning. How can I help you?",
+    "conversationHistory": "Conversations",
+    "noConversations": "No conversations",
+    "deleteConversation": "Delete conversation"
   }
 }

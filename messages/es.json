@@ -361,6 +361,9 @@
     "thinking": "Pensando...",
     "error": "Error al enviar mensaje",
     "newConversation": "Nueva conversacion",
-    "welcome": "Hola! Soy tu asistente de la plataforma. Puedo ayudarte con tus Big Rocks, TARs y planificacion. ¿En que puedo ayudarte?"
+    "welcome": "Hola! Soy tu asistente de la plataforma. Puedo ayudarte con tus Big Rocks, TARs y planificacion. ¿En que puedo ayudarte?",
+    "conversationHistory": "Conversaciones",
+    "noConversations": "No hay conversaciones",
+    "deleteConversation": "Eliminar conversacion"
   }
 }
