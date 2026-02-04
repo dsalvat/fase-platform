@@ -46,7 +46,7 @@ export default async function QuartersPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("quarters")}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("quarters")}</h1>
             <p className="text-muted-foreground">
               Gestiona los trimestres de OKR
             </p>

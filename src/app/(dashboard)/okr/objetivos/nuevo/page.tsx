@@ -58,7 +58,7 @@ export default async function NewObjectivePage({ searchParams }: NewObjectivePag
               Volver
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{t("newObjective")}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("newObjective")}</h1>
         </div>
 
         <Card className="border-amber-200 bg-amber-50">
@@ -121,7 +121,7 @@ export default async function NewObjectivePage({ searchParams }: NewObjectivePag
               Volver
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{t("newObjective")}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("newObjective")}</h1>
         </div>
 
         <Card className="border-amber-200 bg-amber-50">
@@ -159,7 +159,7 @@ export default async function NewObjectivePage({ searchParams }: NewObjectivePag
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("newObjective")}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("newObjective")}</h1>
           <p className="text-muted-foreground">
             Q{activeQuarter.quarter.replace("Q", "")} {activeQuarter.year}
           </p>

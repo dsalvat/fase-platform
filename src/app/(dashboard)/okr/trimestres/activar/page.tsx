@@ -73,7 +73,7 @@ export default function ActivateQuarterPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Activar Trimestre</h1>
+          <h1 className="text-2xl font-bold text-foreground">Activar Trimestre</h1>
           <p className="text-muted-foreground">
             Selecciona el trimestre para trabajar con OKRs
           </p>

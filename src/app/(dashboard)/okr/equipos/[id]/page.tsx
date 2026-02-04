@@ -93,7 +93,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{team.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{team.name}</h1>
             {team.description && (
               <p className="text-muted-foreground">{team.description}</p>
             )}

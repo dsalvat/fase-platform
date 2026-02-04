@@ -9,15 +9,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { createTeam } from "@/app/actions/okr";
+import { updateTeam } from "@/app/actions/okr";
 
-export default function NewTeamPage() {
+interface Team {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+interface EditTeamFormProps {
+  team: Team;
+}
+
+export function EditTeamForm({ team }: EditTeamFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState(team.name);
+  const [description, setDescription] = useState(team.description || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +39,15 @@ export default function NewTeamPage() {
     }
 
     startTransition(async () => {
-      const result = await createTeam({
+      const result = await updateTeam(team.id, {
         name: name.trim(),
         description: description.trim() || undefined,
       });
 
       if (result.success) {
-        router.push("/okr/equipos");
+        router.push(`/okr/equipos/${team.id}`);
       } else {
-        setError(result.error || "Error al crear el equipo");
+        setError(result.error || "Error al actualizar el equipo");
       }
     });
   };
@@ -46,16 +56,16 @@ export default function NewTeamPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/okr/equipos">
+        <Link href={`/okr/equipos/${team.id}`}>
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Nuevo Equipo</h1>
+          <h1 className="text-2xl font-bold text-foreground">Editar Equipo</h1>
           <p className="text-muted-foreground">
-            Crea un equipo para trabajar en OKRs
+            Modifica la información del equipo
           </p>
         </div>
       </div>
@@ -103,7 +113,7 @@ export default function NewTeamPage() {
 
             {/* Actions */}
             <div className="flex justify-end gap-3">
-              <Link href="/okr/equipos">
+              <Link href={`/okr/equipos/${team.id}`}>
                 <Button type="button" variant="outline">
                   Cancelar
                 </Button>
@@ -112,10 +122,10 @@ export default function NewTeamPage() {
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creando...
+                    Guardando...
                   </>
                 ) : (
-                  "Crear Equipo"
+                  "Guardar Cambios"
                 )}
               </Button>
             </div>

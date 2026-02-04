@@ -45,7 +45,7 @@ export default async function OKRGamificationPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-foreground">
             {t("gamification")}
           </h1>
           <p className="text-muted-foreground">

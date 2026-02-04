@@ -48,7 +48,7 @@ export default async function TeamsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
             <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
         </div>

@@ -55,12 +55,12 @@ export default async function ObjectivesPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-foreground">
               {t("objectives")}
             </h1>
             <p className="text-muted-foreground">
               {activeQuarter
-                ? `Q${activeQuarter.quarter} ${activeQuarter.year}`
+                ? `${activeQuarter.quarter} ${activeQuarter.year}`
                 : "Sin trimestre activo"}
             </p>
           </div>

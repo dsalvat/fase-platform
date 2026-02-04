@@ -106,7 +106,7 @@ export default async function OKRDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("dashboard")}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("dashboard")}</h1>
           <p className="text-muted-foreground">
             {activeQuarter
               ? `Q${currentQuarter} ${currentYear}`

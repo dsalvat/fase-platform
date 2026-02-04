@@ -114,7 +114,7 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
                 </Badge>
               )}
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{objective.title}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{objective.title}</h1>
             <p className="text-muted-foreground">
               Q{objective.quarter.quarter.replace("Q", "")} {objective.quarter.year}
             </p>
@@ -186,14 +186,14 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
               <p className="text-sm font-medium text-muted-foreground mb-1">
                 Descripción
               </p>
-              <p className="text-gray-900">{objective.description}</p>
+              <p className="text-foreground">{objective.description}</p>
             </div>
           )}
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">
               Indicador de Éxito
             </p>
-            <p className="text-gray-900">{objective.indicator}</p>
+            <p className="text-foreground">{objective.indicator}</p>
           </div>
           <div className="flex items-center gap-6 pt-2">
             <div>
