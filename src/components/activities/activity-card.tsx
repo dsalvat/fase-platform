@@ -5,7 +5,7 @@ import { ActivityTypeBadge } from "./activity-type-badge";
 import { ActivityCompletionToggle } from "./activity-completion-toggle";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay, isBefore } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface ActivityCardProps {
@@ -23,12 +23,17 @@ export function ActivityCard({
   isReadOnly = false,
   canEdit = true,
 }: ActivityCardProps) {
+  // Activity is editable only if its date is today or in the future
+  const activityDate = startOfDay(new Date(activity.date));
+  const today = startOfDay(new Date());
+  const isPastActivity = isBefore(activityDate, today);
+  const isActivityEditable = canEdit && !isReadOnly && !isPastActivity;
   return (
     <Card
       className={cn(
         "transition-all",
         activity.completed && "bg-green-50 border-green-200",
-        isReadOnly && "opacity-75"
+        (isReadOnly || isPastActivity) && "opacity-75"
       )}
     >
       <CardContent className="p-4">
@@ -64,8 +69,8 @@ export function ActivityCard({
             )}
           </div>
 
-          {/* Completion toggle */}
-          {canEdit && !isReadOnly && (
+          {/* Completion toggle - only for today or future activities */}
+          {isActivityEditable && (
             <ActivityCompletionToggle
               activityId={activity.id}
               initialCompleted={activity.completed}
