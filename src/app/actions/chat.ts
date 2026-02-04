@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { anthropic, DAILY_CREDITS, CREDITS_PER_MESSAGE, CLAUDE_MODEL, MAX_TOKENS } from "@/lib/anthropic";
 import { buildChatContext, formatContextForPrompt } from "@/lib/chat-context";
+import { getSuperviseeChanges, type SuperviseeChangesGroup } from "@/lib/activity-log";
 
 const SYSTEM_PROMPT = `Eres un asistente de la plataforma de metodología de gestión estratégica de Ametller Origen.
 
@@ -59,9 +60,30 @@ interface MessagesResult {
   messages?: {
     id: string;
     role: string;
+    messageType: string;
     content: string;
     createdAt: Date;
   }[];
+  error?: string;
+}
+
+interface UnreadCountResult {
+  success: boolean;
+  count: number;
+  error?: string;
+}
+
+interface SystemNotificationResult {
+  success: boolean;
+  hasNotification: boolean;
+  conversationId?: string;
+  message?: {
+    id: string;
+    role: string;
+    messageType: string;
+    content: string;
+    createdAt: Date;
+  };
   error?: string;
 }
 
@@ -186,8 +208,10 @@ export async function sendChatMessage(
       data: {
         conversationId: conversation.id,
         role: "user",
+        messageType: "USER",
         content: message,
         creditsUsed: 0,
+        isRead: true, // User messages are already "read"
       },
     });
 
@@ -226,8 +250,10 @@ export async function sendChatMessage(
       data: {
         conversationId: conversation.id,
         role: "assistant",
+        messageType: "ASSISTANT",
         content: assistantText,
         creditsUsed: CREDITS_PER_MESSAGE,
+        isRead: false, // New messages are unread
       },
     });
 
@@ -337,6 +363,7 @@ export async function getConversationMessages(
       messages: messages.map((msg) => ({
         id: msg.id,
         role: msg.role,
+        messageType: msg.messageType,
         content: msg.content,
         createdAt: msg.createdAt,
       })),
@@ -384,6 +411,272 @@ export async function deleteConversation(conversationId: string): Promise<{ succ
     return {
       success: false,
       error: "Error al eliminar conversación",
+    };
+  }
+}
+
+/**
+ * Get count of unread messages for the current user
+ */
+export async function getUnreadCount(): Promise<UnreadCountResult> {
+  try {
+    const user = await requireAuth();
+
+    // Count unread assistant messages across all conversations
+    const count = await prisma.chatMessage.count({
+      where: {
+        conversation: {
+          userId: user.id,
+        },
+        role: "assistant",
+        isRead: false,
+      },
+    });
+
+    return {
+      success: true,
+      count,
+    };
+  } catch (error) {
+    console.error("Error getting unread count:", error);
+    return {
+      success: false,
+      count: 0,
+      error: "Error al obtener mensajes no leídos",
+    };
+  }
+}
+
+/**
+ * Mark all messages in a conversation as read
+ */
+export async function markMessagesAsRead(conversationId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+
+    // Verify conversation belongs to user
+    const conversation = await prisma.chatConversation.findFirst({
+      where: {
+        id: conversationId,
+        userId: user.id,
+      },
+    });
+
+    if (!conversation) {
+      return {
+        success: false,
+        error: "Conversación no encontrada",
+      };
+    }
+
+    // Mark all assistant messages as read
+    await prisma.chatMessage.updateMany({
+      where: {
+        conversationId,
+        role: "assistant",
+        isRead: false,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+    return {
+      success: false,
+      error: "Error al marcar mensajes como leídos",
+    };
+  }
+}
+
+/**
+ * Update user's lastVisitedAt timestamp
+ */
+export async function updateLastVisitedAt(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastVisitedAt: new Date() },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating lastVisitedAt:", error);
+    return {
+      success: false,
+      error: "Error al actualizar última visita",
+    };
+  }
+}
+
+/**
+ * Format supervisee changes into a notification message
+ */
+function formatSuperviseeNotification(changesGroups: SuperviseeChangesGroup[]): string {
+  const actionEmojis: Record<string, string> = {
+    CREATE: "🆕",
+    UPDATE: "✏️",
+    DELETE: "🗑️",
+  };
+
+  const entityLabels: Record<string, string> = {
+    BIG_ROCK: "Big Rock",
+    TAR: "TAR",
+    ACTIVITY: "actividad",
+    KEY_PERSON: "persona clave",
+    KEY_MEETING: "reunión clave",
+  };
+
+  const actionLabels: Record<string, string> = {
+    CREATE: "ha creado",
+    UPDATE: "ha actualizado",
+    DELETE: "ha eliminado",
+  };
+
+  let message = "📋 **Novedades de tus supervisados:**\n\n";
+
+  for (const group of changesGroups) {
+    message += `**${group.superviseeName}** ha realizado ${group.changes.length} cambio${group.changes.length > 1 ? "s" : ""}:\n`;
+
+    for (const change of group.changes.slice(0, 5)) { // Limit to 5 changes per person
+      const emoji = actionEmojis[change.action] || "📝";
+      const actionLabel = actionLabels[change.action] || "ha modificado";
+      const entityLabel = entityLabels[change.entityType] || "elemento";
+      const title = change.entityTitle || "sin título";
+
+      message += `- ${emoji} ${actionLabel} ${entityLabel}: "${title}" [Ver →](${change.link})\n`;
+    }
+
+    if (group.changes.length > 5) {
+      message += `- ... y ${group.changes.length - 5} cambio${group.changes.length - 5 > 1 ? "s" : ""} más\n`;
+    }
+
+    message += "\n";
+  }
+
+  return message.trim();
+}
+
+/**
+ * Generate a system notification for supervisor with supervisee changes
+ * This does NOT consume credits
+ */
+export async function generateSystemNotification(): Promise<SystemNotificationResult> {
+  try {
+    const user = await requireAuth();
+    const userId = user.id;
+
+    // Get full user data including role and lastVisitedAt
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+        lastVisitedAt: true,
+      },
+    });
+
+    if (!userData) {
+      return {
+        success: false,
+        hasNotification: false,
+        error: "Usuario no encontrado",
+      };
+    }
+
+    // Only supervisors and above can see supervisee changes
+    if (userData.role !== "SUPERVISOR" && userData.role !== "ADMIN" && userData.role !== "SUPERADMIN") {
+      // Update lastVisitedAt for non-supervisors too
+      await prisma.user.update({
+        where: { id: userId },
+        data: { lastVisitedAt: new Date() },
+      });
+
+      return {
+        success: true,
+        hasNotification: false,
+      };
+    }
+
+    // Get changes since last visit
+    const changesGroups = await getSuperviseeChanges(userId, userData.lastVisitedAt);
+
+    // Update lastVisitedAt
+    await prisma.user.update({
+      where: { id: userId },
+      data: { lastVisitedAt: new Date() },
+    });
+
+    if (changesGroups.length === 0) {
+      return {
+        success: true,
+        hasNotification: false,
+      };
+    }
+
+    // Format notification message
+    const notificationContent = formatSuperviseeNotification(changesGroups);
+
+    // Create or get a "notifications" conversation
+    let conversation = await prisma.chatConversation.findFirst({
+      where: {
+        userId,
+        title: "📋 Notificaciones",
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    if (!conversation) {
+      conversation = await prisma.chatConversation.create({
+        data: {
+          userId,
+          title: "📋 Notificaciones",
+        },
+      });
+    }
+
+    // Create system message (no credits consumed)
+    const systemMessage = await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: "assistant",
+        messageType: "SYSTEM",
+        content: notificationContent,
+        creditsUsed: 0,
+        isRead: false,
+      },
+    });
+
+    // Update conversation timestamp
+    await prisma.chatConversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: new Date() },
+    });
+
+    revalidatePath("/");
+
+    return {
+      success: true,
+      hasNotification: true,
+      conversationId: conversation.id,
+      message: {
+        id: systemMessage.id,
+        role: systemMessage.role,
+        messageType: systemMessage.messageType,
+        content: systemMessage.content,
+        createdAt: systemMessage.createdAt,
+      },
+    };
+  } catch (error) {
+    console.error("Error generating system notification:", error);
+    return {
+      success: false,
+      hasNotification: false,
+      error: "Error al generar notificación",
     };
   }
 }

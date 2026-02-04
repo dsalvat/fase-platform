@@ -11,12 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
-import { sendChatMessage, getCreditsRemaining, getConversationMessages } from "@/app/actions/chat";
-import { MessageCircle, Trash2, Plus } from "lucide-react";
+import {
+  sendChatMessage,
+  getCreditsRemaining,
+  getConversationMessages,
+  markMessagesAsRead
+} from "@/app/actions/chat";
+import { MessageCircle, Plus } from "lucide-react";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
+  messageType: "USER" | "ASSISTANT" | "SYSTEM";
   content: string;
   createdAt: Date;
 }
@@ -35,9 +41,10 @@ interface ChatPanelProps {
     newConversation: string;
     welcome: string;
   };
+  onMessagesRead?: () => void;
 }
 
-export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProps) {
+export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [creditsRemaining, setCreditsRemaining] = useState(10);
@@ -70,10 +77,15 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
       setMessages(result.messages.map(msg => ({
         ...msg,
         role: msg.role as "user" | "assistant",
+        messageType: (msg.messageType || "ASSISTANT") as "USER" | "ASSISTANT" | "SYSTEM",
       })));
       setConversationId(convId);
+
+      // Mark messages as read
+      await markMessagesAsRead(convId);
+      onMessagesRead?.();
     }
-  }, []);
+  }, [onMessagesRead]);
 
   const handleSend = async (content: string) => {
     if (creditsRemaining <= 0) {
@@ -85,6 +97,7 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
     const userMessage: Message = {
       id: `temp-${Date.now()}`,
       role: "user",
+      messageType: "USER",
       content,
       createdAt: new Date(),
     };
@@ -107,6 +120,7 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
           {
             id: result.message!.id,
             role: result.message!.role as "user" | "assistant",
+            messageType: "ASSISTANT" as const,
             content: result.message!.content,
             createdAt: result.message!.createdAt,
           },
@@ -115,6 +129,12 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
         // Update credits
         if (result.creditsRemaining !== undefined) {
           setCreditsRemaining(result.creditsRemaining);
+        }
+
+        // Mark as read immediately since user is viewing
+        if (result.conversationId) {
+          await markMessagesAsRead(result.conversationId);
+          onMessagesRead?.();
         }
       } else {
         setError(result.error || "Error al enviar mensaje");
@@ -148,9 +168,11 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
               <SheetTitle>{t.title}</SheetTitle>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={noCredits ? "destructive" : "secondary"}>
-                {creditsRemaining}/10 {t.credits}
-              </Badge>
+              {creditsRemaining < 3 && (
+                <Badge variant={noCredits ? "destructive" : "secondary"} className="text-xs">
+                  {creditsRemaining}/10 {t.credits}
+                </Badge>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -176,11 +198,12 @@ export function ChatPanel({ open, onOpenChange, translations: t }: ChatPanelProp
                 <ChatMessage
                   key={message.id}
                   role={message.role}
+                  messageType={message.messageType}
                   content={message.content}
                 />
               ))}
               {isLoading && (
-                <ChatMessage role="assistant" content="" isLoading />
+                <ChatMessage role="assistant" messageType="ASSISTANT" content="" isLoading />
               )}
             </>
           )}

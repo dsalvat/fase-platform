@@ -420,3 +420,155 @@ export async function logKeyMeetingDeleted(
     userId,
   });
 }
+
+// ========================
+// Supervisee changes for chat notifications
+// ========================
+
+export interface SuperviseeChange {
+  action: LogActionType;
+  entityType: LogEntityType;
+  entityId: string;
+  entityTitle: string | null;
+  description: string;
+  link: string;
+  createdAt: Date;
+}
+
+export interface SuperviseeChangesGroup {
+  superviseeId: string;
+  superviseeName: string;
+  superviseeEmail: string;
+  changes: SuperviseeChange[];
+}
+
+/**
+ * Get changes made by supervisees since a given date
+ */
+export async function getSuperviseeChanges(
+  supervisorId: string,
+  since: Date | null
+): Promise<SuperviseeChangesGroup[]> {
+  // Get all supervisees
+  const supervisees = await prisma.user.findMany({
+    where: { supervisorId },
+    select: { id: true, name: true, email: true },
+  });
+
+  if (supervisees.length === 0) {
+    return [];
+  }
+
+  const superviseeIds = supervisees.map((s) => s.id);
+
+  // Build where clause
+  const where: Prisma.ActivityLogWhereInput = {
+    userId: { in: superviseeIds },
+  };
+
+  if (since) {
+    where.createdAt = { gt: since };
+  }
+
+  // Get activity logs
+  const logs = await prisma.activityLog.findMany({
+    where,
+    include: {
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 50, // Limit to last 50 changes
+  });
+
+  // Group by supervisee
+  const groupedChanges = new Map<string, SuperviseeChangesGroup>();
+
+  for (const log of logs) {
+    const link = await buildEntityLink(log.entityType, log.entityId);
+
+    const change: SuperviseeChange = {
+      action: log.action,
+      entityType: log.entityType,
+      entityId: log.entityId,
+      entityTitle: log.entityTitle,
+      description: log.description,
+      link,
+      createdAt: log.createdAt,
+    };
+
+    const existing = groupedChanges.get(log.userId);
+    if (existing) {
+      existing.changes.push(change);
+    } else {
+      groupedChanges.set(log.userId, {
+        superviseeId: log.userId,
+        superviseeName: log.user.name || log.user.email,
+        superviseeEmail: log.user.email,
+        changes: [change],
+      });
+    }
+  }
+
+  return Array.from(groupedChanges.values());
+}
+
+/**
+ * Build a link to the entity based on its type
+ */
+async function buildEntityLink(
+  entityType: LogEntityType,
+  entityId: string
+): Promise<string> {
+  try {
+    switch (entityType) {
+      case "BIG_ROCK":
+        return `/big-rocks/${entityId}`;
+
+      case "TAR": {
+        const tar = await prisma.tAR.findUnique({
+          where: { id: entityId },
+          select: { bigRockId: true },
+        });
+        if (tar) {
+          return `/big-rocks/${tar.bigRockId}/tars/${entityId}`;
+        }
+        return `/big-rocks`;
+      }
+
+      case "ACTIVITY": {
+        const activity = await prisma.activity.findUnique({
+          where: { id: entityId },
+          select: {
+            tarId: true,
+            tar: { select: { bigRockId: true } },
+          },
+        });
+        if (activity) {
+          return `/big-rocks/${activity.tar.bigRockId}/tars/${activity.tarId}/activities/${entityId}`;
+        }
+        return `/big-rocks`;
+      }
+
+      case "KEY_MEETING": {
+        const meeting = await prisma.keyMeeting.findUnique({
+          where: { id: entityId },
+          select: { bigRockId: true },
+        });
+        if (meeting) {
+          return `/big-rocks/${meeting.bigRockId}/meetings/${entityId}`;
+        }
+        return `/big-rocks`;
+      }
+
+      case "KEY_PERSON":
+        return `/key-people/${entityId}`;
+
+      default:
+        return `/big-rocks`;
+    }
+  } catch {
+    return `/big-rocks`;
+  }
+}

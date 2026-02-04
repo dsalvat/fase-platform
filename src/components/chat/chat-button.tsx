@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { ChatPanel } from "./chat-panel";
-import { getCreditsRemaining } from "@/app/actions/chat";
+import { getUnreadCount, generateSystemNotification } from "@/app/actions/chat";
 
 interface ChatButtonProps {
   translations: {
@@ -22,31 +22,52 @@ interface ChatButtonProps {
 
 export function ChatButton({ translations }: ChatButtonProps) {
   const [open, setOpen] = useState(false);
-  const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [notificationGenerated, setNotificationGenerated] = useState(false);
+
+  const fetchUnreadCount = useCallback(async () => {
+    const result = await getUnreadCount();
+    if (result.success) {
+      setUnreadCount(result.count);
+    }
+  }, []);
 
   useEffect(() => {
-    // Fetch credits on mount
-    const fetchCredits = async () => {
-      const result = await getCreditsRemaining();
-      if (result.success) {
-        setCreditsRemaining(result.creditsRemaining);
+    // Fetch unread count on mount
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
+
+  const handleOpenChange = async (newOpen: boolean) => {
+    if (newOpen && !notificationGenerated) {
+      // Generate system notification when opening chat for first time
+      const result = await generateSystemNotification();
+      setNotificationGenerated(true);
+
+      if (result.success && result.hasNotification) {
+        // Refresh unread count after notification
+        fetchUnreadCount();
       }
-    };
-    fetchCredits();
-  }, []);
+    }
+    setOpen(newOpen);
+  };
+
+  const handleMessagesRead = () => {
+    // Called when messages are marked as read
+    fetchUnreadCount();
+  };
 
   return (
     <>
       {/* Floating button */}
       <Button
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-40"
         size="icon"
       >
         <MessageCircle className="h-6 w-6" />
-        {creditsRemaining !== null && (
-          <span className="absolute -top-1 -right-1 bg-blue-700 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-            {creditsRemaining}
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </Button>
@@ -54,8 +75,9 @@ export function ChatButton({ translations }: ChatButtonProps) {
       {/* Chat panel */}
       <ChatPanel
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(newOpen) => handleOpenChange(newOpen)}
         translations={translations}
+        onMessagesRead={handleMessagesRead}
       />
     </>
   );
