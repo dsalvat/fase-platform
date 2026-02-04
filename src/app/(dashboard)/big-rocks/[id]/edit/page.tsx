@@ -43,6 +43,7 @@ export default async function EditBigRockPage({ params }: PageProps) {
         select: {
           id: true,
           status: true,
+          progress: true,
         },
       },
       keyPeople: true,
