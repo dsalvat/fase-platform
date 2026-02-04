@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { User, LogOut, ChevronDown, Shield, Users, Activity } from "lucide-react";
+import { User, LogOut, ChevronDown, Shield, Users, Activity, Trophy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+
+interface UserApp {
+  id: string;
+  code: string;
+  name: string;
+}
 
 interface UserMenuProps {
   user: {
@@ -25,13 +31,16 @@ interface UserMenuProps {
     admin?: string;
     supervisor?: string;
     activity?: string;
+    achievements?: string;
   };
   isAdmin?: boolean;
   isSupervisor?: boolean;
   showActivity?: boolean;
+  userApps?: UserApp[];
 }
 
-export function UserMenu({ user, translations, isAdmin, isSupervisor, showActivity }: UserMenuProps) {
+export function UserMenu({ user, translations, isAdmin, isSupervisor, showActivity, userApps = [] }: UserMenuProps) {
+  const showAchievements = userApps.length > 0;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -75,6 +84,14 @@ export function UserMenu({ user, translations, isAdmin, isSupervisor, showActivi
             <Link href="/actividad" className="flex items-center gap-2 cursor-pointer">
               <Activity className="h-4 w-4" />
               {translations.activity || "Actividad"}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {showAchievements && (
+          <DropdownMenuItem asChild>
+            <Link href="/logros" className="flex items-center gap-2 cursor-pointer text-amber-600">
+              <Trophy className="h-4 w-4" />
+              {translations.achievements || "Logros"}
             </Link>
           </DropdownMenuItem>
         )}

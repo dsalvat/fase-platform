@@ -90,7 +90,7 @@ export default async function QuartersPage() {
                 <div
                   key={quarter.id}
                   className={`p-4 border rounded-lg ${
-                    quarter.isActive ? "border-green-200 bg-green-50" : ""
+                    quarter.isActive ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export default async function QuartersPage() {
                             {tQuarter(quarter.quarter)} {quarter.year}
                           </h3>
                           {quarter.isActive && (
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/50 dark:text-green-400 dark:hover:bg-green-900/50">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                               Activo
                             </Badge>

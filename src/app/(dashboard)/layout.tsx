@@ -146,7 +146,6 @@ export default async function DashboardLayout({
     objectives: tOkr("objectives"),
     teams: tOkr("teams"),
     quarters: tOkr("quarters"),
-    gamification: tOkr("gamification"),
   };
 
   return (
@@ -198,9 +197,6 @@ export default async function DashboardLayout({
                     <Link href="/calendario">
                       <Button variant="ghost">{t("calendar")}</Button>
                     </Link>
-                    <Link href="/gamificacion">
-                      <Button variant="ghost">{t("gamification")}</Button>
-                    </Link>
                   </>
                 )}
 
@@ -218,9 +214,6 @@ export default async function DashboardLayout({
                     </Link>
                     <Link href="/okr/trimestres">
                       <Button variant="ghost">{okrNavTranslations.quarters}</Button>
-                    </Link>
-                    <Link href="/okr/gamificacion">
-                      <Button variant="ghost">{okrNavTranslations.gamification}</Button>
                     </Link>
                   </>
                 )}
@@ -261,10 +254,12 @@ export default async function DashboardLayout({
                   admin: t("admin"),
                   supervisor: t("supervisor"),
                   activity: t("activity"),
+                  achievements: t("achievements"),
                 }}
                 isAdmin={isAdmin}
                 isSupervisor={isSupervisor}
                 showActivity={currentAppCode === AppType.FASE}
+                userApps={user.apps || []}
               />
             </div>
           </div>
