@@ -283,16 +283,30 @@ export default async function OKRDashboardPage() {
       {/* My Teams */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            {tTeams("title")}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {tTeams("title")}
+            </CardTitle>
+            <Link href="/okr/equipos/nuevo">
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                {tTeams("new")}
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           {userTeams.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{tTeams("noTeams")}</p>
+              <Link href="/okr/equipos/nuevo">
+                <Button variant="outline" className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {tTeams("new")}
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

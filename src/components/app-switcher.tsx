@@ -34,12 +34,13 @@ interface AppInfo {
 interface AppSwitcherProps {
   apps: AppInfo[];
   currentAppId: string | null;
+  currentAppCode?: AppType;
   translations?: {
     switchApp?: string;
   };
 }
 
-export function AppSwitcher({ apps, currentAppId, translations }: AppSwitcherProps) {
+export function AppSwitcher({ apps, currentAppId, currentAppCode, translations }: AppSwitcherProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -49,7 +50,10 @@ export function AppSwitcher({ apps, currentAppId, translations }: AppSwitcherPro
     return null;
   }
 
-  const currentApp = apps.find((app) => app.id === currentAppId);
+  // Find current app by ID first, then by code as fallback
+  const currentApp = apps.find((app) => app.id === currentAppId)
+    || (currentAppCode && apps.find((app) => app.code === currentAppCode))
+    || apps[0]; // Default to first app if nothing matches
 
   const handleSwitchApp = async (appId: string, appCode: AppType) => {
     startTransition(async () => {
@@ -93,7 +97,7 @@ export function AppSwitcher({ apps, currentAppId, translations }: AppSwitcherPro
               {APP_ICONS[app.code]}
               <span>{app.name}</span>
             </div>
-            {app.id === currentAppId && (
+            {currentApp && app.id === currentApp.id && (
               <Check className="h-4 w-4 text-green-600" />
             )}
           </DropdownMenuItem>

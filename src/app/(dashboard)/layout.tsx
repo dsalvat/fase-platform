@@ -243,6 +243,7 @@ export default async function DashboardLayout({
                 <AppSwitcher
                   apps={user.apps}
                   currentAppId={user.currentAppId || null}
+                  currentAppCode={currentAppCode}
                   translations={appTranslations}
                 />
               )}
