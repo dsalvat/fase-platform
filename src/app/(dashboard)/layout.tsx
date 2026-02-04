@@ -244,8 +244,12 @@ export default async function DashboardLayout({
 
             {/* User menu */}
             <div className="flex items-center gap-4">
-              {showAppSwitcher && (
-                <AppSwitcher translations={appTranslations} />
+              {showAppSwitcher && user.apps && (
+                <AppSwitcher
+                  apps={user.apps}
+                  currentAppId={user.currentAppId || null}
+                  translations={appTranslations}
+                />
               )}
               {showCompanySwitcher && (
                 <CompanySwitcherWrapper

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AppType } from "@prisma/client";
 import {
@@ -26,35 +25,39 @@ const APP_ROUTES: Record<AppType, string> = {
   OKR: "/okr",
 };
 
+interface AppInfo {
+  id: string;
+  code: AppType;
+  name: string;
+}
+
 interface AppSwitcherProps {
+  apps: AppInfo[];
+  currentAppId: string | null;
   translations?: {
     switchApp?: string;
   };
 }
 
-export function AppSwitcher({ translations }: AppSwitcherProps) {
-  const { data: session, update } = useSession();
+export function AppSwitcher({ apps, currentAppId, translations }: AppSwitcherProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
   // Don't render if user has only one app or no apps
-  if (!session?.user?.apps || session.user.apps.length <= 1) {
+  if (!apps || apps.length <= 1) {
     return null;
   }
 
-  const currentApp = session.user.apps.find(
-    (app) => app.id === session.user.currentAppId
-  );
+  const currentApp = apps.find((app) => app.id === currentAppId);
 
   const handleSwitchApp = async (appId: string, appCode: AppType) => {
     startTransition(async () => {
       const result = await switchCurrentApp(appId);
       if (result.success) {
-        // Update session
-        await update({ currentAppId: appId });
-        // Navigate to the app's main page
+        // Navigate to the app's main page and refresh to get new session data
         router.push(APP_ROUTES[appCode]);
+        router.refresh();
       }
       setOpen(false);
     });
@@ -79,7 +82,7 @@ export function AppSwitcher({ translations }: AppSwitcherProps) {
           {translations?.switchApp || "Cambiar aplicación"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {session.user.apps.map((app) => (
+        {apps.map((app) => (
           <DropdownMenuItem
             key={app.id}
             onClick={() => handleSwitchApp(app.id, app.code)}
@@ -90,7 +93,7 @@ export function AppSwitcher({ translations }: AppSwitcherProps) {
               {APP_ICONS[app.code]}
               <span>{app.name}</span>
             </div>
-            {app.id === session.user.currentAppId && (
+            {app.id === currentAppId && (
               <Check className="h-4 w-4 text-green-600" />
             )}
           </DropdownMenuItem>
