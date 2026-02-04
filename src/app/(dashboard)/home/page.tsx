@@ -37,6 +37,7 @@ async function getUserBigRocks(userId: string, month: string) {
         select: {
           id: true,
           status: true,
+          progress: true,
         },
       },
       _count: {
