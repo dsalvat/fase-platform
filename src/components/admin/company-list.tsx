@@ -49,39 +49,39 @@ export function CompanyList({ companies, translations: t }: CompanyListProps) {
   if (companies.length === 0) {
     return (
       <div className="text-center py-12">
-        <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">{t.noResults}</p>
+        <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <p className="text-muted-foreground">{t.noResults}</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="bg-white rounded-lg border overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-lg border dark:border-gray-800 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {t.name}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {t.slug}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {t.users}
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {/* Actions */}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
             {companies.map((company) => (
-              <tr key={company.id} className="hover:bg-gray-50">
+              <tr key={company.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     {company.logo ? (
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border">
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border dark:border-gray-700">
                         <Image
                           src={company.logo}
                           alt={company.name}
@@ -90,20 +90,20 @@ export function CompanyList({ companies, translations: t }: CompanyListProps) {
                         />
                       </div>
                     ) : (
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Building2 className="w-5 h-5 text-blue-700" />
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                        <Building2 className="w-5 h-5 text-blue-700 dark:text-blue-400" />
                       </div>
                     )}
-                    <span className="font-medium text-gray-900">{company.name}</span>
+                    <span className="font-medium text-foreground">{company.name}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <code className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                  <code className="text-sm text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                     {company.slug}
                   </code>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-1 text-gray-600">
+                  <div className="flex items-center gap-1 text-muted-foreground">
                     <Users className="w-4 h-4" />
                     <span>{company._count.userCompanies}</span>
                   </div>
@@ -122,7 +122,7 @@ export function CompanyList({ companies, translations: t }: CompanyListProps) {
                       size="sm"
                       onClick={() => handleDelete(company.id)}
                       disabled={deletingId === company.id || company._count.userCompanies > 0}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

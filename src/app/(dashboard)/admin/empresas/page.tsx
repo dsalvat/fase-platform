@@ -56,8 +56,8 @@ export default async function AdminEmpresasPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Building2 className="w-6 h-6 text-blue-700" />
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+            <Building2 className="w-6 h-6 text-blue-700 dark:text-blue-400" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
@@ -89,13 +89,13 @@ function StatCard({
   color: "blue" | "green";
 }) {
   const colors = {
-    blue: "bg-blue-50 border-blue-200",
-    green: "bg-green-50 border-green-200",
+    blue: "bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800",
+    green: "bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800",
   };
 
   return (
     <div className={`p-4 rounded-lg border ${colors[color]}`}>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
       <p className="text-sm text-muted-foreground">{label}</p>
     </div>
   );
