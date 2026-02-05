@@ -40,23 +40,23 @@ export interface PaginatedUsers {
 export const roleConfig: Record<UserRole, { label: string; color: string; bgColor: string }> = {
   USER: {
     label: "Usuario",
-    color: "text-gray-700",
-    bgColor: "bg-gray-100",
+    color: "text-gray-700 dark:text-gray-300",
+    bgColor: "bg-gray-100 dark:bg-gray-800",
   },
   SUPERVISOR: {
     label: "Supervisor",
-    color: "text-blue-700",
-    bgColor: "bg-blue-100",
+    color: "text-blue-700 dark:text-blue-300",
+    bgColor: "bg-blue-100 dark:bg-blue-900/50",
   },
   ADMIN: {
     label: "Administrador",
-    color: "text-purple-700",
-    bgColor: "bg-purple-100",
+    color: "text-purple-700 dark:text-purple-300",
+    bgColor: "bg-purple-100 dark:bg-purple-900/50",
   },
   SUPERADMIN: {
     label: "Super Admin",
-    color: "text-red-700",
-    bgColor: "bg-red-100",
+    color: "text-red-700 dark:text-red-300",
+    bgColor: "bg-red-100 dark:bg-red-900/50",
   },
 };
 
@@ -66,17 +66,17 @@ export const roleConfig: Record<UserRole, { label: string; color: string; bgColo
 export const statusConfig: Record<UserStatus, { label: string; color: string; bgColor: string }> = {
   INVITED: {
     label: "Invitado",
-    color: "text-amber-700",
-    bgColor: "bg-amber-100",
+    color: "text-amber-700 dark:text-amber-300",
+    bgColor: "bg-amber-100 dark:bg-amber-900/50",
   },
   ACTIVE: {
     label: "Activo",
-    color: "text-green-700",
-    bgColor: "bg-green-100",
+    color: "text-green-700 dark:text-green-300",
+    bgColor: "bg-green-100 dark:bg-green-900/50",
   },
   DEACTIVATED: {
     label: "Desactivado",
-    color: "text-red-700",
-    bgColor: "bg-red-100",
+    color: "text-red-700 dark:text-red-300",
+    bgColor: "bg-red-100 dark:bg-red-900/50",
   },
 };

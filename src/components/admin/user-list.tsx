@@ -119,24 +119,24 @@ export function UserList({
   return (
     <div className="space-y-4">
       {/* Filter controls */}
-      <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-        <Filter className="h-4 w-4 text-gray-500" />
+      <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <Filter className="h-4 w-4 text-muted-foreground" />
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"
             checked={hideDeactivated}
             onChange={(e) => setHideDeactivated(e.target.checked)}
-            className="rounded border-gray-300"
+            className="rounded border-gray-300 dark:border-gray-600"
           />
           <span>{t.hideDeactivated}</span>
         </label>
-        <span className="text-sm text-gray-500 ml-auto">
+        <span className="text-sm text-muted-foreground ml-auto">
           {formatShowingUsers(t.showingUsersTemplate, filteredUsers.length, users.length)}
         </span>
       </div>
 
       {filteredUsers.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           {t.noResults}
         </div>
       ) : (
@@ -186,7 +186,7 @@ function UserCard({
 
   return (
     <Card className={cn(
-      isCurrentUser && "border-blue-300 bg-blue-50/30",
+      isCurrentUser && "border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20",
       user.status === UserStatus.DEACTIVATED && "opacity-60"
     )}>
       <CardContent className="p-4">
@@ -202,14 +202,14 @@ function UserCard({
                 className="rounded-full"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="w-6 h-6 text-gray-500" />
+              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               </div>
             )}
             {/* Status indicator dot */}
             <span
               className={cn(
-                "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white",
+                "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900",
                 user.status === UserStatus.ACTIVE && "bg-green-500",
                 user.status === UserStatus.INVITED && "bg-amber-500",
                 user.status === UserStatus.DEACTIVATED && "bg-red-500"
@@ -221,16 +221,16 @@ function UserCard({
           {/* User Info */}
           <div className="flex-grow min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-gray-900 truncate">
+              <h3 className="font-semibold text-foreground truncate">
                 {user.name || t.noName}
               </h3>
               {isCurrentUser && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
                   {t.you}
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-600 truncate">{user.email}</p>
+            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
 
             <div className="flex flex-wrap items-center gap-2 mt-2">
               {/* Role badge */}
@@ -258,7 +258,7 @@ function UserCard({
 
               {/* Company badge */}
               {user.company && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                   {user.company.logo ? (
                     <div className="relative w-3 h-3 rounded overflow-hidden">
                       <Image
@@ -277,14 +277,14 @@ function UserCard({
 
               {/* Supervisor info */}
               {user.supervisor && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {t.supervisor}: {user.supervisor.name || user.supervisor.email}
                 </span>
               )}
 
               {/* Supervisees count */}
               {user._count.supervisees > 0 && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {user._count.supervisees} supervisado(s)
                 </span>
               )}
@@ -318,7 +318,7 @@ function UserCard({
             )}>
               {/* Role selector */}
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label className="block text-sm font-medium text-foreground mb-1">
                   {t.role}
                 </Label>
                 <UserRoleSelect
@@ -327,7 +327,7 @@ function UserCard({
                   disabled={isCurrentUser}
                 />
                 {isCurrentUser && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {t.cannotChangeOwnRole}
                   </p>
                 )}
@@ -335,7 +335,7 @@ function UserCard({
 
               {/* Status selector */}
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label className="block text-sm font-medium text-foreground mb-1">
                   {t.status}
                 </Label>
                 <UserStatusSelect
@@ -344,7 +344,7 @@ function UserCard({
                   disabled={isCurrentUser}
                 />
                 {isCurrentUser && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {t.cannotChangeOwnStatus}
                   </p>
                 )}
@@ -352,7 +352,7 @@ function UserCard({
 
               {/* Supervisor selector */}
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label className="block text-sm font-medium text-foreground mb-1">
                   {t.supervisor}
                 </Label>
                 <UserSupervisorSelect
@@ -365,7 +365,7 @@ function UserCard({
               {/* Company selector (only for SUPERADMIN) */}
               {isSuperAdmin && (
                 <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label className="block text-sm font-medium text-foreground mb-1">
                     {t.company}
                   </Label>
                   <UserCompanySelect
@@ -384,7 +384,7 @@ function UserCard({
             {/* Apps selector */}
             {apps.length > 0 && (
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Label className="block text-sm font-medium text-foreground mb-1">
                   {t.apps}
                 </Label>
                 <UserAppSelect
@@ -399,7 +399,7 @@ function UserCard({
               </div>
             )}
 
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-muted-foreground">
               {t.registeredOn} {new Date(user.createdAt).toLocaleDateString()}
             </div>
           </div>

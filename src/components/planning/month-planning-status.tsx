@@ -96,23 +96,23 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
   // Already confirmed
   if (status.isPlanningConfirmed) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+      <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-green-600" />
+            <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
             <div>
-              <p className="text-sm font-medium text-green-800">
+              <p className="text-sm font-medium text-green-800 dark:text-green-300">
                 {t.confirmed}
               </p>
               {status.planningConfirmedAt && (
-                <p className="text-xs text-green-600">
+                <p className="text-xs text-green-600 dark:text-green-400">
                   {t.planningConfirmedOn.replace("__DATE__", new Date(status.planningConfirmedAt).toLocaleDateString())}
                 </p>
               )}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-green-700">
+            <div className="text-sm text-green-700 dark:text-green-300">
               {status.confirmedBigRocks}/{status.totalBigRocks} Big Rocks
             </div>
             {canUnconfirm && (
@@ -121,7 +121,7 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="border-red-400 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/50 dark:hover:text-red-300"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
                     {t.unconfirmPlanning || "Desconfirmar"}

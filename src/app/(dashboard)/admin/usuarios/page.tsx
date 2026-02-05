@@ -171,8 +171,8 @@ export default async function AdminUsuariosPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Shield className="w-6 h-6 text-purple-700" />
+          <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+            <Shield className="w-6 h-6 text-purple-700 dark:text-purple-400" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
@@ -237,18 +237,18 @@ function StatCard({
   color: "gray" | "purple" | "blue" | "green" | "amber" | "emerald" | "red";
 }) {
   const colors = {
-    gray: "bg-gray-50 border-gray-200",
-    purple: "bg-purple-50 border-purple-200",
-    blue: "bg-blue-50 border-blue-200",
-    green: "bg-green-50 border-green-200",
-    amber: "bg-amber-50 border-amber-200",
-    emerald: "bg-emerald-50 border-emerald-200",
-    red: "bg-red-50 border-red-200",
+    gray: "bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700",
+    purple: "bg-purple-50 border-purple-200 dark:bg-purple-900/30 dark:border-purple-800",
+    blue: "bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800",
+    green: "bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800",
+    amber: "bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800",
+    emerald: "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/30 dark:border-emerald-800",
+    red: "bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800",
   };
 
   return (
     <div className={`p-4 rounded-lg border ${colors[color]}`}>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
       <p className="text-sm text-muted-foreground">{label}</p>
     </div>
   );
