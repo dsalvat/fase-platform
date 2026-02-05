@@ -54,20 +54,20 @@ export interface TARStats {
 export const tarStatusConfig = {
   PENDIENTE: {
     label: "Pendiente",
-    color: "text-gray-500",
-    bgColor: "bg-gray-100",
-    borderColor: "border-gray-300",
+    color: "text-gray-600 dark:text-gray-300",
+    bgColor: "bg-gray-100 dark:bg-gray-800",
+    borderColor: "border-gray-300 dark:border-gray-600",
   },
   EN_PROGRESO: {
     label: "En Progreso",
-    color: "text-blue-500",
-    bgColor: "bg-blue-100",
-    borderColor: "border-blue-300",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-100 dark:bg-blue-900/50",
+    borderColor: "border-blue-300 dark:border-blue-700",
   },
   COMPLETADA: {
     label: "Completada",
-    color: "text-green-500",
-    bgColor: "bg-green-100",
-    borderColor: "border-green-300",
+    color: "text-green-600 dark:text-green-400",
+    bgColor: "bg-green-100 dark:bg-green-900/50",
+    borderColor: "border-green-300 dark:border-green-700",
   },
 } as const;

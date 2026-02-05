@@ -165,9 +165,9 @@ export default async function BigRockDetailPage({ params }: PageProps) {
 
       {/* Confirmed banner */}
       {isConfirmed && (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-green-600" />
-          <p className="text-sm text-green-800">
+        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3 flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <p className="text-sm text-green-800 dark:text-green-300">
             <strong>Big Rock confirmado.</strong> Solo puedes gestionar TARs, Reuniones Clave y Personas Clave.
           </p>
         </div>
@@ -175,8 +175,8 @@ export default async function BigRockDetailPage({ params }: PageProps) {
 
       {/* Read-only banner */}
       {isReadOnly && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-3">
+          <p className="text-sm text-yellow-800 dark:text-yellow-300">
             Este Big Rock es de un mes pasado y no puede ser editado.
           </p>
         </div>
@@ -284,11 +284,11 @@ export default async function BigRockDetailPage({ params }: PageProps) {
               )}
 
               {bigRock.aiRisks && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm font-medium text-red-800 mb-1">
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                  <p className="text-sm font-medium text-red-800 dark:text-red-300 mb-1">
                     Alertas de Riesgo
                   </p>
-                  <p className="text-sm text-red-700">{bigRock.aiRisks}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">{bigRock.aiRisks}</p>
                 </div>
               )}
             </div>
@@ -405,7 +405,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
               {bigRock.keyPeople.map((keyPerson) => (
                 <div
                   key={keyPerson.id}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm"
                 >
                   {keyPerson.user.image ? (
                     <Image
@@ -420,7 +420,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
                   )}
                   <span>{keyPerson.user.name || keyPerson.user.email}</span>
                   {keyPerson.role && (
-                    <span className="text-xs text-blue-500">({keyPerson.role})</span>
+                    <span className="text-xs text-blue-500 dark:text-blue-400">({keyPerson.role})</span>
                   )}
                 </div>
               ))}

@@ -32,15 +32,15 @@ export function TARCard({
     >
       <Card
         className={cn(
-          "transition-all hover:shadow-md hover:border-blue-300",
-          isReadOnly && "opacity-75 bg-gray-50",
-          !canEdit && "border-gray-300"
+          "transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700",
+          isReadOnly && "opacity-75 bg-gray-50 dark:bg-gray-800/50",
+          !canEdit && "border-gray-300 dark:border-gray-700"
         )}
       >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <p className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {tar.description}
               </p>
 
@@ -58,10 +58,10 @@ export function TARCard({
 
             {/* Progress indicator */}
             <div className="flex-shrink-0 text-right">
-              <div className="text-lg font-semibold text-gray-900">
+              <div className="text-lg font-semibold text-foreground">
                 {tar.progress}%
               </div>
-              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+              <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
                 <div
                   className={cn(
                     "h-full transition-all",
