@@ -104,17 +104,17 @@ export default async function OKRDashboardPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("dashboard")}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t("dashboard")}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             {activeQuarter
               ? `Q${currentQuarter} ${currentYear}`
               : "Sin trimestre activo"}
           </p>
         </div>
         <Link href="/okr/objetivos/nuevo">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             {t("newObjective")}
           </Button>
@@ -122,16 +122,16 @@ export default async function OKRDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Target className="h-6 w-6 text-blue-600" />
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{totalObjectives}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{totalObjectives}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {t("objectives")}
                 </p>
               </div>
@@ -140,28 +140,28 @@ export default async function OKRDashboardPage() {
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/30 rounded-lg shrink-0">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{avgProgress}%</p>
-                <p className="text-sm text-muted-foreground">{t("progress")}</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{avgProgress}%</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{t("progress")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600" />
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg shrink-0">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{userTeams.length}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{userTeams.length}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {tTeams("title")}
                 </p>
               </div>
@@ -170,16 +170,16 @@ export default async function OKRDashboardPage() {
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-amber-600" />
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg shrink-0">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 dark:text-amber-400" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">
                   {completedObjectives}/{totalObjectives}
                 </p>
-                <p className="text-sm text-muted-foreground">Completados</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Completados</p>
               </div>
             </div>
           </CardContent>

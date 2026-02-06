@@ -163,34 +163,34 @@ export default async function HomePage() {
     <div className="space-y-8">
       {/* My Big Rocks Section */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Target className="w-5 h-5 text-blue-700" />
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
+              <Target className="w-5 h-5 text-blue-700 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">{t("myBigRocks")}</h2>
-              <p className="text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
+              <h2 className="text-lg sm:text-xl font-bold text-foreground">{t("myBigRocks")}</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {planningConfirmed ? (
               <Badge variant="outline" className="text-muted-foreground">
                 <Lock className="h-3 w-3 mr-1" />
-                {t("confirmed")}
+                <span className="hidden sm:inline">{t("confirmed")}</span>
               </Badge>
             ) : (
               <Link href={`/big-rocks/new?month=${currentMonth}`}>
                 <Button size="sm">
-                  <Plus className="h-4 w-4 mr-1" />
-                  {tBigRocks("new")}
+                  <Plus className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{tBigRocks("new")}</span>
                 </Button>
               </Link>
             )}
             <Link href="/big-rocks">
               <Button variant="outline" size="sm">
-                {t("viewAll")}
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <span className="hidden sm:inline">{t("viewAll")}</span>
+                <ArrowRight className="h-4 w-4 sm:ml-1" />
               </Button>
             </Link>
           </div>
@@ -223,20 +223,20 @@ export default async function HomePage() {
       {/* Supervisees Section */}
       {isSupervisor && (
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <Users className="w-5 h-5 text-teal-700" />
+              <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg shrink-0">
+                <Users className="w-5 h-5 text-teal-700 dark:text-teal-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-foreground">{t("superviseesBigRocks")}</h2>
-                <p className="text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground">{t("superviseesBigRocks")}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
               </div>
             </div>
             <Link href="/supervisor">
               <Button variant="outline" size="sm">
-                {t("viewAll")}
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <span className="hidden sm:inline">{t("viewAll")}</span>
+                <ArrowRight className="h-4 w-4 sm:ml-1" />
               </Button>
             </Link>
           </div>
@@ -283,21 +283,21 @@ export default async function HomePage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {/* Status */}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <Badge
                           className={allConfirmed
-                            ? "bg-green-100 text-green-800 hover:bg-green-100"
-                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                            ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400"
                           }
                         >
                           {allConfirmed ? (
-                            <><CheckCircle className="h-3 w-3 mr-1" /> {t("confirmed")}</>
+                            <><CheckCircle className="h-3 w-3 mr-1" /> <span className="hidden sm:inline">{t("confirmed")}</span></>
                           ) : (
-                            <><Clock className="h-3 w-3 mr-1" /> {t("inProgress")}</>
+                            <><Clock className="h-3 w-3 mr-1" /> <span className="hidden sm:inline">{t("inProgress")}</span></>
                           )}
                         </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {confirmedCount}/{totalCount} Big Rocks
+                        <span className="text-xs sm:text-sm text-muted-foreground">
+                          {confirmedCount}/{totalCount} <span className="hidden sm:inline">Big Rocks</span>
                         </span>
                       </div>
 
@@ -343,20 +343,20 @@ export default async function HomePage() {
       {/* All Users Section - Only for Admins */}
       {isAdmin && (
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg shrink-0">
                 <UsersRound className="w-5 h-5 text-purple-700 dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-foreground">{t("allUsersBigRocks")}</h2>
-                <p className="text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground">{t("allUsersBigRocks")}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">{formatMonthLabel(currentMonth)}</p>
               </div>
             </div>
             <Link href="/admin/usuarios">
               <Button variant="outline" size="sm">
-                {t("viewAll")}
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <span className="hidden sm:inline">{t("viewAll")}</span>
+                <ArrowRight className="h-4 w-4 sm:ml-1" />
               </Button>
             </Link>
           </div>

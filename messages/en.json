@@ -34,6 +34,8 @@
     "errorDeactivated": "Your account has been deactivated. Contact the administrator for more information."
   },
   "nav": {
+    "menu": "Menu",
+    "home": "Home",
     "bigRocks": "Big Rocks",
     "keyPeople": "Key People",
     "calendar": "Calendar",

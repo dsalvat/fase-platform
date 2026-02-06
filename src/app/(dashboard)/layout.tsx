@@ -14,6 +14,7 @@ import { OnboardingProvider } from "@/components/onboarding";
 import { ChatButton } from "@/components/chat";
 import { AppSwitcher } from "@/components/app-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MobileNav } from "@/components/mobile-nav";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole, AppType } from "@prisma/client";
@@ -163,6 +164,25 @@ export default async function DashboardLayout({
       <nav className="bg-card border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
+            {/* Mobile menu button */}
+            <MobileNav
+              currentAppCode={currentAppCode}
+              translations={{
+                menu: t("menu"),
+                home: t("home"),
+                bigRocks: t("bigRocks"),
+                calendar: t("calendar"),
+                dashboard: okrNavTranslations.dashboard,
+                objectives: okrNavTranslations.objectives,
+                teams: okrNavTranslations.teams,
+                quarters: okrNavTranslations.quarters,
+              }}
+              isAdmin={isAdmin}
+              isSupervisor={isSupervisor}
+              adminLabel={t("admin")}
+              supervisorLabel={t("supervisor")}
+            />
+
             {/* Logo and main nav */}
             <div className="flex items-center gap-8">
               <Link href="/home" className="flex items-center gap-2">

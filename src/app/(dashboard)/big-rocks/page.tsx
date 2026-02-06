@@ -66,8 +66,8 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             {t("subtitle")}
           </p>
         </div>
@@ -96,10 +96,10 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         )}
 
         {isReadOnly && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-3 sm:px-4 py-2 sm:py-3">
             <div className="flex items-center gap-2">
               <svg
-                className="h-5 w-5 text-yellow-600"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 dark:text-yellow-500 shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -112,10 +112,10 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
                 />
               </svg>
               <div>
-                <p className="text-sm font-medium text-yellow-800">
+                <p className="text-xs sm:text-sm font-medium text-yellow-800 dark:text-yellow-200">
                   {t("readOnlyMonth")}
                 </p>
-                <p className="text-xs text-yellow-700">
+                <p className="text-xs text-yellow-700 dark:text-yellow-300">
                   {t("readOnlyMonthDesc")}
                 </p>
               </div>

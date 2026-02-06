@@ -34,6 +34,8 @@
     "errorDeactivated": "Tu cuenta ha sido desactivada. Contacta al administrador para mas informacion."
   },
   "nav": {
+    "menu": "Menu",
+    "home": "Inicio",
     "bigRocks": "Big Rocks",
     "keyPeople": "Personas Clave",
     "calendar": "Calendario",

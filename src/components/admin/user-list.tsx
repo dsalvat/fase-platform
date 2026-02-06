@@ -119,18 +119,20 @@ export function UserList({
   return (
     <div className="space-y-4">
       {/* Filter controls */}
-      <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={hideDeactivated}
-            onChange={(e) => setHideDeactivated(e.target.checked)}
-            className="rounded border-gray-300 dark:border-gray-600"
-          />
-          <span>{t.hideDeactivated}</span>
-        </label>
-        <span className="text-sm text-muted-foreground ml-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hideDeactivated}
+              onChange={(e) => setHideDeactivated(e.target.checked)}
+              className="rounded border-gray-300 dark:border-gray-600"
+            />
+            <span>{t.hideDeactivated}</span>
+          </label>
+        </div>
+        <span className="text-xs sm:text-sm text-muted-foreground sm:ml-auto">
           {formatShowingUsers(t.showingUsersTemplate, filteredUsers.length, users.length)}
         </span>
       </div>
@@ -189,10 +191,12 @@ function UserCard({
       isCurrentUser && "border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20",
       user.status === UserStatus.DEACTIVATED && "opacity-60"
     )}>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+          {/* Avatar and basic info row on mobile */}
+          <div className="flex items-start gap-3 sm:contents">
           {/* Avatar */}
-          <div className="flex-shrink-0 relative">
+          <div className="shrink-0 relative">
             {user.image ? (
               <Image
                 src={user.image}
@@ -221,34 +225,34 @@ function UserCard({
           {/* User Info */}
           <div className="flex-grow min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-foreground truncate">
+              <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">
                 {user.name || t.noName}
               </h3>
               {isCurrentUser && (
-                <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
+                <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded shrink-0">
                   {t.you}
                 </span>
               )}
             </div>
-            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{user.email}</p>
 
-            <div className="flex flex-wrap items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
               {/* Role badge */}
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
+                  "inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium",
                   roleInfo.bgColor,
                   roleInfo.color
                 )}
               >
                 <RoleIcon className="w-3 h-3" />
-                {roleInfo.label}
+                <span className="hidden sm:inline">{roleInfo.label}</span>
               </span>
 
               {/* Status badge */}
               <span
                 className={cn(
-                  "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium",
+                  "inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium",
                   statusInfo.bgColor,
                   statusInfo.color
                 )}
@@ -256,9 +260,9 @@ function UserCard({
                 {statusInfo.label}
               </span>
 
-              {/* Company badge */}
+              {/* Company badge - hidden on mobile */}
               {user.company && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                   {user.company.logo ? (
                     <div className="relative w-3 h-3 rounded overflow-hidden">
                       <Image
@@ -275,34 +279,36 @@ function UserCard({
                 </span>
               )}
 
-              {/* Supervisor info */}
+              {/* Supervisor info - hidden on mobile */}
               {user.supervisor && (
-                <span className="text-xs text-muted-foreground">
+                <span className="hidden sm:inline text-xs text-muted-foreground">
                   {t.supervisor}: {user.supervisor.name || user.supervisor.email}
                 </span>
               )}
 
-              {/* Supervisees count */}
+              {/* Supervisees count - hidden on mobile */}
               {user._count.supervisees > 0 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="hidden sm:inline text-xs text-muted-foreground">
                   {user._count.supervisees} supervisado(s)
                 </span>
               )}
             </div>
           </div>
+          </div>
 
-          {/* Actions */}
-          <div className="flex-shrink-0 flex items-center gap-2">
-            <Link href={`/supervisor/${user.id}/${getCurrentMonth()}`}>
-              <Button variant="outline" size="sm">
-                <Target className="h-4 w-4 mr-1" />
-                {t.viewBigRocks}
+          {/* Actions - full width on mobile */}
+          <div className="flex items-center gap-2 mt-2 sm:mt-0 sm:shrink-0">
+            <Link href={`/supervisor/${user.id}/${getCurrentMonth()}`} className="flex-1 sm:flex-initial">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Target className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{t.viewBigRocks}</span>
               </Button>
             </Link>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              className="flex-1 sm:flex-initial"
             >
               {isExpanded ? t.close : t.edit}
             </Button>
@@ -313,8 +319,8 @@ function UserCard({
         {isExpanded && (
           <div className="mt-4 pt-4 border-t space-y-4">
             <div className={cn(
-              "grid gap-4",
-              isSuperAdmin ? "sm:grid-cols-4" : "sm:grid-cols-3"
+              "grid gap-3 sm:gap-4",
+              isSuperAdmin ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"
             )}>
               {/* Role selector */}
               <div>
