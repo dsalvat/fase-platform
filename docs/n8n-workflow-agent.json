@@ -1,0 +1,586 @@
+{
+  "name": "FASE Agent - Chat Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fase-agent-chat",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "fase-agent-chat"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "openai-chat",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [500, 500]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 16000
+      },
+      "id": "window-memory",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [700, 500]
+    },
+    {
+      "parameters": {
+        "name": "get_user_profile",
+        "description": "Get the current user's profile including their available apps (FASE, OKR), teams, and planning status. Always call this first to understand what the user can access.",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/common/profile",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "parameters": []
+        }
+      },
+      "id": "tool-get-profile",
+      "name": "Get User Profile",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [300, 500]
+    },
+    {
+      "parameters": {
+        "name": "list_big_rocks",
+        "description": "List the user's Big Rocks (monthly objectives in FASE methodology). Can filter by month (YYYY-MM format) or status (CREADO, CONFIRMADO). Use this to see what objectives the user has.",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/fase/big-rocks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "month",
+              "value": "={{ $fromAI('month', 'Optional: Filter by month in YYYY-MM format', 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "tool-list-big-rocks",
+      "name": "List Big Rocks",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [300, 600]
+    },
+    {
+      "parameters": {
+        "name": "create_big_rock",
+        "description": "Create a new Big Rock (monthly objective) for the user. Requires title and month. Optionally accepts description, indicator (success metric), numTars (number of tasks), keyPeople (array of {name}), and keyMeetings (array of {title, date?, objective?}).",
+        "method": "POST",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/fase/big-rocks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $fromAI('title', 'Title of the Big Rock objective', 'string'), month: $fromAI('month', 'Month in YYYY-MM format', 'string'), description: $fromAI('description', 'Optional description of the objective', 'string'), indicator: $fromAI('indicator', 'Optional success metric/indicator', 'string'), numTars: $fromAI('numTars', 'Optional number of TARs (default 3)', 'number'), keyPeople: $fromAI('keyPeople', 'Optional array of key people objects with name field', 'json'), keyMeetings: $fromAI('keyMeetings', 'Optional array of key meeting objects with title and optional date/objective', 'json') }) }}"
+      },
+      "id": "tool-create-big-rock",
+      "name": "Create Big Rock",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [300, 700]
+    },
+    {
+      "parameters": {
+        "name": "list_tars",
+        "description": "List TARs (Tareas de Alto Rendimiento / High-Performance Tasks) associated with Big Rocks. Can filter by bigRockId, month, or status (PENDIENTE, EN_PROGRESO, COMPLETADA).",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/fase/tars",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "bigRockId",
+              "value": "={{ $fromAI('bigRockId', 'Optional: Filter by Big Rock ID', 'string') }}"
+            },
+            {
+              "name": "month",
+              "value": "={{ $fromAI('month', 'Optional: Filter by month', 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "tool-list-tars",
+      "name": "List TARs",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [300, 800]
+    },
+    {
+      "parameters": {
+        "name": "create_tar",
+        "description": "Create a new TAR (High-Performance Task) for a Big Rock. Requires bigRockId and description.",
+        "method": "POST",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/fase/tars",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ bigRockId: $fromAI('bigRockId', 'ID of the Big Rock to add TAR to', 'string'), description: $fromAI('description', 'Description of the TAR', 'string') }) }}"
+      },
+      "id": "tool-create-tar",
+      "name": "Create TAR",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [300, 900]
+    },
+    {
+      "parameters": {
+        "name": "update_tar_progress",
+        "description": "Update a TAR's progress or status. Provide the TAR ID and optionally progress (0-100) and/or status (PENDIENTE, EN_PROGRESO, COMPLETADA).",
+        "method": "PATCH",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/fase/tars/{{ $fromAI('tarId', 'ID of the TAR to update', 'string') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ progress: $fromAI('progress', 'Optional: Progress percentage 0-100', 'number'), status: $fromAI('status', 'Optional: PENDIENTE, EN_PROGRESO, or COMPLETADA', 'string') }) }}"
+      },
+      "id": "tool-update-tar",
+      "name": "Update TAR Progress",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [500, 900]
+    },
+    {
+      "parameters": {
+        "name": "get_planning_status",
+        "description": "Get the planning status for a specific month. Shows Big Rocks count, TARs progress, and whether planning is confirmed. Defaults to current month if not specified.",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/common/planning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "month",
+              "value": "={{ $fromAI('month', 'Optional: Month in YYYY-MM format', 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "tool-planning-status",
+      "name": "Get Planning Status",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [500, 600]
+    },
+    {
+      "parameters": {
+        "name": "list_okr_teams",
+        "description": "List the user's OKR teams. Shows team membership, role, objectives count, and progress.",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/okr/teams",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        }
+      },
+      "id": "tool-list-teams",
+      "name": "List OKR Teams",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [700, 600]
+    },
+    {
+      "parameters": {
+        "name": "list_okr_objectives",
+        "description": "List OKR objectives. Can filter by teamId, quarterId, or status (DRAFT, ACTIVE, COMPLETED, CANCELLED). Shows objectives with their key results.",
+        "method": "GET",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/okr/objectives",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "teamId",
+              "value": "={{ $fromAI('teamId', 'Optional: Filter by team ID', 'string') }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $fromAI('status', 'Optional: DRAFT, ACTIVE, COMPLETED, or CANCELLED', 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "tool-list-objectives",
+      "name": "List OKR Objectives",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [700, 700]
+    },
+    {
+      "parameters": {
+        "name": "create_okr_objective",
+        "description": "Create a new OKR objective. Requires teamId and title. Optionally accepts description and keyResults array (each with title, targetValue, startValue, unit).",
+        "method": "POST",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/okr/objectives",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ teamId: $fromAI('teamId', 'ID of the team for this objective', 'string'), title: $fromAI('title', 'Title of the objective', 'string'), description: $fromAI('description', 'Optional description', 'string'), keyResults: $fromAI('keyResults', 'Optional array of key results with title, targetValue, startValue, unit', 'json') }) }}"
+      },
+      "id": "tool-create-objective",
+      "name": "Create OKR Objective",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [700, 800]
+    },
+    {
+      "parameters": {
+        "name": "update_key_result",
+        "description": "Update a Key Result's current value and optionally add a comment. Provide the keyResultId and currentValue.",
+        "method": "PATCH",
+        "url": "={{ $env.FASE_API_URL }}/api/agent/okr/key-results/{{ $fromAI('keyResultId', 'ID of the Key Result to update', 'string') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-user-id",
+              "value": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ currentValue: $fromAI('currentValue', 'New current value for the KR', 'number'), comment: $fromAI('comment', 'Optional comment for this update', 'string') }) }}"
+      },
+      "id": "tool-update-kr",
+      "name": "Update Key Result",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [700, 900]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ response: $json.output, conversationId: $('Webhook').item.json.body.conversationId }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Profile": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Big Rocks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Big Rock": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List TARs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create TAR": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update TAR Progress": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Planning Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List OKR Teams": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List OKR Objectives": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create OKR Objective": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Key Result": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "tags": []
+}
