@@ -108,10 +108,10 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
         return (
           <div
             key={member.id}
-            className="flex items-center justify-between p-3 border rounded-lg"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border rounded-lg"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
                 {member.user.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -125,12 +125,12 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
                   </span>
                 )}
               </div>
-              <div>
-                <p className="font-medium">{member.user.name || "Sin nombre"}</p>
-                <p className="text-sm text-muted-foreground">{member.user.email}</p>
+              <div className="min-w-0">
+                <p className="font-medium truncate">{member.user.name || "Sin nombre"}</p>
+                <p className="text-sm text-muted-foreground truncate">{member.user.email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               {canManageMembers ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -177,7 +177,7 @@ export function TeamMemberList({ teamId, members, canManageMembers }: TeamMember
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
                       disabled={isPending && removingId === member.user.id}
                     >
                       {isPending && removingId === member.user.id ? (

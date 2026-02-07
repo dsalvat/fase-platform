@@ -27,7 +27,7 @@ import {
   markMessagesAsRead,
   deleteConversation,
 } from "@/app/actions/chat";
-import { MessageCircle, Plus, History, Trash2, ChevronDown } from "lucide-react";
+import { MessageCircle, Plus, History, Trash2, ChevronDown, X } from "lucide-react";
 
 interface Message {
   id: string;
@@ -221,18 +221,18 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col [&>button:last-child]:hidden">
         {/* Header */}
-        <SheetHeader className="p-4 border-b flex-shrink-0">
+        <SheetHeader className="pt-[max(1rem,env(safe-area-inset-top,1rem))] px-4 pb-4 border-b flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
+              <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <SheetTitle>{t.title}</SheetTitle>
               <Badge variant={noCredits ? "destructive" : "secondary"} className="text-xs">
                 {creditsRemaining}/10
               </Badge>
             </div>
-            <div className="flex items-center gap-2 mr-6">
+            <div className="flex items-center gap-2">
 
               {/* Conversation History Dropdown */}
               <DropdownMenu>
@@ -290,6 +290,15 @@ export function ChatPanel({ open, onOpenChange, translations: t, onMessagesRead 
                 title={t.newConversation}
               >
                 <Plus className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="ml-1"
+              >
+                <X className="w-4 h-4" />
+                <span className="sr-only">Close</span>
               </Button>
             </div>
           </div>
