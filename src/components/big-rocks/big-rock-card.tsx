@@ -57,7 +57,7 @@ export function BigRockCard({
   const bigRockProgress = totalTars > 0 ? Math.round(totalProgress / totalTars) : 0;
 
   return (
-    <Link href={`/big-rocks/${bigRock.id}`} className="block group">
+    <Link href={`/big-rocks/${bigRock.id}`} className="block group min-w-0">
       <Card
         className={cn(
           "relative transition-all hover:shadow-md",
