@@ -273,6 +273,7 @@ export default async function DashboardLayout({
               {/* Mobile menu button - on the RIGHT */}
               <MobileNav
                 currentAppCode={currentAppCode}
+                userApps={user.apps || []}
                 translations={{
                   menu: t("menu"),
                   home: t("home"),

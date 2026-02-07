@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 interface MobileNavProps {
   currentAppCode: AppType;
+  userApps?: { code: string }[];
   translations: {
     menu: string;
     home: string;
@@ -36,6 +37,7 @@ interface MobileNavProps {
 
 export function MobileNav({
   currentAppCode,
+  userApps,
   translations,
   isAdmin,
   isSupervisor,
@@ -58,7 +60,14 @@ export function MobileNav({
     { href: "/okr/trimestres", label: translations.quarters, icon: Calendar },
   ];
 
-  const links = currentAppCode === AppType.OKR ? okrLinks : faseLinks;
+  // Determine which app link sets to show
+  const hasFase = userApps?.some(a => a.code === AppType.FASE);
+  const hasOkr = userApps?.some(a => a.code === AppType.OKR);
+  const hasBothApps = hasFase && hasOkr;
+
+  // If no userApps provided, fall back to the old behavior (current app only)
+  const showFase = hasBothApps || (!userApps && currentAppCode === AppType.FASE) || (userApps && hasFase && !hasOkr);
+  const showOkr = hasBothApps || (!userApps && currentAppCode === AppType.OKR) || (userApps && hasOkr && !hasFase);
 
   const additionalLinks = [];
   if (isSupervisor) {
@@ -76,6 +85,29 @@ export function MobileNav({
     });
   }
 
+  const renderLinks = (links: typeof faseLinks) => {
+    return links.map((link) => {
+      const Icon = link.icon;
+      const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+      return (
+        <SheetClose asChild key={link.href}>
+          <Link
+            href={link.href}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              isActive
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted"
+            )}
+          >
+            <Icon className="h-5 w-5" />
+            {link.label}
+          </Link>
+        </SheetClose>
+      );
+    });
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -91,26 +123,27 @@ export function MobileNav({
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-2">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
-            return (
-              <SheetClose asChild key={link.href}>
-                <Link
-                  href={link.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {link.label}
-                </Link>
-              </SheetClose>
-            );
-          })}
+          {showFase && (
+            <>
+              {hasBothApps && (
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">FASE</p>
+              )}
+              {renderLinks(faseLinks)}
+            </>
+          )}
+
+          {showFase && showOkr && (
+            <div className="my-2 border-t" />
+          )}
+
+          {showOkr && (
+            <>
+              {hasBothApps && (
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">OKR</p>
+              )}
+              {renderLinks(okrLinks)}
+            </>
+          )}
 
           {additionalLinks.length > 0 && (
             <>

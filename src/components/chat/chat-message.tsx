@@ -34,7 +34,7 @@ function parseContentWithLinks(content: string): React.ReactNode[] {
       <Link
         key={`link-${match.index}`}
         href={linkUrl}
-        className="text-blue-600 hover:text-blue-800 underline font-medium"
+        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium"
       >
         {linkText}
       </Link>
@@ -117,12 +117,12 @@ export function ChatMessage({ role, messageType = "ASSISTANT", content, isLoadin
   if (isSystem) {
     return (
       <div className="p-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <Bell className="w-4 h-4 text-blue-600" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+              <Bell className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="flex-1 text-sm text-gray-800">
+            <div className="flex-1 text-sm text-gray-800 dark:text-gray-200">
               {isLoading ? (
                 <div className="flex items-center gap-1">
                   <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -150,13 +150,13 @@ export function ChatMessage({ role, messageType = "ASSISTANT", content, isLoadin
       <div
         className={cn(
           "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-          isUser ? "bg-blue-600" : "bg-gray-200"
+          isUser ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
         )}
       >
         {isUser ? (
           <User className="w-4 h-4 text-white" />
         ) : (
-          <Bot className="w-4 h-4 text-gray-600" />
+          <Bot className="w-4 h-4 text-gray-600 dark:text-gray-300" />
         )}
       </div>
 
@@ -166,7 +166,7 @@ export function ChatMessage({ role, messageType = "ASSISTANT", content, isLoadin
           "max-w-[80%] rounded-2xl px-4 py-2",
           isUser
             ? "bg-blue-600 text-white rounded-tr-sm"
-            : "bg-gray-100 text-gray-900 rounded-tl-sm"
+            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-sm"
         )}
       >
         {isLoading ? (

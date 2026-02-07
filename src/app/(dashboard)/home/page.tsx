@@ -311,7 +311,7 @@ export default async function HomePage() {
                               ) : (
                                 <Clock className="h-3 w-3 text-yellow-500 flex-shrink-0" />
                               )}
-                              <span className="truncate text-foreground/80">{br.title}</span>
+                              <span className="text-foreground/80">{br.title}</span>
                             </li>
                           ))}
                           {supervisee.bigRocks.length > 3 && (
@@ -431,7 +431,7 @@ export default async function HomePage() {
                               ) : (
                                 <Clock className="h-3 w-3 text-yellow-500 flex-shrink-0" />
                               )}
-                              <span className="truncate text-foreground/80">{br.title}</span>
+                              <span className="text-foreground/80">{br.title}</span>
                             </li>
                           ))}
                           {userItem.bigRocks.length > 3 && (
