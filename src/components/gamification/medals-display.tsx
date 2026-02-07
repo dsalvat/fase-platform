@@ -38,7 +38,7 @@ export function MedalsDisplay({ medals }: MedalsDisplayProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Completa objetivos y mantén tu racha para ganar medallas.
           </p>
         </CardContent>
@@ -77,8 +77,8 @@ function MedalBadge({ medal }: { medal: Medal }) {
       <p className={`font-semibold ${levelConfig.color}`}>
         {medalConfig.label}
       </p>
-      <p className="text-xs text-gray-600">{levelConfig.label}</p>
-      <p className="text-xs text-gray-400 mt-1">
+      <p className="text-xs text-muted-foreground">{levelConfig.label}</p>
+      <p className="text-xs text-muted-foreground/70 mt-1">
         {new Date(medal.earnedAt).toLocaleDateString("es-ES", {
           day: "numeric",
           month: "short",

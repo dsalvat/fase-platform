@@ -92,23 +92,23 @@ export const MEDAL_LEVEL_CONFIG: Record<
 > = {
   BRONCE: {
     label: "Bronce",
-    color: "text-amber-700",
-    bgColor: "bg-amber-100",
+    color: "text-amber-700 dark:text-amber-400",
+    bgColor: "bg-amber-100 dark:bg-amber-950/30",
   },
   PLATA: {
     label: "Plata",
-    color: "text-gray-500",
-    bgColor: "bg-gray-100",
+    color: "text-gray-500 dark:text-gray-400",
+    bgColor: "bg-gray-100 dark:bg-gray-800/50",
   },
   ORO: {
     label: "Oro",
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-100",
+    color: "text-yellow-600 dark:text-yellow-400",
+    bgColor: "bg-yellow-100 dark:bg-yellow-950/30",
   },
   DIAMANTE: {
     label: "Diamante",
-    color: "text-cyan-500",
-    bgColor: "bg-cyan-100",
+    color: "text-cyan-500 dark:text-cyan-400",
+    bgColor: "bg-cyan-100 dark:bg-cyan-950/30",
   },
 };
 

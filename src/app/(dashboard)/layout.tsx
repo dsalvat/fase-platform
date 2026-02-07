@@ -154,7 +154,7 @@ export default async function DashboardLayout({
       translations={onboardingTranslations}
       onboardingCompleted={onboardingCompleted}
     >
-      <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
+      <div className="min-h-screen-safe bg-background overflow-x-hidden flex flex-col">
         {/* Navigation progress indicator */}
         <Suspense fallback={null}>
           <NavigationProgress />

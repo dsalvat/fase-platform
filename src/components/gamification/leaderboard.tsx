@@ -23,7 +23,7 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Se el primero en aparecer completando actividades.
           </p>
         </CardContent>
@@ -62,7 +62,7 @@ function LeaderboardRow({
   return (
     <div
       className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
-        isCurrentUser ? "bg-blue-50 border border-blue-200" : "hover:bg-gray-50"
+        isCurrentUser ? "bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800" : "hover:bg-muted"
       }`}
     >
       {/* Rank */}
@@ -70,7 +70,7 @@ function LeaderboardRow({
         {entry.rank <= 3 ? (
           <span className="text-2xl">{getRankMedal(entry.rank)}</span>
         ) : (
-          <span className="text-lg font-bold text-gray-400">{entry.rank}</span>
+          <span className="text-lg font-bold text-muted-foreground">{entry.rank}</span>
         )}
       </div>
 
@@ -93,18 +93,18 @@ function LeaderboardRow({
         <p className="font-medium truncate">
           {entry.userName}
           {isCurrentUser && (
-            <span className="ml-2 text-xs text-blue-600">(Tu)</span>
+            <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Tu)</span>
           )}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Nivel {entry.level} - {entry.medalCount} medallas
         </p>
       </div>
 
       {/* Points */}
       <div className="text-right">
-        <p className="font-bold text-blue-600">{entry.points.toLocaleString()}</p>
-        <p className="text-xs text-gray-500">puntos</p>
+        <p className="font-bold text-blue-600 dark:text-blue-400">{entry.points.toLocaleString()}</p>
+        <p className="text-xs text-muted-foreground">puntos</p>
       </div>
     </div>
   );

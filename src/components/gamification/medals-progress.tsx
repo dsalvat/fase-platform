@@ -66,11 +66,11 @@ function MedalProgressItem({
           <span className="text-xl">{getMedalIcon(config.icon)}</span>
           <div>
             <p className="font-medium">{config.label}</p>
-            <p className="text-xs text-gray-500">{config.description}</p>
+            <p className="text-xs text-muted-foreground">{config.description}</p>
           </div>
         </div>
         {progress.completed ? (
-          <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full">
+          <span className="text-xs bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 px-2 py-1 rounded-full">
             Completado
           </span>
         ) : levelConfig ? (
@@ -83,7 +83,7 @@ function MedalProgressItem({
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               progress.completed
@@ -95,7 +95,7 @@ function MedalProgressItem({
             style={{ width: `${progress.percentage}%` }}
           />
         </div>
-        <span className="text-sm text-gray-500 min-w-[80px] text-right">
+        <span className="text-sm text-muted-foreground min-w-[80px] text-right">
           {progress.current}
           {progress.nextThreshold && ` / ${progress.nextThreshold}`}
         </span>

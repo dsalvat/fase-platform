@@ -20,29 +20,29 @@ export function StatsCard({ stats }: StatsCardProps) {
       label: "Big Rocks Creados",
       value: stats.bigRocksCreated,
       icon: "target",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-100 dark:bg-blue-950/30",
     },
     {
       label: "TARs Completadas",
       value: stats.tarsCompleted,
       icon: "check",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-100 dark:bg-green-950/30",
     },
     {
       label: "Revisiones Semanales",
       value: stats.weeklyReviews,
       icon: "calendar",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-100 dark:bg-purple-950/30",
     },
     {
       label: "Registros Diarios",
       value: stats.dailyLogs,
       icon: "edit",
-      color: "text-amber-600",
-      bgColor: "bg-amber-100",
+      color: "text-amber-600 dark:text-amber-400",
+      bgColor: "bg-amber-100 dark:bg-amber-950/30",
     },
   ];
 
@@ -61,7 +61,7 @@ export function StatsCard({ stats }: StatsCardProps) {
               <p className={`text-2xl font-bold ${item.color}`}>
                 {item.value}
               </p>
-              <p className="text-sm text-gray-600">{item.label}</p>
+              <p className="text-sm text-muted-foreground">{item.label}</p>
             </div>
           ))}
         </div>
