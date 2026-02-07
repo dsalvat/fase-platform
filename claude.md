@@ -1,679 +1,635 @@
 # Plataforma FASE
-## Plataforma de metodologia de gestio Estrategica - Ametller Origen
+## Plataforma de Gestio Estrategica - Ametller Origen
 
 ---
 
-## Índice
+## Indice
 1. [Objetivo del Sistema](#1-objetivo-del-sistema)
-2. [Conceptos Clave](#2-conceptos-clave)
-3. [Tareas de Alto Rendimiento (TAR)](#3-tareas-de-alto-rendimiento-tar)
-4. [Planificación Temporal](#4-planificación-temporal)
-5. [Personas y Reuniones Clave](#5-personas-y-reuniones-clave)
-6. [Usuarios, Autenticación y Autorización](#6-usuarios-autenticación-y-autorización)
-7. [Gestión de Calendario](#7-gestión-de-calendario)
-8. [Principios de Diseño](#8-principios-de-diseño)
-9. [Sistema de Evaluación con IA](#9-sistema-de-evaluación-con-ia)
-10. [Arquitectura Técnica](#10-arquitectura-técnica)
-11. [Sistema de Gamificación](#11-sistema-de-gamificación)
-12. [Flujo de Trabajo](#12-flujo-de-trabajo)
+2. [Aplicacion FASE](#2-aplicacion-fase)
+3. [Aplicacion OKR](#3-aplicacion-okr)
+4. [Usuarios, Autenticacion y Autorizacion](#4-usuarios-autenticacion-y-autorizacion)
+5. [Administracion](#5-administracion)
+6. [Chat IA](#6-chat-ia)
+7. [Sistema de Gamificacion](#7-sistema-de-gamificacion)
+8. [Arquitectura Tecnica](#8-arquitectura-tecnica)
+9. [Estructura del Proyecto](#9-estructura-del-proyecto)
+10. [Estado Actual y Pendientes](#10-estado-actual-y-pendientes)
 
 ---
 
 ## 1. Objetivo del Sistema
 
-La aplicación tiene como objetivo ayudar al usuario a **planificar, ejecutar y hacer seguimiento** de sus objetivos mensuales (Big Rocks).
+La plataforma es un sistema de gestion estrategica con **dos aplicaciones** independientes:
 
-### Características principales
-- **Plataforma web y móvil** para acceso multiplataforma
-- **Integración con IA** para recomendaciones y feedback en tiempo real
-- **Sistema de gamificación** para mantener la motivación
-- **Planificación estructurada** mensual, semanal y diaria
+- **FASE**: Planificacion y seguimiento de objetivos mensuales personales (Big Rocks) con ciclos semanales y diarios
+- **OKR**: Gestion de Objetivos y Resultados Clave trimestrales a nivel de equipo
 
-El sistema asegura alineación entre objetivos mensuales, planificación semanal y ejecución diaria, con foco en tareas de alto rendimiento.
+### Caracteristicas principales
+- **Multi-aplicacion**: Los usuarios pueden tener acceso a FASE, OKR o ambas, y cambiar entre ellas con el App Switcher
+- **Multi-empresa**: Soporte para multiples organizaciones (Companies) con usuarios compartidos
+- **Multi-idioma**: Interfaz disponible en Espanol (ES), Catalan (CA) e Ingles (EN)
+- **Plataforma web responsive** con soporte movil
+- **Integracion con IA** (Claude/Anthropic) para chat y feedback
+- **Sistema de gamificacion** independiente por aplicacion
 
 ---
 
-## 2. Conceptos Clave
+## 2. Aplicacion FASE
 
-### 2.1 Big Rocks (Objetivos Mensuales)
+### 2.1 Conceptos Clave
 
-Los Big Rocks son los **objetivos mensuales** principales del usuario.
+#### Big Rocks (Objetivos Mensuales)
 
-#### Características principales
-- Siempre se planifican para el **mes siguiente**
-- Cada mes activo tiene su propio conjunto de Big Rocks
-- Los meses pasados son de **solo lectura**
-- Los meses futuros deben ser **abiertos explícitamente** para su planificación
+Los Big Rocks son los objetivos mensuales principales del usuario.
 
-#### Estructura de un Big Rock
-
-Cada Big Rock contiene:
-
-| Campo | Descripción |
+| Campo | Descripcion |
 |-------|-------------|
-| **Identificador único** | ID del objetivo |
-| **Título** | Nombre descriptivo del objetivo |
-| **Descripción** | Detalle completo del objetivo |
-| **Indicador** | Métrica para medir el éxito |
-| **Número de TAR** | Cantidad de Tareas de Alto Rendimiento |
-| **Lista de TAR** | Tareas asociadas al objetivo |
-| **Key People** | Personas clave para el logro |
-| **Key Meetings** | Reuniones críticas necesarias |
-| **Estado** | Planificado / En progreso / Finalizado |
+| **Titulo** | Nombre del objetivo (3-100 caracteres) |
+| **Descripcion** | Detalle completo (10-2000 caracteres) |
+| **Indicador** | Metrica de exito / KPI (5-500 caracteres) |
+| **Numero de TAR** | Cantidad de tareas a crear (1-20) |
+| **Mes** | Mes de ejecucion |
+| **Personas Clave** | Usuarios de la empresa vinculados |
+| **Reuniones Clave** | Reuniones con titulo, objetivo, decision esperada, fecha |
 
----
+**Estados de un Big Rock:**
+```
+CREADO → CONFIRMADO → EN_PROGRESO → FINALIZADO
+                   → FEEDBACK_RECIBIDO (via supervisor)
+```
 
-## 3. Tareas de Alto Rendimiento (TAR)
+- **CREADO**: Campos editables, borrador
+- **CONFIRMADO**: Campos principales bloqueados (titulo, descripcion, indicador, mes). Se pueden seguir gestionando TARs, reuniones y personas clave
+- **EN_PROGRESO / FINALIZADO**: Estados de progreso durante la ejecucion
 
-### 3.1 Definición
+#### TAR (Tareas de Alto Rendimiento)
 
-Las TAR son **bloques de trabajo relevantes** que contribuyen directamente a la consecución del Big Rock.
+Bloques de trabajo que contribuyen directamente al Big Rock.
 
-### 3.2 Estructura de una TAR
-
-Cada TAR incluye:
-
-| Campo | Descripción |
+| Campo | Descripcion |
 |-------|-------------|
-| **Identificador** | ID único de la TAR |
-| **Descripción** | Detalle de la tarea |
-| **Big Rock asociado** | Referencia al objetivo principal |
-| **Actividades semanales** | Desglose por semana |
-| **Actividades diarias** | Desglose por día |
-| **Estado de progreso** | Porcentaje o estado de completitud |
+| **Descripcion** | Detalle de la tarea |
+| **Estado** | PENDIENTE / EN_PROGRESO / COMPLETADA |
+| **Progreso** | Porcentaje 0-100% |
+| **Actividades** | Desglose semanal y diario |
 
-### 3.3 Reglas importantes
+**Calculo de progreso**: El progreso del Big Rock = media del progreso de todas sus TARs.
 
-- El **número de TAR debe definirse explícitamente** al crear el Big Rock
-- Cada TAR debe tener una relación clara con el Big Rock
-- Las TAR se descomponen en actividades semanales y diarias
+#### Activities (Actividades)
 
----
+Desglose de las TARs en acciones concretas:
+- **Tipo SEMANAL**: Planificacion de la semana
+- **Tipo DIARIA**: Tareas del dia
 
-## 4. Planificación Temporal
+#### Key Meetings (Reuniones Clave)
 
-### 4.1 Planificación Mensual
+Reuniones para validar, refinar y tomar decisiones sobre Big Rocks:
+- Titulo, objetivo, decision esperada, fecha, descripcion
+- Se vinculan a un Big Rock especifico
 
-**Cuándo**: Mes anterior al mes de ejecución
+#### Key People (Personas Clave)
 
-**Actividades**:
-- El usuario define los Big Rocks del **mes siguiente**
-- Se asignan TAR, personas clave y reuniones clave
-- El sistema valida que los objetivos estén equilibrados dentro del marco FASE
+Usuarios de la empresa identificados como necesarios para lograr el objetivo.
 
-**Validación del sistema**:
-- Verifica distribución equilibrada entre categorías FASE
-- Sugiere ajustes si hay desbalance
+### 2.2 Workflow FASE - Paso a Paso
 
-### 4.2 Planificación Semanal
-
-**Cuándo**: Viernes anterior a la semana de ejecución
-
-**Actividades**:
-- Cada Big Rock se descompone en **acciones semanales**
-- El sistema puede sugerir una distribución semanal basada en las TAR
-- Se ajustan prioridades según progreso actual
-
-### 4.3 Revisión Semanal (Viernes)
-
-**Actividad obligatoria** que incluye:
-
-#### Evaluación
-- ¿Qué se ha completado?
-- ¿Qué queda pendiente?
-- ¿Qué obstáculos surgieron?
-
-#### Replanificación
-- Ajustar la semana siguiente
-- Redistribuir TAR si es necesario
-- Alinear actividades con Big Rocks
-
-**Duración estimada**: 30–60 minutos
-
-### 4.4 Seguimiento Diario
-
-**Actividades diarias**:
-- Reservar tiempo para ejecutar TAR
-- Registrar progreso en la aplicación
-- Completar actividades planificadas para la semana
-- Breve reflexión sobre el día
-
-**El sistema permite**:
-- Registrar ejecución diaria
-- Marcar actividades completadas
-- Añadir notas y aprendizajes
-
----
-
-## 5. Personas y Reuniones Clave
-
-### 5.1 Key People (Personas Clave)
-
-**Definición**: Personas identificadas que ayudan a lograr el objetivo
-
-**Características**:
-- Se registran con **nombre y apellidos**
-- Deben identificarse **antes de iniciar la ejecución**
-- Pueden asociarse a Big Rocks o TAR específicas
-
-**Ejemplos**:
-- Colaboradores en el proyecto
-- Mentores o coaches
-- Stakeholders importantes
-
-### 5.2 Key Meetings (Reuniones Clave)
-
-**Definición**: Reuniones necesarias para validar, refinar y tomar decisiones
-
-**Propósito**:
-- **Validar**: Confirmar que se va por el camino correcto
-- **Refinar**: Ajustar detalles y enfoque
-- **Tomar decisiones**: Resolver bloqueadores
-
-**Asociación**:
-- Se vinculan a Big Rocks específicos
-- Pueden asociarse a TAR individuales
-- Se programan con fecha y objetivo claro
-
----
-
-## 6. Usuarios, Autenticación y Autorización
-
-### 6.1 Autenticación
-
-**Método**: Google Single Sign-On (SSO)
-
-**Ventajas**:
-- Acceso rápido y seguro
-- No requiere crear contraseñas adicionales
-- Integración nativa con ecosistema Google
-
-### 6.2 Roles de Usuario
-
-#### Usuario Estándar
-**Permisos**:
-- Gestiona sus propios Big Rocks, TAR y actividades
-- Solo tiene acceso a su información personal
-- Puede interactuar con la IA para feedback
-
-**Limitaciones**:
-- No puede ver información de otros usuarios
-- No puede administrar permisos
-
-#### Supervisor
-**Permisos**:
-- Todo lo del usuario estándar
-- **Visualiza** los Big Rocks y TAR de usuarios supervisados
-- Puede dar feedback a sus supervisados
-
-**Características**:
-- **Relación uno a uno**: Cada usuario tiene como máximo un supervisor
-- Solo tiene visibilidad de lectura sobre supervisados
-- No puede editar objetivos de otros usuarios
-
-#### Administrador de la Aplicación
-**Permisos**:
-- Todo lo anterior
-- **Gestión completa de usuarios**:
-  - Alta de nuevos usuarios
-  - Edición de perfiles
-  - Deshabilitación temporal
-  - Baja definitiva
-- Asigna supervisor a cada usuario
-- Gestiona configuración global
-
-**Casos especiales**:
-- Puede existir un usuario sin supervisor (supervisor global)
-- Los administradores tienen visibilidad total del sistema
-
----
-
-## 7. Gestión de Calendario
-
-### 7.1 Vista Mensual
-
-**Característica obligatoria**: La vista principal es mensual
-
-### 7.2 Estados del Mes
-
-| Estado | Descripción | Permisos |
-|--------|-------------|----------|
-| **Pasado** | Meses anteriores al actual | Solo lectura |
-| **Actual** | Mes en curso | Editable (Big Rocks y TAR) |
-| **Futuro** | Meses posteriores | Bloqueado hasta apertura manual |
-
-### 7.3 Apertura de Meses Futuros
-
-**Proceso**:
-1. Usuario solicita abrir mes futuro
-2. Sistema valida que no haya meses intermedios sin abrir
-3. Se habilita la planificación para ese mes
-4. Usuario puede empezar a crear Big Rocks
-
-**Regla importante**: Los meses futuros deben abrirse explícitamente para permitir planificación anticipada.
-
----
-
-## 8. Principios de Diseño
-
-### Principios de la Metodología
-1. **Gestión individual como base**: Cada usuario es dueño de sus objetivos
-2. **Visibilidad jerárquica controlada**: Solo quienes necesitan ver, ven
-3. **Planificación orientada a impacto**: Foco en lo que realmente importa
-4. **Revisión continua y aprendizaje iterativo**: Mejora constante
-
-### Principios del Sistema
-1. **Motivación intrínseca**: El sistema motiva desde dentro
-2. **Feedback constructivo**: La IA acompaña, no juzga
-3. **Transparencia**: Claridad en objetivos y progreso
-4. **Aprendizaje continuo**: Cada acción es una oportunidad de mejora
-5. **Progreso visible**: El usuario ve su avance claramente
-
----
-
-## 9. Sistema de Evaluación con IA
-
-### 9.1 Objetivo del Sistema de IA
-
-Proporcionar **feedback en tiempo real** sobre:
-- Calidad de los objetivos (Big Rocks)
-- Coherencia con la metodología FASE
-- Viabilidad mensual, semanal y diaria
-- Nivel de ejecución y consistencia del usuario
-
-### 9.2 Criterios de Evaluación
-
-La IA evalúa según:
-
-| Criterio | Descripción |
-|----------|-------------|
-| **Claridad del objetivo** | ¿Está bien definido? |
-| **Medibilidad del indicador** | ¿Se puede medir el éxito? |
-| **Coherencia con categoría FASE** | ¿Encaja en la categoría seleccionada? |
-| **Número adecuado de TAR** | ¿Cantidad apropiada de tareas? |
-| **Realismo temporal** | ¿Es alcanzable en el tiempo estimado? |
-| **Dependencias identificadas** | ¿Están claras las personas y reuniones clave? |
-
-### 9.3 Output de la IA
-
-Cada evaluación genera:
-
-1. **Score de calidad** (0–100)
-   - 0-40: Necesita trabajo significativo
-   - 41-70: Objetivo aceptable con mejoras sugeridas
-   - 71-100: Objetivo bien definido
-
-2. **Observaciones clave**
-   - Puntos fuertes del objetivo
-   - Áreas de mejora específicas
-
-3. **Recomendaciones de mejora**
-   - Acciones concretas para mejorar el objetivo
-   - Sugerencias de TAR adicionales
-   - Refinamiento de indicadores
-
-4. **Alertas de riesgo**
-   - Señales de objetivos demasiado ambiciosos
-   - Falta de dependencias identificadas
-   - Desbalance en categorías FASE
-
-### 9.4 Interacción Diaria
-
-**Solicitud de la aplicación**:
-- Registro de actividades del día
-- Breve reflexión (1-3 líneas)
-
-**Respuesta del sistema**:
-- Feedback **inmediato y contextual**
-- Reconocimiento de logros
-- Sugerencias para mañana
-
-**Filosofía**: El sistema actúa como **acompañante, no como juez**
-
----
-
-## 10. Arquitectura Técnica
-
-### 10.1 Frontend / App
-
-**Plataforma**: Vercel
-**Framework**: Next.js / React
-
-**Responsabilidades**:
-- Interfaz principal de interacción del usuario
-- Gestión de objetivos, planificación y seguimiento
-- Visualización de calendario y progreso
-- Interfaz de gamificación
-
-**Acceso**:
-- Web responsive
-- Progressive Web App (PWA) para móvil
-
-### 10.2 Backend Lógico
-
-**Tecnología**: Node.js / TypeScript
-
-**Responsabilidades**:
-- API REST para la aplicación
-- Gestión de usuarios y autenticación
-- Persistencia de datos
-- Integración con n8n
-
-### 10.3 n8n (Motor de Orquestación)
-
-**Integración**: n8n-MCP y n8n-skills
-
-**Recibe eventos de la aplicación**:
-- Creación de objetivos (Big Rocks)
-- Planificación semanal
-- Registro diario de actividades
-- Finalización de TAR
-
-**Ejecuta flujos de evaluación**:
-- Análisis de calidad de objetivos
-- Generación de feedback personalizado
-- Recomendaciones accionables
-- Cálculo de puntos de gamificación
-
-**Ventajas de n8n**:
-- Orquestación visual de workflows
-- Integración fácil con APIs de IA
-- Escalabilidad
-- Mantenimiento simplificado
-
-### 10.4 Base de Datos
-
-**Opciones**: PostgreSQL o MongoDB
-
-**Modelos principales**:
-- Users (usuarios con roles)
-- BigRocks (objetivos mensuales)
-- TARs (tareas de alto rendimiento)
-- Activities (actividades diarias/semanales)
-- KeyPeople (personas clave)
-- KeyMeetings (reuniones clave)
-- Gamification (puntos, medallas, ranking)
-
-### 10.5 Autenticación
-
-**Proveedor**: Google SSO
-
-**Flujo**:
-1. Usuario hace clic en "Iniciar sesión con Google"
-2. Redirección a Google OAuth
-3. Usuario autoriza la aplicación
-4. Recepción de token
-5. Creación/actualización de sesión
-6. Redirección a dashboard
-
-### 10.6 Despliegue
-
-**Repositorio**: GitHub (GitHub MCP)
-**CI/CD**: Integración automática GitHub → Vercel
-
-**Flujo de despliegue**:
-```
-Código → GitHub (push) → Vercel (build automático) → Producción
-```
-
-**Ventajas**:
-- Despliegue continuo automático
-- Preview deployments para cada PR
-- Rollback fácil a versiones anteriores
-
-### 10.7 Skills y Herramientas
-
-- **Frontend designer claude skills**: Para diseño de UI/UX
-- **n8n-MCP**: Para gestión de workflows de n8n
-- **n8n-skills**: Funcionalidades adicionales de n8n
-- **GitHub MCP**: Para operaciones de Git y GitHub
-
----
-
-## 11. Sistema de Gamificación
-
-### 11.1 Sistema de Puntos
-
-El usuario obtiene puntos por:
-
-| Acción | Puntos | Frecuencia |
-|--------|--------|------------|
-| Definir un Big Rock | 50 | Por Big Rock |
-| Planificar la semana | 30 | Semanal |
-| Realizar revisión semanal | 40 | Semanal (viernes) |
-| Registrar actividades diarias | 10 | Diaria |
-| Completar una TAR | 25 | Por TAR |
-| Mantener racha de 7 días | 100 | Por racha |
-| Mantener racha de 30 días | 500 | Por racha |
-
-### 11.2 Medallas
-
-Medallas por hitos alcanzados:
-
-#### Medalla de Constancia
-- **Bronce**: 7 días consecutivos de registro
-- **Plata**: 30 días consecutivos
-- **Oro**: 90 días consecutivos
-- **Diamante**: 365 días consecutivos
-
-#### Medalla de Claridad
-- **Bronce**: 5 Big Rocks con score >70
-- **Plata**: 15 Big Rocks con score >80
-- **Oro**: 50 Big Rocks con score >90
-
-#### Medalla de Ejecución
-- **Bronce**: 10 TAR completadas
-- **Plata**: 50 TAR completadas
-- **Oro**: 200 TAR completadas
-
-#### Medalla de Mejora Continua
-- **Bronce**: 10 revisiones semanales
-- **Plata**: 50 revisiones semanales
-- **Oro**: 200 revisiones semanales
-
-### 11.3 Ranking
-
-**Visibilidad**: Ranking visible entre usuarios (opcional por organización)
-
-**Basado en**:
-- **Actividad**: Frecuencia de uso
-- **Consistencia**: Rachas mantenidas
-- **Engagement**: Interacción con el sistema
-
-**Importante**:
-- **No mide resultados absolutos, solo engagement**
-- Fomenta la participación, no la competencia destructiva
-- Cada usuario compite consigo mismo principalmente
-
-**Opciones de privacidad**:
-- Usuario puede optar por no aparecer en ranking público
-- Mantiene sus medallas y puntos personales
-
----
-
-## 12. Flujo de Trabajo
-
-### Diagrama de Ciclo Completo
+#### Paso 1: Planificacion Mensual
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     PLANIFICACIÓN MENSUAL                       │
-│  (Mes anterior)                                                 │
-│                                                                 │
-│  • Define Big Rocks (3-5 objetivos)                            │
-│  • Asigna categoría FASE a cada uno                            │
-│  • Define TAR por Big Rock                                     │
-│  • Identifica Key People y Key Meetings                        │
-│  • Valida equilibrio FASE                                      │
-│                                                                 │
-│  [IA evalúa y da score de calidad]                             │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    PLANIFICACIÓN SEMANAL                        │
-│  (Viernes anterior)                                             │
-│                                                                 │
-│  • Desglosa cada Big Rock en actividades semanales             │
-│  • Asigna TAR a días específicos                               │
-│  • Programa Key Meetings                                       │
-│  • Define prioridades de la semana                             │
-│                                                                 │
-│  [Sistema sugiere distribución óptima]                          │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      EJECUCIÓN DIARIA                           │
-│  (Lunes a Viernes)                                              │
-│                                                                 │
-│  • Consulta actividades del día                                │
-│  • Ejecuta TAR planificadas                                    │
-│  • Registra progreso                                           │
-│  • Completa reflexión breve                                    │
-│  • Marca actividades completadas                               │
-│                                                                 │
-│  [IA da feedback diario y reconocimiento]                       │
-│  [Sistema acumula puntos de gamificación]                       │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  REVISIÓN SEMANAL (Viernes)                     │
-│  (30-60 minutos)                                                │
-│                                                                 │
-│  EVALUACIÓN:                                                    │
-│  • ¿Qué TAR se completaron?                                    │
-│  • ¿Qué quedó pendiente y por qué?                             │
-│  • ¿Qué obstáculos surgieron?                                 │
-│  • ¿Qué aprendizajes hubo?                                     │
-│                                                                 │
-│  REPLANIFICACIÓN:                                               │
-│  • Ajustar semana siguiente                                    │
-│  • Redistribuir TAR si es necesario                            │
-│  • Reprogramar Key Meetings                                    │
-│  • Actualizar prioridades                                      │
-│                                                                 │
-│  [IA analiza tendencias y sugiere mejoras]                      │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      FEEDBACK IA                                │
-│                                                                 │
-│  • Score de calidad (0-100)                                    │
-│  • Observaciones clave                                         │
-│  • Recomendaciones accionables                                 │
-│  • Alertas de riesgo                                           │
-│  • Actualización de puntos y medallas                          │
-│  • Sugerencias para siguiente ciclo                            │
-└─────────────────────────────────────────────────────────────────┘
-                         │
-                         │ (El ciclo se repite)
-                         │
-                         ▼
-            [Nueva semana / Nuevo mes]
+1. Abrir mes futuro
+   └── Ir a Calendario → Si el mes esta bloqueado, pulsar "Abrir Mes"
+       (Los meses deben abrirse secuencialmente)
+
+2. Crear Big Rocks (3-5 objetivos)
+   └── /big-rocks → "Nuevo Big Rock"
+       ├── Rellenar: titulo, descripcion, indicador, num. TARs
+       ├── Asignar personas clave
+       └── Crear reuniones clave
+
+3. Confirmar cada Big Rock
+   └── Abrir Big Rock → Pulsar "Confirmar"
+       (Los campos principales se bloquean)
+
+4. Crear TARs para cada Big Rock
+   └── Dentro del Big Rock → "Nueva TAR"
+       └── Definir descripcion y actividades
+
+5. Confirmar planificacion mensual
+   └── Solo aparece cuando TODOS los Big Rocks estan confirmados
+       └── El supervisor puede ver la planificacion
 ```
 
-### Frecuencias de Interacción
+#### Paso 2: Ejecucion Semanal
 
-| Actividad | Frecuencia | Duración estimada |
-|-----------|------------|-------------------|
-| Planificación mensual | 1 vez/mes | 1-2 horas |
-| Planificación semanal | 1 vez/semana | 20-30 minutos |
-| Revisión semanal | 1 vez/semana | 30-60 minutos |
-| Ejecución diaria | Diaria | 2-4 horas (trabajo en TAR) |
-| Registro diario | Diaria | 5-10 minutos |
+```
+1. Vista semanal del calendario
+   └── /calendario/semana/[semana]
+       ├── Ver actividades distribuidas por dia
+       └── Crear/actualizar actividades semanales por TAR
 
----
+2. Seguimiento de TARs
+   └── Actualizar progreso (%) de cada TAR
+       └── El progreso del Big Rock se recalcula automaticamente
+```
 
-## Stack Tecnológico Completo
+#### Paso 3: Seguimiento Diario
 
-### Frontend
-- **Framework**: Next.js 14+ (React 18+)
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS
-- **Estado**: Zustand o React Context
-- **UI Components**: shadcn/ui o MUI
-- **Calendario**: react-big-calendar o similar
+```
+1. Vista diaria del calendario
+   └── /calendario/dia/[fecha]
+       ├── Ver actividades del dia
+       ├── Ver reuniones clave programadas
+       └── Marcar actividades como completadas
 
-### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Next.js API Routes o Express
-- **Lenguaje**: TypeScript
-- **ORM**: Prisma o TypeORM
-- **Validación**: Zod
+2. Registrar progreso
+   └── Actualizar estado de TARs y actividades
+```
 
-### Base de Datos
-- **Opción 1**: PostgreSQL (Supabase o Neon)
-- **Opción 2**: MongoDB Atlas
+#### Paso 4: Revision Semanal (Viernes)
 
-### Autenticación
-- **Proveedor**: NextAuth.js con Google Provider
-- **Sesiones**: JWT o Database Sessions
+```
+1. Evaluar la semana
+   ├── Que TARs se completaron?
+   ├── Que quedo pendiente y por que?
+   └── Que obstaculos surgieron?
 
-### IA y Orquestación
-- **n8n**: Motor de workflows
-- **LLM**: OpenAI GPT-4 o Claude API
-- **Integraciones**: n8n-MCP, n8n-skills
+2. Replanificar
+   ├── Ajustar actividades de la semana siguiente
+   ├── Redistribuir TARs si es necesario
+   └── Actualizar prioridades
+```
 
-### DevOps
-- **Control de versiones**: GitHub
-- **CI/CD**: GitHub Actions + Vercel
-- **Hosting**: Vercel
-- **Monitoreo**: Vercel Analytics
+### 2.3 Supervision FASE
 
-### Herramientas de Desarrollo
-- **GitHub MCP**: Gestión de repositorio
-- **Frontend designer claude skills**: Diseño de interfaces
-- **ESLint + Prettier**: Calidad de código
+El supervisor tiene una vista de solo lectura de sus supervisados:
 
----
+- **Pagina de supervisor** (`/supervisor`): Lista de supervisados con estado de planificacion
+- **Vista de planificacion** (`/supervisor/[userId]/[month]`): Big Rocks, TARs, reuniones y personas clave del supervisado
+- **Feedback**: El supervisor puede dejar comentarios y valoracion en:
+  - Cada Big Rock individual
+  - La planificacion mensual global
+- La vista solo esta disponible cuando el supervisado ha confirmado su planificacion mensual
 
-## Próximos Pasos
+### 2.4 Calendario FASE
 
-### Fase 1: Setup Inicial
-1. Inicializar repositorio en GitHub
-2. Configurar proyecto Next.js con TypeScript
-3. Configurar Vercel para despliegue automático
-4. Setup base de datos (PostgreSQL/MongoDB)
+Tres niveles de vista:
 
-### Fase 2: Autenticación
-1. Implementar Google SSO
-2. Crear sistema de roles (Usuario/Supervisor/Admin)
-3. Proteger rutas según roles
+| Vista | Ruta | Contenido |
+|-------|------|-----------|
+| **Mensual** | `/calendario` | Cuadricula del mes con resumen de actividades por dia |
+| **Semanal** | `/calendario/semana/[week]` | Actividades distribuidas por dia de la semana |
+| **Diaria** | `/calendario/dia/[date]` | Actividades y reuniones del dia |
 
-### Fase 3: Core Features
-1. Crear modelo de datos (Big Rocks, TAR)
-2. Implementar CRUD de Big Rocks
-3. Implementar CRUD de TAR
-4. Calendario mensual con estados
-
-### Fase 4: Planificación
-1. Vista de planificación mensual
-2. Vista de planificación semanal
-3. Vista de seguimiento diario
-4. Revisión semanal (viernes)
-
-### Fase 5: IA Integration
-1. Configurar n8n
-2. Crear workflows de evaluación
-3. Integrar feedback en tiempo real
-4. Sistema de recomendaciones
-
-### Fase 6: Gamificación
-1. Sistema de puntos
-2. Medallas y logros
-3. Ranking (opcional)
-4. Notificaciones de logros
-
-### Fase 7: Mobile & Polish
-1. PWA configuration
-2. Responsive design
-3. Performance optimization
-4. Testing end-to-end
+**Estados del mes**:
+- **Pasado**: Solo lectura
+- **Actual**: Editable
+- **Futuro**: Bloqueado hasta apertura manual (secuencial)
 
 ---
 
-**Metodología FASE** - Sistema de gestión de objetivos de alto rendimiento
-Documentación creada para desarrollo de la plataforma
+## 3. Aplicacion OKR
+
+### 3.1 Conceptos Clave
+
+#### Trimestres (Quarters)
+
+Periodos trimestrales (Q1, Q2, Q3, Q4) que enmarcan los objetivos.
+- Solo un trimestre activo por empresa a la vez
+- Los trimestres deben ser activados por un admin
+- Duracion automatica: 12 semanas
+
+#### Equipos (Teams)
+
+Agrupaciones de usuarios para trabajar objetivos compartidos.
+
+**Roles de equipo:**
+| Rol | Permisos |
+|-----|----------|
+| **RESPONSABLE** | Crear/editar/eliminar objetivos, gestionar equipo |
+| **EDITOR** | Editar objetivos y Key Results existentes |
+| **VISUALIZADOR** | Solo lectura |
+| **DIRECTOR** | Solo lectura (supervisores) |
+
+#### Objetivos (Objectives)
+
+Metas trimestrales de un equipo.
+
+| Campo | Descripcion |
+|-------|-------------|
+| **Titulo** | Nombre del objetivo |
+| **Descripcion** | Contexto e importancia |
+| **Indicador** | Metrica de exito |
+| **Estado** | DRAFT / ACTIVE / COMPLETED / CANCELLED |
+| **Progreso** | Calculado automaticamente (media de Key Results) |
+| **Equipo** | Equipo propietario |
+| **Owner** | Usuario creador |
+
+#### Key Results (Resultados Clave)
+
+Metricas medibles que indican el avance del objetivo.
+
+| Campo | Descripcion |
+|-------|-------------|
+| **Titulo** | Que se mide |
+| **Indicador** | Descripcion de la metrica |
+| **Valor Inicial** | Punto de partida |
+| **Valor Objetivo** | Meta a alcanzar |
+| **Valor Actual** | Progreso actual |
+| **Unidad** | %, euros, # (unidades) |
+| **Responsable** | Usuario asignado |
+
+#### Key Activities (Actividades Clave)
+
+Sub-tareas asociadas a un Key Result con fecha limite y asignacion.
+
+#### Actualizaciones Semanales (Key Result Updates)
+
+Progreso semanal por Key Result:
+- Una actualizacion por semana por Key Result (semanas 1-12)
+- Incluye: nuevo valor del indicador + comentario
+- Sistema muestra si la semana actual esta actualizada o pendiente
+
+### 3.2 Workflow OKR - Paso a Paso
+
+#### Paso 1: Setup del Trimestre (Solo Admin)
+
+```
+1. Activar trimestre
+   └── /okr/trimestres → "Activar Trimestre"
+       ├── Seleccionar anyo y trimestre (Q1-Q4)
+       └── Sistema calcula fechas automaticamente
+```
+
+#### Paso 2: Crear y Gestionar Equipos
+
+```
+1. Crear equipo (Solo Admin)
+   └── /okr/equipos/nuevo
+       └── Nombre y descripcion
+
+2. Anadir miembros
+   └── /okr/equipos/[id]
+       └── "Agregar miembro" → Asignar rol (RESPONSABLE/EDITOR/VISUALIZADOR)
+```
+
+#### Paso 3: Crear Objetivos
+
+```
+1. Nuevo objetivo (RESPONSABLE)
+   └── /okr/objetivos/nuevo
+       ├── Seleccionar equipo
+       ├── Titulo (obligatorio)
+       ├── Descripcion (opcional)
+       └── Indicador de exito (obligatorio)
+
+2. El objetivo se crea en estado DRAFT con progreso 0%
+```
+
+#### Paso 4: Definir Key Results
+
+```
+1. Abrir objetivo → "Agregar Resultado Clave"
+   ├── Titulo
+   ├── Indicador
+   ├── Valor inicial y valor objetivo
+   ├── Unidad (%, euros, #...)
+   └── Asignar responsable
+```
+
+#### Paso 5: Ejecucion Semanal (Ciclo Principal)
+
+```
+Cada semana durante el trimestre (semanas 1-12):
+
+1. Abrir objetivo → Para cada Key Result:
+   ├── "Agregar actualizacion semanal"
+   │   ├── Nuevo valor del indicador
+   │   └── Comentario (progreso, obstaculos, logros)
+   └── Sistema muestra:
+       ├── Badge "Actualizado" o "Pendiente actualizacion"
+       ├── Barra de progreso (valor actual vs objetivo)
+       └── Historial de actualizaciones
+
+2. Gestionar actividades
+   ├── Crear actividades con fecha limite
+   ├── Marcar completadas
+   └── Ver ratio: "3/5 actividades completadas"
+```
+
+#### Paso 6: Seguimiento de Progreso
+
+```
+- Progreso del objetivo = media de todos sus Key Results
+- Colores: verde (>=70%), ambar (30-70%), gris (<30%)
+- Historial visible: "Ver historial 6/12" semanas
+```
+
+### 3.3 Dashboard OKR
+
+La pagina `/okr` muestra:
+- Estadisticas del trimestre activo
+- Objetivos del usuario y sus equipos
+- Progreso global
+
+---
+
+## 4. Usuarios, Autenticacion y Autorizacion
+
+### 4.1 Autenticacion
+
+- **Metodo**: Google Single Sign-On (SSO) via NextAuth.js
+- **Estrategia de sesion**: JWT
+- **Requisito**: El usuario debe ser invitado previamente por un admin (email en la BD)
+- **Primer login**: Estado cambia de INVITED a ACTIVE automaticamente
+
+### 4.2 Roles de Usuario
+
+| Rol | Descripcion |
+|-----|-------------|
+| **USER** | Gestiona sus propios objetivos (FASE y/o OKR) |
+| **SUPERVISOR** | Todo lo anterior + visualiza objetivos de sus supervisados (solo lectura) + da feedback |
+| **ADMIN** | Todo lo anterior + gestiona usuarios de su empresa (invitar, roles, estado, supervisor, acceso a apps) |
+| **SUPERADMIN** | Todo lo anterior + gestiona todas las empresas y usuarios globalmente |
+
+### 4.3 Estados del Usuario
+
+| Estado | Descripcion |
+|--------|-------------|
+| **INVITED** | Invitado pero nunca ha hecho login |
+| **ACTIVE** | Usuario activo |
+| **DEACTIVATED** | Deshabilitado por admin (no puede hacer login) |
+
+### 4.4 Multi-Empresa
+
+- Los usuarios pueden pertenecer a multiples empresas (relacion M:N via `UserCompany`)
+- El usuario selecciona la empresa activa con el Company Switcher
+- Cada empresa tiene sus propios Big Rocks, equipos OKR, trimestres, etc.
+
+### 4.5 Multi-Aplicacion
+
+- Cada usuario tiene acceso a una o mas aplicaciones (FASE/OKR) via `UserApp`
+- El App Switcher permite cambiar entre aplicaciones
+- La navegacion se adapta segun la aplicacion activa:
+  - **FASE**: Home, Big Rocks, Calendario
+  - **OKR**: Dashboard, Objetivos, Equipos, Trimestres
+
+### 4.6 Supervision
+
+- Relacion uno a uno: cada usuario tiene como maximo un supervisor
+- El supervisor ve la planificacion de sus supervisados (solo lectura)
+- El supervisor puede dar feedback (comentario + valoracion)
+
+---
+
+## 5. Administracion
+
+### 5.1 Gestion de Usuarios (`/admin/usuarios`)
+
+Accesible para ADMIN y SUPERADMIN.
+
+Funcionalidades:
+- **Invitar usuarios**: Por email, el usuario recibe acceso al hacer login con Google
+- **Cambiar rol**: Asignar USER, SUPERVISOR, ADMIN
+- **Cambiar estado**: Activar o desactivar usuarios
+- **Asignar supervisor**: Relacion 1:1
+- **Gestionar acceso a apps**: Activar/desactivar FASE y/o OKR por usuario
+
+Estadisticas: total usuarios, por rol, por estado.
+
+### 5.2 Gestion de Empresas (`/admin/empresas`)
+
+Solo accesible para SUPERADMIN.
+
+Funcionalidades:
+- Crear nuevas empresas
+- Editar informacion (nombre, slug, logo)
+- Eliminar empresas
+- Ver estadisticas globales
+
+---
+
+## 6. Chat IA
+
+### Integracion
+
+- **Motor**: Anthropic Claude SDK
+- **Interfaz**: Panel deslizable accesible desde cualquier pagina
+
+### Funcionalidades
+
+- Chat conversacional con IA
+- Historial de conversaciones con titulos
+- Sistema de creditos diarios: **10 mensajes/dia** (reset diario)
+- Marcado de mensajes leidos/no leidos
+- Eliminar conversaciones
+
+### Modelos de datos
+
+- `ChatConversation`: Conversaciones por usuario
+- `ChatMessage`: Mensajes individuales con tracking de uso
+- `UserChatCredits`: Creditos diarios por usuario
+
+---
+
+## 7. Sistema de Gamificacion
+
+### 7.1 Gamificacion FASE
+
+#### Puntos
+
+| Accion | Puntos |
+|--------|--------|
+| Crear Big Rock | 50 |
+| Planificar semana | 30 |
+| Revision semanal | 40 |
+| Registro diario | 10 |
+| Completar TAR | 25 |
+| Racha de 7 dias | 100 |
+| Racha de 30 dias | 500 |
+
+#### Medallas (4 tipos x 4 niveles: Bronce, Plata, Oro, Diamante)
+
+| Medalla | Bronce | Plata | Oro | Diamante |
+|---------|--------|-------|-----|----------|
+| **Constancia** | 7 dias racha | 30 dias | 90 dias | 365 dias |
+| **Claridad** | 5 Big Rocks score >70 | 15 con >80 | 50 con >90 | 100 con >90 |
+| **Ejecucion** | 10 TARs completadas | 50 | 200 | 500 |
+| **Mejora Continua** | 10 revisiones | 50 | 200 | 500 |
+
+#### Niveles
+
+10 niveles basados en puntos acumulados (0 a 10.000+).
+
+#### Contadores
+
+- `bigRocksCreated`, `tarsCompleted`, `weeklyReviews`, `dailyLogs`
+- `currentStreak`, `longestStreak`
+
+### 7.2 Gamificacion OKR
+
+#### Puntos
+
+| Accion | Puntos |
+|--------|--------|
+| Crear Objetivo | 50 |
+| Crear Key Result | 25 |
+| Completar Key Result | 100 |
+| Completar Actividad | 10 |
+| Objetivo al 100% | 200 |
+
+#### Niveles
+
+- Nivel = (Puntos / 500) + 1
+- Barra de progreso hacia el siguiente nivel
+
+---
+
+## 8. Arquitectura Tecnica
+
+### Stack
+
+| Capa | Tecnologia |
+|------|-----------|
+| **Framework** | Next.js 16 + React 19 |
+| **Lenguaje** | TypeScript |
+| **Base de datos** | PostgreSQL + Prisma ORM |
+| **Autenticacion** | NextAuth.js v4 + Google OAuth 2.0 |
+| **Estilos** | Tailwind CSS 3.4 |
+| **Componentes UI** | Radix UI + shadcn/ui |
+| **Iconos** | lucide-react |
+| **Estado** | Zustand + React Context |
+| **Calendario** | react-big-calendar |
+| **i18n** | next-intl (ES, CA, EN) |
+| **IA** | Anthropic Claude SDK |
+| **Dark mode** | next-themes |
+| **Validacion** | Zod |
+| **Fechas** | date-fns |
+| **Testing** | Vitest (unit) + Playwright (E2E) |
+| **Hosting** | Vercel |
+| **Repositorio** | GitHub |
+| **CI/CD** | GitHub → Vercel (deploy automatico) |
+
+### Flujo de Autenticacion
+
+```
+1. Usuario pulsa "Iniciar sesion con Google"
+2. Redireccion a Google OAuth
+3. Callback a NextAuth.js
+4. Verificacion: usuario invitado en BD?
+   ├── NO → Redirigir a /auth/error?error=NotInvited
+   ├── DEACTIVATED → Redirigir a /auth/error?error=UserDeactivated
+   └── SI → Activar usuario si INVITED, crear sesion JWT
+5. JWT incluye: id, role, status, companies[], apps[], currentCompanyId, currentAppCode
+6. Redireccion al dashboard
+```
+
+### Despliegue
+
+```
+Codigo → GitHub (push) → Vercel (build automatico) → Produccion
+```
+
+---
+
+## 9. Estructura del Proyecto
+
+```
+fase-platform/
+├── prisma/
+│   ├── schema.prisma          # Modelos de datos
+│   └── seed.ts                # Datos iniciales
+├── messages/
+│   ├── es.json                # Traducciones espanol
+│   ├── ca.json                # Traducciones catalan
+│   └── en.json                # Traducciones ingles
+├── src/
+│   ├── app/
+│   │   ├── api/auth/          # NextAuth API routes
+│   │   ├── actions/           # Server Actions
+│   │   │   ├── big-rocks.ts
+│   │   │   ├── tars.ts
+│   │   │   ├── planning.ts
+│   │   │   ├── apps.ts
+│   │   │   ├── chat.ts
+│   │   │   ├── companies.ts
+│   │   │   └── ...
+│   │   └── (dashboard)/       # Paginas protegidas
+│   │       ├── home/          # Dashboard principal
+│   │       ├── big-rocks/     # FASE: Big Rocks CRUD
+│   │       │   └── [id]/
+│   │       │       ├── tars/          # TARs del Big Rock
+│   │       │       ├── meetings/      # Reuniones clave
+│   │       │       └── edit/
+│   │       ├── calendario/    # FASE: Calendario
+│   │       │   ├── semana/[week]/
+│   │       │   └── dia/[date]/
+│   │       ├── supervisor/    # FASE: Vista de supervisor
+│   │       │   └── [userId]/[month]/
+│   │       ├── okr/           # OKR: Modulo completo
+│   │       │   ├── objetivos/
+│   │       │   ├── equipos/
+│   │       │   ├── trimestres/
+│   │       │   └── gamificacion/
+│   │       ├── gamificacion/  # FASE: Gamificacion
+│   │       ├── logros/        # FASE: Medallas
+│   │       ├── actividad/     # Timeline de actividad
+│   │       ├── admin/         # Administracion
+│   │       │   ├── usuarios/
+│   │       │   └── empresas/
+│   │       └── perfil/        # Perfil de usuario
+│   ├── components/
+│   │   ├── big-rocks/         # Componentes FASE
+│   │   ├── calendar/          # Componentes calendario
+│   │   ├── tars/              # Componentes TAR
+│   │   ├── activities/        # Componentes actividades
+│   │   ├── key-meetings/      # Componentes reuniones
+│   │   ├── okr/               # Componentes OKR
+│   │   ├── gamification/      # Componentes gamificacion
+│   │   ├── chat/              # Chat con IA
+│   │   ├── admin/             # Componentes admin
+│   │   ├── app-switcher.tsx   # Cambio FASE/OKR
+│   │   ├── mobile-nav.tsx     # Navegacion movil
+│   │   ├── language-selector.tsx
+│   │   └── theme-toggle.tsx
+│   ├── lib/
+│   │   ├── auth-options.ts    # Configuracion NextAuth
+│   │   ├── db.ts              # Cliente Prisma
+│   │   └── gamification.ts    # Logica de gamificacion
+│   └── i18n/
+│       ├── config.ts          # Configuracion idiomas
+│       └── request.ts         # Setup server-side
+├── next.config.ts
+├── package.json
+└── CLAUDE.md                  # Este archivo
+```
+
+---
+
+## 10. Estado Actual y Pendientes
+
+### Implementado
+
+- FASE: Big Rocks CRUD completo con confirmacion, TARs, actividades, reuniones y personas clave
+- FASE: Calendario mensual/semanal/diario con gestion de meses
+- FASE: Vista de supervisor con feedback
+- FASE: Gamificacion completa (puntos, medallas, niveles, rachas)
+- OKR: Trimestres, equipos, objetivos, Key Results con actualizaciones semanales
+- OKR: Gamificacion basica (puntos y niveles)
+- Autenticacion Google SSO con sistema de invitaciones
+- Multi-empresa y multi-aplicacion con switchers
+- Internacionalizacion (ES, CA, EN)
+- Chat con IA (Claude) con creditos diarios
+- Administracion de usuarios y empresas
+- Dark mode
+- Responsive design / mobile
+
+### Pendiente
+
+- **Categorias FASE**: El framework menciona categorias F-A-S-E para clasificar Big Rocks, pero no esta implementado en el schema ni UI
+- **Evaluacion IA automatica**: Los campos `aiScore`, `aiObservations`, `aiRecommendations`, `aiRisks` existen en el modelo BigRock pero no hay workflow automatico (n8n) que los genere
+- **Integracion n8n**: Preparada conceptualmente pero sin workflows activos
+- **PWA**: Configuracion de Progressive Web App
+
+---
+
+**Plataforma FASE** - Sistema de gestion estrategica de alto rendimiento
