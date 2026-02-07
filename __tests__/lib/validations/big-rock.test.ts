@@ -9,15 +9,13 @@ import {
 
 describe('big-rock validations', () => {
   describe('createBigRockSchema', () => {
-    // Note: status must be provided explicitly because the schema default 'CREADO'
-    // is not a valid enum value (enum has: PLANIFICADO, EN_PROGRESO, FINALIZADO)
     const validInput = {
       title: 'Complete Q1 goals',
       description: 'Focus on completing all quarterly objectives for the team',
       indicator: 'All 5 objectives marked as complete',
       numTars: 5,
       month: '2026-03',
-      status: 'PLANIFICADO',
+      status: 'CREADO',
     }
 
     it('validates correct input', () => {
@@ -28,8 +26,12 @@ describe('big-rock validations', () => {
     it('allows different status values', () => {
       const input1 = { ...validInput, status: 'EN_PROGRESO' }
       const input2 = { ...validInput, status: 'FINALIZADO' }
+      const input3 = { ...validInput, status: 'CONFIRMADO' }
+      const input4 = { ...validInput, status: 'FEEDBACK_RECIBIDO' }
       expect(createBigRockSchema.safeParse(input1).success).toBe(true)
       expect(createBigRockSchema.safeParse(input2).success).toBe(true)
+      expect(createBigRockSchema.safeParse(input3).success).toBe(true)
+      expect(createBigRockSchema.safeParse(input4).success).toBe(true)
     })
 
     describe('title validation', () => {

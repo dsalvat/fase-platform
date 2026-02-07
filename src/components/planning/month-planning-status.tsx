@@ -84,7 +84,7 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
   // No Big Rocks case
   if (status.totalBigRocks === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 sm:px-4 py-3">
         <div className="flex items-center gap-2 text-gray-600">
           <Clock className="h-5 w-5" />
           <span className="text-sm">{t.noBigRocks}</span>
@@ -96,12 +96,12 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
   // Already confirmed
   if (status.isPlanningConfirmed) {
     return (
-      <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <div>
-              <p className="text-sm font-medium text-green-800 dark:text-green-300">
+      <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-3 sm:px-4 py-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-green-800 dark:text-green-300 truncate">
                 {t.confirmed}
               </p>
               {status.planningConfirmedAt && (
@@ -111,7 +111,7 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="text-sm text-green-700 dark:text-green-300">
               {status.confirmedBigRocks}/{status.totalBigRocks} Big Rocks
             </div>
@@ -173,11 +173,11 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
 
   // Not yet confirmed - show progress
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-blue-600" />
-          <div>
+    <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 sm:px-4 py-3 space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Clock className="h-5 w-5 text-blue-600 shrink-0" />
+          <div className="min-w-0">
             <p className="text-sm font-medium text-blue-800">
               {t.notConfirmed}
             </p>

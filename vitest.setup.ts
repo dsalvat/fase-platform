@@ -1,5 +1,5 @@
-import { beforeAll, afterAll, afterEach, vi } from 'vitest'
-import { mockDeep, mockReset } from 'vitest-mock-extended'
+import { vi } from 'vitest'
+import { mockDeep } from 'vitest-mock-extended'
 import type { PrismaClient } from '@prisma/client'
 
 // Mock Prisma
@@ -15,8 +15,3 @@ vi.mock('next-auth', () => ({
 vi.mock('@/lib/auth-options', () => ({
   authOptions: {},
 }))
-
-// Reset mocks between tests
-afterEach(() => {
-  vi.clearAllMocks()
-})

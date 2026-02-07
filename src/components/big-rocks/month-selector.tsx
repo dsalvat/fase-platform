@@ -40,7 +40,7 @@ export function MonthSelector({ defaultMonth }: MonthSelectorProps) {
         Mes:
       </label>
       <Select value={currentMonth} onValueChange={handleChange}>
-        <SelectTrigger id="month-select" className="w-[200px]">
+        <SelectTrigger id="month-select" className="w-[180px] sm:w-[200px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

@@ -84,7 +84,7 @@ export function MobileNav({
           <span className="sr-only">{translations.menu}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 pt-10">
+      <SheetContent side="right" className="w-64 sm:w-72 pt-10">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-left">
             {currentAppCode === AppType.OKR ? "OKR" : "FASE"}

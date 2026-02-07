@@ -154,7 +154,7 @@ export default async function DashboardLayout({
       translations={onboardingTranslations}
       onboardingCompleted={onboardingCompleted}
     >
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background overflow-x-hidden">
         {/* Navigation progress indicator */}
         <Suspense fallback={null}>
           <NavigationProgress />
@@ -162,32 +162,13 @@ export default async function DashboardLayout({
 
       {/* Navigation */}
       <nav className="bg-card border-b shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Mobile menu button */}
-            <MobileNav
-              currentAppCode={currentAppCode}
-              translations={{
-                menu: t("menu"),
-                home: t("home"),
-                bigRocks: t("bigRocks"),
-                calendar: t("calendar"),
-                dashboard: okrNavTranslations.dashboard,
-                objectives: okrNavTranslations.objectives,
-                teams: okrNavTranslations.teams,
-                quarters: okrNavTranslations.quarters,
-              }}
-              isAdmin={isAdmin}
-              isSupervisor={isSupervisor}
-              adminLabel={t("admin")}
-              supervisorLabel={t("supervisor")}
-            />
-
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between h-16 gap-2">
             {/* Logo and main nav */}
-            <div className="flex items-center gap-8">
-              <Link href="/home" className="flex items-center gap-2">
+            <div className="flex items-center gap-4 md:gap-8 min-w-0">
+              <Link href="/home" className="flex items-center gap-2 shrink-0">
                 {currentCompanyLogo ? (
-                  <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0">
                     <Image
                       src={currentCompanyLogo}
                       alt={currentCompanyName || ""}
@@ -196,13 +177,13 @@ export default async function DashboardLayout({
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
                     <span className="text-white font-bold text-lg">
                       {currentCompanyName ? currentCompanyName.charAt(0).toUpperCase() : "F"}
                     </span>
                   </div>
                 )}
-                <span className="font-bold text-xl text-foreground">
+                <span className="font-bold text-xl text-foreground hidden sm:inline truncate max-w-[150px]">
                   {currentCompanyName ? currentCompanyName.toUpperCase() : "FASE"}
                 </span>
               </Link>
@@ -240,28 +221,36 @@ export default async function DashboardLayout({
               </div>
             </div>
 
-            {/* User menu */}
-            <div className="flex items-center gap-4">
+            {/* Right side: user controls + mobile hamburger */}
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-4 shrink-0">
               {showAppSwitcher && user.apps && (
-                <AppSwitcher
-                  apps={user.apps}
-                  currentAppId={user.currentAppId || null}
-                  currentAppCode={currentAppCode}
-                  translations={appTranslations}
-                />
+                <div className="hidden sm:block">
+                  <AppSwitcher
+                    apps={user.apps}
+                    currentAppId={user.currentAppId || null}
+                    currentAppCode={currentAppCode}
+                    translations={appTranslations}
+                  />
+                </div>
               )}
               {showCompanySwitcher && (
-                <CompanySwitcherWrapper
-                  companies={companies}
-                  currentCompanyId={user.currentCompanyId}
-                  currentCompanyName={currentCompanyName}
-                  currentCompanyLogo={currentCompanyLogo}
-                  isSuperAdmin={isSuperAdmin}
-                  translations={companySwitcherTranslations}
-                />
+                <div className="hidden sm:block">
+                  <CompanySwitcherWrapper
+                    companies={companies}
+                    currentCompanyId={user.currentCompanyId}
+                    currentCompanyName={currentCompanyName}
+                    currentCompanyLogo={currentCompanyLogo}
+                    isSuperAdmin={isSuperAdmin}
+                    translations={companySwitcherTranslations}
+                  />
+                </div>
               )}
-              <ThemeToggle />
-              <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
+              <div className="hidden sm:block">
+                <ThemeToggle />
+              </div>
+              <div className="hidden sm:block">
+                <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
+              </div>
               <UserMenu
                 user={{
                   name: user?.name,
@@ -281,17 +270,35 @@ export default async function DashboardLayout({
                 showActivity={currentAppCode === AppType.FASE}
                 userApps={user.apps || []}
               />
+              {/* Mobile menu button - on the RIGHT */}
+              <MobileNav
+                currentAppCode={currentAppCode}
+                translations={{
+                  menu: t("menu"),
+                  home: t("home"),
+                  bigRocks: t("bigRocks"),
+                  calendar: t("calendar"),
+                  dashboard: okrNavTranslations.dashboard,
+                  objectives: okrNavTranslations.objectives,
+                  teams: okrNavTranslations.teams,
+                  quarters: okrNavTranslations.quarters,
+                }}
+                isAdmin={isAdmin}
+                isSupervisor={isSupervisor}
+                adminLabel={t("admin")}
+                supervisorLabel={t("supervisor")}
+              />
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">{children}</main>
 
       {/* Footer */}
       <footer className="border-t bg-card mt-auto">
-        <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6">
           <div className="text-center text-sm text-muted-foreground">
             <p>
               Plataforma de metodologia de gestio Estrategica - Ametller Origen | © {new Date().getFullYear()}
