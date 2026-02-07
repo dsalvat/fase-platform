@@ -131,11 +131,11 @@ export default async function BigRockDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header with actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <Link href={`/big-rocks?month=${bigRock.month}`}>
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver a Big Rocks
+            Volver
           </Button>
         </Link>
 
@@ -149,8 +149,8 @@ export default async function BigRockDetailPage({ params }: PageProps) {
             )}
             <Link href={`/big-rocks/${id}/edit`}>
               <Button size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
+                <Edit className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Editar</span>
               </Button>
             </Link>
             {!isConfirmed && (
@@ -299,7 +299,7 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       {/* TARs section */}
       <Card data-tour="tars-section">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <CardTitle>
               TARs ({bigRock.tars.length}/{bigRock.numTars})
             </CardTitle>
@@ -331,17 +331,17 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       {/* Key Meetings section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+              <Calendar className="h-5 w-5 shrink-0" />
               Reuniones Clave ({bigRock.keyMeetings.length})
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {canEdit && (
                 <Link href={`/big-rocks/${id}/meetings/new`}>
                   <Button size="sm" variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Anadir Reunion
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Anadir Reunion</span>
                   </Button>
                 </Link>
               )}
@@ -380,9 +380,9 @@ export default async function BigRockDetailPage({ params }: PageProps) {
       {/* Key People section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <Users className="h-5 w-5 shrink-0" />
               Personas Clave ({bigRock.keyPeople.length})
             </CardTitle>
             {canEdit && (

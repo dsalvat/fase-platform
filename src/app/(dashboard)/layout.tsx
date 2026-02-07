@@ -234,20 +234,16 @@ export default async function DashboardLayout({
                 </div>
               )}
               {showCompanySwitcher && (
-                <div className="hidden sm:block">
-                  <CompanySwitcherWrapper
-                    companies={companies}
-                    currentCompanyId={user.currentCompanyId}
-                    currentCompanyName={currentCompanyName}
-                    currentCompanyLogo={currentCompanyLogo}
-                    isSuperAdmin={isSuperAdmin}
-                    translations={companySwitcherTranslations}
-                  />
-                </div>
+                <CompanySwitcherWrapper
+                  companies={companies}
+                  currentCompanyId={user.currentCompanyId}
+                  currentCompanyName={currentCompanyName}
+                  currentCompanyLogo={currentCompanyLogo}
+                  isSuperAdmin={isSuperAdmin}
+                  translations={companySwitcherTranslations}
+                />
               )}
-              <div className="hidden sm:block">
-                <ThemeToggle />
-              </div>
+              <ThemeToggle />
               <div className="hidden sm:block">
                 <LanguageSelector currentLocale={currentLocale} userId={user?.id} />
               </div>
