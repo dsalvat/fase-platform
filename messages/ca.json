@@ -34,6 +34,8 @@
     "errorDeactivated": "El teu compte ha estat desactivat. Contacta amb l'administrador per a mes informacio."
   },
   "nav": {
+    "menu": "Menu",
+    "home": "Els meus Big Rocks",
     "bigRocks": "Big Rocks",
     "keyPeople": "Persones Clau",
     "calendar": "Calendari",

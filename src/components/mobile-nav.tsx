@@ -88,7 +88,10 @@ export function MobileNav({
   const renderLinks = (links: typeof faseLinks) => {
     return links.map((link) => {
       const Icon = link.icon;
-      const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+      // For /okr (dashboard), only match exactly to avoid highlighting when on /okr/equipos etc.
+      const isActive = link.href === "/okr"
+        ? pathname === "/okr"
+        : pathname === link.href || pathname.startsWith(link.href + "/");
       return (
         <SheetClose asChild key={link.href}>
           <Link
@@ -119,7 +122,7 @@ export function MobileNav({
       <SheetContent side="right" className="w-64 sm:w-72 pt-10">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-left">
-            {currentAppCode === AppType.OKR ? "OKR" : "FASE"}
+            {translations.menu}
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-2">

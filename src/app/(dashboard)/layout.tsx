@@ -154,7 +154,7 @@ export default async function DashboardLayout({
       translations={onboardingTranslations}
       onboardingCompleted={onboardingCompleted}
     >
-      <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
         {/* Navigation progress indicator */}
         <Suspense fallback={null}>
           <NavigationProgress />
@@ -295,7 +295,7 @@ export default async function DashboardLayout({
       </nav>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 w-full flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="border-t bg-card mt-auto">
