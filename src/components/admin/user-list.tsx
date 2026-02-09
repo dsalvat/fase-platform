@@ -52,7 +52,7 @@ interface UserListTranslations {
 
 interface UserListProps {
   users: UserListItem[];
-  allUsers: { id: string; name: string | null; email: string }[];
+  allUsers: { id: string; name: string | null; email: string; companyIds: string[] }[];
   currentUserId: string;
   companies?: Company[];
   apps?: App[];
@@ -161,7 +161,7 @@ export function UserList({
 
 interface UserCardProps {
   user: UserListItem;
-  allUsers: { id: string; name: string | null; email: string }[];
+  allUsers: { id: string; name: string | null; email: string; companyIds: string[] }[];
   isCurrentUser: boolean;
   companies: Company[];
   apps: App[];
@@ -183,8 +183,9 @@ function UserCard({
   const statusInfo = statusConfig[user.status];
   const RoleIcon = roleIcons[user.role];
 
-  // Filter out the user from potential supervisors (can't supervise themselves)
-  const potentialSupervisors = allUsers.filter((u) => u.id !== user.id);
+  // Get potential supervisors filtered by company (can't supervise themselves)
+  const getSupervisorsForCompany = (companyId: string) =>
+    allUsers.filter((u) => u.id !== user.id && u.companyIds.includes(companyId));
 
   return (
     <Card className={cn(
@@ -383,7 +384,7 @@ function UserCard({
                       userId={user.id}
                       currentSupervisorId={uc.supervisorId}
                       companyId={uc.companyId}
-                      potentialSupervisors={potentialSupervisors}
+                      potentialSupervisors={getSupervisorsForCompany(uc.companyId)}
                     />
                   </div>
                 </div>

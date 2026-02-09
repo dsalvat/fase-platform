@@ -153,11 +153,19 @@ async function getAllUsersForSelector(companyId: string | null, isSuperAdmin: bo
       id: true,
       name: true,
       email: true,
+      companies: {
+        select: { companyId: true },
+      },
     },
     orderBy: { name: "asc" },
   });
 
-  return users;
+  return users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    companyIds: u.companies.map((c) => c.companyId),
+  }));
 }
 
 export default async function AdminUsuariosPage() {
