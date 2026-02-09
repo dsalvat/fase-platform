@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAuth, canViewSuperviseePlanning } from "@/lib/auth";
 import { getCurrentCompanyId } from "@/lib/company-context";
+import { evaluateMonthPlanning } from "@/lib/ai-evaluation";
 import { UserRole } from "@prisma/client";
 import type {
   MonthPlanningStatus,
@@ -345,6 +346,10 @@ export async function getSuperviseeMonthPlanning(
       id: true,
       isPlanningConfirmed: true,
       planningConfirmedAt: true,
+      aiScore: true,
+      aiObservations: true,
+      aiRecommendations: true,
+      aiRisks: true,
     },
   });
 
@@ -456,5 +461,47 @@ export async function getSuperviseeMonthPlanning(
     planningConfirmedAt: openMonth?.planningConfirmedAt ?? null,
     bigRocks: bigRocksWithFeedback,
     monthFeedback,
+    monthAI: openMonth
+      ? {
+          score: openMonth.aiScore,
+          observations: openMonth.aiObservations,
+          recommendations: openMonth.aiRecommendations,
+          risks: openMonth.aiRisks,
+        }
+      : null,
   };
+}
+
+/**
+ * Generate AI evaluation for the entire month planning.
+ * Only supervisors/admins can call this.
+ */
+export async function generateMonthAIEvaluation(
+  targetUserId: string,
+  month: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role as UserRole;
+
+    if (userRole !== "SUPERVISOR" && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+      return {
+        success: false,
+        error: "No tienes permiso para generar evaluaciones IA",
+      };
+    }
+
+    await evaluateMonthPlanning(targetUserId, month);
+
+    revalidatePath("/supervisor");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error generating month AI evaluation:", error);
+    return {
+      success: false,
+      error: "Error al generar la evaluacion IA del mes",
+    };
+  }
 }

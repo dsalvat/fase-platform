@@ -140,3 +140,128 @@ ${meetingsText}
 
   revalidatePath(`/big-rocks/${bigRockId}`);
 }
+
+const MONTH_EVALUATION_SYSTEM_PROMPT = `Eres un evaluador experto en planificacion estrategica y metodologia FASE (objetivos mensuales de alto rendimiento).
+
+Tu tarea es evaluar la calidad GLOBAL de la planificacion mensual de un usuario, considerando todos sus Big Rocks (objetivos) en conjunto.
+
+Evalua segun estos criterios:
+1. **Coherencia**: Los objetivos del mes son coherentes entre si y forman un plan estrategico solido?
+2. **Equilibrio**: Hay un balance adecuado entre los distintos objetivos (no todo en una sola area)?
+3. **Ambicion**: El nivel de ambicion es adecuado para un mes (ni demasiado ni demasiado poco)?
+4. **Cobertura**: Los indicadores de exito cubren aspectos clave del rendimiento?
+5. **Viabilidad**: Es realista completar todos los objetivos en el mes con las TARs planificadas?
+
+IMPORTANTE:
+- Responde EXCLUSIVAMENTE con un JSON valido, sin markdown ni texto adicional.
+- El JSON debe tener exactamente esta estructura:
+{
+  "score": <numero entero de 0 a 100>,
+  "observations": "<texto con observaciones sobre la calidad global de la planificacion>",
+  "recommendations": "<texto con recomendaciones concretas de mejora>",
+  "risks": "<texto con riesgos o alertas identificados>"
+}
+
+- El score debe reflejar la calidad global de la planificacion mensual (0=muy pobre, 100=excelente)
+- Las observaciones deben valorar el conjunto, no repetir lo dicho en evaluaciones individuales
+- Las recomendaciones deben ser accionables a nivel de planificacion mensual
+- Los riesgos deben identificar posibles conflictos entre objetivos u obstaculos globales
+- Responde siempre en espanol
+- Se conciso pero completo (cada campo entre 2-4 frases)`;
+
+/**
+ * Evaluates the entire month planning using Claude AI and saves results on OpenMonth.
+ * Summarizes all Big Rocks for the given user/month.
+ */
+export async function evaluateMonthPlanning(
+  userId: string,
+  month: string
+): Promise<void> {
+  const bigRocks = await prisma.bigRock.findMany({
+    where: { userId, month },
+    include: {
+      tars: { select: { description: true, status: true } },
+      keyMeetings: { select: { title: true, objective: true, date: true } },
+      keyPeople: { include: { user: { select: { name: true } } } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (bigRocks.length === 0) {
+    console.error(`AI month evaluation: no Big Rocks for user ${userId} month ${month}`);
+    return;
+  }
+
+  const bigRocksText = bigRocks
+    .map((br, i) => {
+      const tarsText =
+        br.tars.length > 0
+          ? br.tars.map((t, j) => `  ${j + 1}. ${t.description} (${t.status})`).join("\n")
+          : "  Ninguna definida";
+
+      const meetingsCount = br.keyMeetings.length;
+      const peopleText =
+        br.keyPeople.length > 0
+          ? br.keyPeople.map((p) => p.user.name || "Sin nombre").join(", ")
+          : "Ninguna";
+
+      return `### Big Rock ${i + 1}: ${br.title}
+- **Descripcion**: ${br.description}
+- **Indicador (KPI)**: ${br.indicator}
+- **TARs planificadas**: ${br.numTars}
+- **Reuniones clave**: ${meetingsCount}
+- **Personas clave**: ${peopleText}
+- **Score IA individual**: ${br.aiScore !== null ? `${br.aiScore}/100` : "No evaluado"}
+- **TARs definidas**:
+${tarsText}`;
+    })
+    .join("\n\n");
+
+  const userMessage = `Evalua la planificacion mensual global del usuario para el mes ${month}.
+
+El usuario tiene ${bigRocks.length} Big Rocks este mes:
+
+${bigRocksText}`;
+
+  const response = await anthropic.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: AI_EVALUATION_MAX_TOKENS,
+    system: MONTH_EVALUATION_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: userMessage }],
+  });
+
+  const content = response.content[0];
+  if (content.type !== "text") {
+    console.error("AI month evaluation: unexpected response type", content.type);
+    return;
+  }
+
+  const result = parseEvaluationResponse(content.text);
+  if (!result) {
+    console.error("AI month evaluation: failed to parse response", content.text);
+    return;
+  }
+
+  // Upsert the OpenMonth record with AI evaluation
+  await prisma.openMonth.upsert({
+    where: {
+      month_userId: { month, userId },
+    },
+    update: {
+      aiScore: result.score,
+      aiObservations: result.observations,
+      aiRecommendations: result.recommendations,
+      aiRisks: result.risks,
+    },
+    create: {
+      month,
+      userId,
+      aiScore: result.score,
+      aiObservations: result.observations,
+      aiRecommendations: result.recommendations,
+      aiRisks: result.risks,
+    },
+  });
+
+  revalidatePath("/supervisor");
+}

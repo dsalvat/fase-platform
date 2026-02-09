@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
 import { AIFeedbackSection } from "@/components/feedback/ai-feedback-section";
+import { MonthAIFeedbackSection } from "@/components/feedback/month-ai-feedback-section";
 import { formatMonthLabel } from "@/lib/month-helpers";
 import { UserRole } from "@prisma/client";
 import {
@@ -300,13 +301,23 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
               {tFeedback("monthFeedback")}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <FeedbackForm
-              targetType="MONTH_PLANNING"
-              targetId={openMonth.id}
-              existingFeedback={planningData.monthFeedback}
-              compact
+          <CardContent className="space-y-4">
+            {/* Month AI evaluation */}
+            <MonthAIFeedbackSection
+              userId={userId}
+              month={month}
+              monthAI={planningData.monthAI}
             />
+
+            {/* Supervisor month feedback */}
+            <div className="pt-4 border-t">
+              <FeedbackForm
+                targetType="MONTH_PLANNING"
+                targetId={openMonth.id}
+                existingFeedback={planningData.monthFeedback}
+                compact
+              />
+            </div>
           </CardContent>
         </Card>
       )}

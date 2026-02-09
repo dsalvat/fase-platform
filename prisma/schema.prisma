@@ -330,6 +330,12 @@ model OpenMonth {
   isPlanningConfirmed   Boolean   @default(false)
   planningConfirmedAt   DateTime?
 
+  // AI evaluation of the month planning
+  aiScore               Int?
+  aiObservations        String?
+  aiRecommendations     String?
+  aiRisks               String?
+
   @@unique([month, userId])
   @@index([userId])
   @@index([month])

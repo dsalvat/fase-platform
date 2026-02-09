@@ -80,6 +80,12 @@ export interface SuperviseePlanningData {
     feedback: FeedbackWithSupervisor | null;
   }>;
   monthFeedback: FeedbackWithSupervisor | null;
+  monthAI: {
+    score: number | null;
+    observations: string | null;
+    recommendations: string | null;
+    risks: string | null;
+  } | null;
 }
 
 export { FeedbackTargetType };
