@@ -13,12 +13,13 @@ import { UserRole, UserStatus, AppType } from "@prisma/client";
  */
 export async function updateUserRole(
   userId: string,
-  role: UserRole
+  role: UserRole,
+  targetCompanyId?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await requireRole([UserRole.ADMIN, UserRole.SUPERADMIN]);
 
-    const companyId = await getCurrentCompanyId();
+    const companyId = targetCompanyId || await getCurrentCompanyId();
     if (!companyId) {
       return { success: false, error: "No hay empresa seleccionada" };
     }
@@ -47,12 +48,13 @@ export async function updateUserRole(
  */
 export async function assignSupervisor(
   userId: string,
-  supervisorId: string | null
+  supervisorId: string | null,
+  targetCompanyId?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await requireRole([UserRole.ADMIN, UserRole.SUPERADMIN]);
 
-    const companyId = await getCurrentCompanyId();
+    const companyId = targetCompanyId || await getCurrentCompanyId();
     if (!companyId) {
       return { success: false, error: "No hay empresa seleccionada" };
     }

@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 interface UserRoleSelectProps {
   userId: string;
   currentRole: UserRole;
+  companyId: string;
   disabled?: boolean;
 }
 
@@ -24,6 +25,7 @@ const roles: UserRole[] = ["USER", "SUPERVISOR", "ADMIN"];
 export function UserRoleSelect({
   userId,
   currentRole,
+  companyId,
   disabled = false,
 }: UserRoleSelectProps) {
   const [isPending, startTransition] = useTransition();
@@ -32,7 +34,7 @@ export function UserRoleSelect({
   const handleChange = (value: string) => {
     setError(null);
     startTransition(async () => {
-      const result = await updateUserRole(userId, value as UserRole);
+      const result = await updateUserRole(userId, value as UserRole, companyId);
       if (!result.success) {
         setError(result.error || "Error al actualizar");
       }

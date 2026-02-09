@@ -318,28 +318,8 @@ function UserCard({
         {/* Expanded edit section */}
         {isExpanded && (
           <div className="mt-4 pt-4 border-t space-y-4">
-            <div className={cn(
-              "grid gap-3 sm:gap-4",
-              isSuperAdmin ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"
-            )}>
-              {/* Role selector */}
-              <div>
-                <Label className="block text-sm font-medium text-foreground mb-1">
-                  {t.role}
-                </Label>
-                <UserRoleSelect
-                  userId={user.id}
-                  currentRole={user.role}
-                  disabled={isCurrentUser}
-                />
-                {isCurrentUser && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t.cannotChangeOwnRole}
-                  </p>
-                )}
-              </div>
-
-              {/* Status selector */}
+            {/* Status selector (global) */}
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
               <div>
                 <Label className="block text-sm font-medium text-foreground mb-1">
                   {t.status}
@@ -355,25 +335,63 @@ function UserCard({
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* Supervisor selector */}
-              <div>
-                <Label className="block text-sm font-medium text-foreground mb-1">
-                  {t.supervisor}
-                </Label>
-                <UserSupervisorSelect
-                  userId={user.id}
-                  currentSupervisorId={user.supervisor?.id || null}
-                  potentialSupervisors={potentialSupervisors}
-                />
-              </div>
+            {/* Per-company role and supervisor */}
+            <div className="space-y-2">
+              {user.companies.map((uc) => (
+                <div
+                  key={uc.companyId}
+                  className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 p-3 rounded-lg bg-muted/40 border border-border/50"
+                >
+                  {/* Company name */}
+                  <div className="flex items-center gap-1.5 sm:w-40 shrink-0">
+                    {uc.company.logo ? (
+                      <div className="relative w-4 h-4 rounded overflow-hidden shrink-0">
+                        <Image
+                          src={uc.company.logo}
+                          alt={uc.company.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <Building2 className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <span className="text-sm font-medium truncate">{uc.company.name}</span>
+                  </div>
 
-              {/* Company selector (only for SUPERADMIN) */}
+                  {/* Role selector */}
+                  <div className="flex-1 min-w-0">
+                    <Label className="block text-xs text-muted-foreground mb-1">
+                      {t.role}
+                    </Label>
+                    <UserRoleSelect
+                      userId={user.id}
+                      currentRole={uc.role}
+                      companyId={uc.companyId}
+                      disabled={isCurrentUser}
+                    />
+                  </div>
+
+                  {/* Supervisor selector */}
+                  <div className="flex-1 min-w-0">
+                    <Label className="block text-xs text-muted-foreground mb-1">
+                      {t.supervisor}
+                    </Label>
+                    <UserSupervisorSelect
+                      userId={user.id}
+                      currentSupervisorId={uc.supervisorId}
+                      companyId={uc.companyId}
+                      potentialSupervisors={potentialSupervisors}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {/* Add company (SUPERADMIN only) */}
               {isSuperAdmin && (
-                <div>
-                  <Label className="block text-sm font-medium text-foreground mb-1">
-                    {t.company}
-                  </Label>
+                <div className="pt-1">
                   <UserCompanySelect
                     userId={user.id}
                     userCompanies={user.companies.map(uc => ({ companyId: uc.companyId }))}
@@ -386,6 +404,12 @@ function UserCard({
                 </div>
               )}
             </div>
+
+            {isCurrentUser && (
+              <p className="text-xs text-muted-foreground">
+                {t.cannotChangeOwnRole}
+              </p>
+            )}
 
             {/* Apps selector */}
             {apps.length > 0 && (

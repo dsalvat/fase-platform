@@ -14,12 +14,14 @@ import { Loader2 } from "lucide-react";
 interface UserSupervisorSelectProps {
   userId: string;
   currentSupervisorId: string | null;
+  companyId: string;
   potentialSupervisors: { id: string; name: string | null; email: string }[];
 }
 
 export function UserSupervisorSelect({
   userId,
   currentSupervisorId,
+  companyId,
   potentialSupervisors,
 }: UserSupervisorSelectProps) {
   const [isPending, startTransition] = useTransition();
@@ -30,7 +32,7 @@ export function UserSupervisorSelect({
     const supervisorId = value === "none" ? null : value;
 
     startTransition(async () => {
-      const result = await assignSupervisor(userId, supervisorId);
+      const result = await assignSupervisor(userId, supervisorId, companyId);
       if (!result.success) {
         setError(result.error || "Error al asignar supervisor");
       }

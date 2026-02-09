@@ -15,7 +15,13 @@ export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'statu
   currentCompanyId: string | null;
   supervisor: Pick<User, 'id' | 'name' | 'email'> | null; // Per-company supervisor from UserCompany
   company: { id: string; name: string; logo: string | null } | null; // First/current company for display
-  companies: { companyId: string; company: { id: string; name: string; logo: string | null } }[]; // All companies via UserCompany
+  companies: {
+    companyId: string;
+    role: UserRole;
+    supervisorId: string | null;
+    supervisor: Pick<User, 'id' | 'name' | 'email'> | null;
+    company: { id: string; name: string; logo: string | null };
+  }[]; // All companies via UserCompany with per-company role/supervisor
   apps?: { appId: string; app: { id: string; code: AppType; name: string } }[]; // All apps via UserApp
   _count: {
     supervisees: number; // Per-company supervisee count

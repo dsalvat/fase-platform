@@ -99,6 +99,9 @@ async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
       company: user.companies[0]?.company || null,
       companies: user.companies.map((uc) => ({
         companyId: uc.company.id,
+        role: uc.role,
+        supervisorId: uc.supervisorId,
+        supervisor: uc.supervisor,
         company: uc.company,
       })),
       apps: user.apps.map((ua) => ({
