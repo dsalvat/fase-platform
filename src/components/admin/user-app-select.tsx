@@ -3,6 +3,12 @@
 import { useState, useTransition } from "react";
 import { Target, BarChart3, Loader2, Plus, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { addUserToApp, removeUserFromApp } from "@/app/actions/users";
 import { AppType } from "@prisma/client";
 
@@ -38,7 +44,6 @@ export function UserAppSelect({
 }: UserAppSelectProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
 
   // Get IDs of apps user already has
   const userAppIds = new Set(userApps.map((ua) => ua.appId));
@@ -51,7 +56,6 @@ export function UserAppSelect({
 
   const handleAddApp = (appId: string) => {
     setError(null);
-    setShowDropdown(false);
     startTransition(async () => {
       const result = await addUserToApp(userId, appId);
       if (!result.success) {
@@ -109,45 +113,33 @@ export function UserAppSelect({
         </div>
       )}
 
-      {/* Add app dropdown */}
+      {/* Add app dropdown - uses Radix portal to escape overflow-hidden */}
       {availableApps.length > 0 && !disabled && (
-        <div className="relative">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            {t.addApp || "Agregar app"}
-            <ChevronDown className="w-3 h-3 ml-1" />
-          </Button>
-
-          {showDropdown && (
-            <>
-              {/* Backdrop to close dropdown */}
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowDropdown(false)}
-              />
-              {/* Dropdown menu */}
-              <div className="absolute left-0 top-full mt-1 z-20 bg-white border rounded-md shadow-lg min-w-[200px] py-1">
-                {availableApps.map((app) => (
-                  <button
-                    key={app.id}
-                    type="button"
-                    onClick={() => handleAddApp(app.id)}
-                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-100 text-left text-sm"
-                  >
-                    {APP_ICONS[app.code]}
-                    <span>{app.name}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              {t.addApp || "Agregar app"}
+              <ChevronDown className="w-3 h-3 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {availableApps.map((app) => (
+              <DropdownMenuItem
+                key={app.id}
+                onClick={() => handleAddApp(app.id)}
+              >
+                {APP_ICONS[app.code]}
+                <span>{app.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       {error && <p className="text-xs text-red-500">{error}</p>}
