@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
+import { AIFeedbackSection } from "@/components/feedback/ai-feedback-section";
 import { formatMonthLabel } from "@/lib/month-helpers";
 import { UserRole } from "@prisma/client";
 import {
@@ -262,7 +263,16 @@ export default async function SuperviseePlanningPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {/* Feedback section */}
+                {/* AI Feedback section */}
+                <AIFeedbackSection
+                  bigRockId={bigRock.id}
+                  aiScore={bigRock.aiScore}
+                  aiObservations={bigRock.aiObservations}
+                  aiRecommendations={bigRock.aiRecommendations}
+                  aiRisks={bigRock.aiRisks}
+                />
+
+                {/* Supervisor Feedback section */}
                 <div className="pt-4 border-t">
                   <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />

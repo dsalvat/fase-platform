@@ -54,6 +54,9 @@ export interface SuperviseePlanningData {
     numTars: number;
     status: string;
     aiScore: number | null;
+    aiObservations: string | null;
+    aiRecommendations: string | null;
+    aiRisks: string | null;
     tars: Array<{
       id: string;
       description: string;

@@ -9,7 +9,7 @@ import {
   createBigRockSchema,
   updateBigRockSchema,
 } from "@/lib/validations/big-rock";
-import { BigRockStatus, FaseCategory } from "@prisma/client";
+import { BigRockStatus, FaseCategory, UserRole } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
 import { evaluateBigRock } from "@/lib/ai-evaluation";
 import {
@@ -545,6 +545,53 @@ export async function confirmBigRock(id: string): Promise<{
     return {
       success: false,
       error: "Error al confirmar el Big Rock",
+    };
+  }
+}
+
+/**
+ * Server action to generate AI evaluation for a Big Rock.
+ * Can be called by supervisors/admins when no AI evaluation exists yet.
+ */
+export async function generateAIEvaluation(bigRockId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const user = await requireAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (user as any).role as UserRole;
+
+    if (userRole !== "SUPERVISOR" && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
+      return {
+        success: false,
+        error: "No tienes permiso para generar evaluaciones IA",
+      };
+    }
+
+    const bigRock = await prisma.bigRock.findUnique({
+      where: { id: bigRockId },
+      select: { id: true, month: true },
+    });
+
+    if (!bigRock) {
+      return {
+        success: false,
+        error: "Big Rock no encontrado",
+      };
+    }
+
+    await evaluateBigRock(bigRockId);
+
+    revalidatePath(`/big-rocks/${bigRockId}`);
+    revalidatePath("/supervisor");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error generating AI evaluation:", error);
+    return {
+      success: false,
+      error: "Error al generar la evaluacion IA",
     };
   }
 }
