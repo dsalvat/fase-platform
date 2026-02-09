@@ -275,10 +275,13 @@
     "superadmin": "Super Administrador"
   },
   "categories": {
+    "title": "Categoria FASE",
     "focus": "Focus",
     "atencion": "Atencio",
     "sistemas": "Sistemes",
-    "energia": "Energia"
+    "energia": "Energia",
+    "none": "Sense categoria",
+    "help": "Classifica el teu objectiu segons la metodologia FASE (opcional)"
   },
   "settings": {
     "title": "Configuracio",

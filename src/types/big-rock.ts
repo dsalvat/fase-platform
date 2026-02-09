@@ -1,4 +1,4 @@
-import { BigRock, TAR, KeyMeeting, User, BigRockStatus } from "@prisma/client";
+import { BigRock, TAR, KeyMeeting, User, BigRockStatus, FaseCategory } from "@prisma/client";
 
 /**
  * Key Person (User) linked to Big Rock
@@ -39,7 +39,7 @@ export type BigRockWithCounts = BigRock & {
  */
 export type BigRockListItem = Pick<
   BigRock,
-  'id' | 'title' | 'status' | 'month' | 'numTars' | 'aiScore' | 'createdAt'
+  'id' | 'title' | 'status' | 'month' | 'numTars' | 'aiScore' | 'category' | 'createdAt'
 > & {
   _count?: {
     tars: number;
@@ -57,6 +57,7 @@ export interface BigRockFormData {
   numTars: number;
   month: string;
   status?: BigRockStatus;
+  category?: FaseCategory | null;
 }
 
 /**

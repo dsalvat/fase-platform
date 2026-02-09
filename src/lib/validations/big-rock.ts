@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BigRockStatus } from "@prisma/client";
+import { BigRockStatus, FaseCategory } from "@prisma/client";
 
 /**
  * Schema for creating a new Big Rock
@@ -36,6 +36,13 @@ export const createBigRockSchema = z.object({
     })
     .optional()
     .default("CREADO"),
+
+  category: z
+    .nativeEnum(FaseCategory, {
+      errorMap: () => ({ message: "Categoría FASE inválida" }),
+    })
+    .nullable()
+    .optional(),
 });
 
 /**

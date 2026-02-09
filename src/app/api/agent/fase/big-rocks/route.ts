@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
       title: br.title,
       description: br.description,
       indicator: br.indicator,
+      category: br.category,
       month: br.month,
       status: br.status,
       numTars: br.numTars,
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, description, indicator, numTars, month, keyPeople, keyMeetings } = body;
+    const { title, description, indicator, numTars, month, category, keyPeople, keyMeetings } = body;
 
     // Validate required fields
     if (!title || !month) {
@@ -142,6 +143,7 @@ export async function POST(request: NextRequest) {
           indicator: indicator || "",
           numTars: numTars || 3,
           month,
+          category: category || null,
           status: BigRockStatus.CREADO,
         },
       });

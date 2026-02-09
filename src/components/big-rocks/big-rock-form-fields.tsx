@@ -13,6 +13,7 @@ import { BigRockWithCounts } from "@/types/big-rock";
 import { generateMonthOptions, getCurrentMonth, getNextMonth } from "@/lib/month-helpers";
 import { BigRockUserSelector } from "./big-rock-user-selector";
 import { BigRockKeyMeetingInline } from "./big-rock-key-meeting-inline";
+import { categoryConfig } from "./fase-category-badge";
 import { InlineKeyMeeting } from "@/types/inline-forms";
 import { Users, Calendar } from "lucide-react";
 
@@ -216,6 +217,38 @@ export function BigRockFormFields({
           </p>
         </div>
       )}
+
+      {/* FASE Category (always editable) */}
+      <div className="space-y-2">
+        <Label htmlFor="category">Categoría FASE</Label>
+        <Select
+          name="category"
+          defaultValue={defaultValues?.category || "none"}
+          disabled={isPending}
+        >
+          <SelectTrigger id="category">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">
+              <span className="text-muted-foreground">Sin categoría</span>
+            </SelectItem>
+            {(Object.entries(categoryConfig) as [string, { label: string; dot: string }][]).map(
+              ([value, config]) => (
+                <SelectItem key={value} value={value}>
+                  <span className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${config.dot}`} />
+                    {config.label}
+                  </span>
+                </SelectItem>
+              )
+            )}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Clasifica tu objetivo según la metodología FASE (opcional)
+        </p>
+      </div>
 
       {/* Status (only in edit mode when confirmed or admin can reset) */}
       {mode === "edit" && (isConfirmed || canResetStatus) && (

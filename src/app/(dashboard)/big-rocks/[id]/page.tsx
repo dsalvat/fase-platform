@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth, canAccessBigRock } from "@/lib/auth";
 import { BigRockDeleteButton } from "@/components/big-rocks/big-rock-delete-button";
 import { BigRockConfirmButton } from "@/components/big-rocks/big-rock-confirm-button";
+import { FaseCategoryBadge } from "@/components/big-rocks/fase-category-badge";
 import { TARList } from "@/components/tars/tar-list";
 import { KeyMeetingList } from "@/components/key-meetings";
 import { FeedbackDisplay } from "@/components/feedback";
@@ -188,9 +189,14 @@ export default async function BigRockDetailPage({ params }: PageProps) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <CardTitle className="text-2xl">{bigRock.title}</CardTitle>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2">
-                <StatusIcon className={statusInfo.color} />
-                <span>{statusInfo.label}</span>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                <div className="flex items-center gap-1.5">
+                  <StatusIcon className={statusInfo.color} />
+                  <span>{statusInfo.label}</span>
+                </div>
+                {bigRock.category && (
+                  <FaseCategoryBadge category={bigRock.category} size="md" />
+                )}
               </div>
             </div>
           </div>
@@ -214,6 +220,16 @@ export default async function BigRockDetailPage({ params }: PageProps) {
             <div>
               <p className="text-sm text-muted-foreground">Mes</p>
               <p className="font-medium">{formatMonthLabel(bigRock.month)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Categoría FASE</p>
+              <div className="mt-0.5">
+                {bigRock.category ? (
+                  <FaseCategoryBadge category={bigRock.category} size="sm" />
+                ) : (
+                  <p className="text-sm text-muted-foreground">—</p>
+                )}
+              </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">TARs Planificadas</p>

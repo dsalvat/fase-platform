@@ -9,7 +9,7 @@ import {
   createBigRockSchema,
   updateBigRockSchema,
 } from "@/lib/validations/big-rock";
-import { BigRockStatus } from "@prisma/client";
+import { BigRockStatus, FaseCategory } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
 import {
   logBigRockCreated,
@@ -34,6 +34,11 @@ export async function createBigRock(
     const companyId = await getCurrentCompanyId();
 
     // Extract form data
+    const categoryRaw = formData.get("category") as string | null;
+    const category = categoryRaw && categoryRaw !== "none"
+      ? categoryRaw as FaseCategory
+      : null;
+
     const rawData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -41,6 +46,7 @@ export async function createBigRock(
       numTars: Number(formData.get("numTars")),
       month: formData.get("month") as string,
       status: (formData.get("status") as BigRockStatus) || "CREADO",
+      category,
     };
 
     // Validate with Zod
@@ -210,6 +216,9 @@ export async function updateBigRock(
     }
 
     // Extract form data
+    const categoryRaw = formData.get("category") as string | null;
+    const category = categoryRaw === "none" ? null : categoryRaw as FaseCategory | null;
+
     const rawData = {
       id,
       title: formData.get("title") as string | undefined,
@@ -217,6 +226,7 @@ export async function updateBigRock(
       indicator: formData.get("indicator") as string | undefined,
       numTars: formData.get("numTars") ? Number(formData.get("numTars")) : undefined,
       status: formData.get("status") as BigRockStatus | undefined,
+      ...(formData.has("category") && { category }),
     };
 
     // Validate with Zod

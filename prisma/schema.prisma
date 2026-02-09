@@ -41,6 +41,14 @@ enum BigRockStatus {
   FINALIZADO          // Completado
 }
 
+// Categorias FASE para Big Rocks (opcional)
+enum FaseCategory {
+  FOCUS
+  ATENCION
+  SISTEMAS
+  ENERGIA
+}
+
 // Estados de TAR
 enum TarStatus {
   PENDIENTE
@@ -328,6 +336,7 @@ model BigRock {
   indicator       String         // Métrica para medir el éxito
   numTars         Int            // Número de TAR planificadas
   status          BigRockStatus  @default(CREADO)
+  category        FaseCategory?  // Categoria FASE (opcional)
 
   // Mes al que pertenece (formato: YYYY-MM)
   month           String

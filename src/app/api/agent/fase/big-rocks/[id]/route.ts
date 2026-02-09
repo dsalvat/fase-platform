@@ -63,6 +63,7 @@ export async function GET(
         title: bigRock.title,
         description: bigRock.description,
         indicator: bigRock.indicator,
+        category: bigRock.category,
         month: bigRock.month,
         status: bigRock.status,
         numTars: bigRock.numTars,
@@ -115,7 +116,7 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { title, description, indicator, numTars } = body;
+    const { title, description, indicator, numTars, category } = body;
 
     // Verify ownership
     const existing = await prisma.bigRock.findFirst({
@@ -139,6 +140,7 @@ export async function PATCH(
         ...(description !== undefined && { description }),
         ...(indicator !== undefined && { indicator }),
         ...(numTars && { numTars }),
+        ...(category !== undefined && { category: category || null }),
       },
     });
 
