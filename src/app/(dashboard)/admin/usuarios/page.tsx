@@ -27,12 +27,21 @@ async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
       email: true,
       name: true,
       image: true,
-      role: true,
       status: true,
       createdAt: true,
       currentCompanyId: true,
       companies: {
         select: {
+          companyId: true,
+          role: true,
+          supervisorId: true,
+          supervisor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
           company: {
             select: {
               id: true,
@@ -54,38 +63,53 @@ async function getUsers(companyId: string | null, isSuperAdmin: boolean) {
           },
         },
       },
-      supervisor: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      _count: {
-        select: {
-          supervisees: true,
-        },
-      },
     },
     orderBy: [
-      { role: "desc" }, // ADMIN first, then SUPERVISOR, then USER
       { createdAt: "desc" },
     ],
   });
 
-  // Transform companies structure for the UI
-  return users.map((user) => ({
-    ...user,
-    company: user.companies[0]?.company || null,
-    companies: user.companies.map((uc) => ({
-      companyId: uc.company.id,
-      company: uc.company,
-    })),
-    apps: user.apps.map((ua) => ({
-      appId: ua.app.id,
-      app: ua.app,
-    })),
-  }));
+  // Count supervisees per user in the current company
+  const superviseeCounts = companyId
+    ? await prisma.userCompany.groupBy({
+        by: ["supervisorId"],
+        where: { companyId, supervisorId: { not: null } },
+        _count: true,
+      })
+    : [];
+
+  const superviseeCountMap = new Map<string, number>();
+  for (const entry of superviseeCounts) {
+    if (entry.supervisorId) {
+      superviseeCountMap.set(entry.supervisorId, entry._count);
+    }
+  }
+
+  // Transform: resolve role and supervisor from UserCompany for the current company
+  return users.map((user) => {
+    // Find the UserCompany entry for the current company (or first available)
+    const currentUc = companyId
+      ? user.companies.find((uc) => uc.companyId === companyId)
+      : user.companies[0];
+
+    return {
+      ...user,
+      role: currentUc?.role || "USER",
+      supervisor: currentUc?.supervisor || null,
+      company: user.companies[0]?.company || null,
+      companies: user.companies.map((uc) => ({
+        companyId: uc.company.id,
+        company: uc.company,
+      })),
+      apps: user.apps.map((ua) => ({
+        appId: ua.app.id,
+        app: ua.app,
+      })),
+      _count: {
+        supervisees: superviseeCountMap.get(user.id) || 0,
+      },
+    };
+  });
 }
 
 async function getCompanies() {

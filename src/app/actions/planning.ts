@@ -219,21 +219,30 @@ export async function getSuperviseesWithPlanningStatus(
     throw new Error("No tienes permiso para ver supervisados");
   }
 
-  // Get supervisees
-  const supervisees = await prisma.user.findMany({
+  // Get supervisees in current company (per-company supervisor relationship)
+  const companyId = await getCurrentCompanyId();
+
+  const superviseeUcs = await prisma.userCompany.findMany({
     where: {
       supervisorId: user.id,
+      ...(companyId && { companyId }),
     },
     select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
     },
     orderBy: {
-      name: "asc",
+      user: { name: "asc" },
     },
   });
+
+  const supervisees = superviseeUcs.map((uc) => uc.user);
 
   // Get planning status for each supervisee
   const result: SuperviseeWithStatus[] = [];
@@ -304,8 +313,9 @@ export async function getSuperviseeMonthPlanning(
     throw new Error("No tienes permiso para ver esta planificacion");
   }
 
-  // Check if can view this supervisee's planning
-  const canView = await canViewSuperviseePlanning(user.id, superviseeId, month);
+  // Check if can view this supervisee's planning (per-company)
+  const companyId = await getCurrentCompanyId();
+  const canView = await canViewSuperviseePlanning(user.id, superviseeId, month, companyId);
   if (!canView && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
     return null;
   }

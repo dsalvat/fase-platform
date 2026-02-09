@@ -39,7 +39,8 @@ export async function recordActivityLog(input: {
 export async function getActivityLogs(
   userId: string,
   userRole: UserRole,
-  params: ActivityLogQueryInput
+  params: ActivityLogQueryInput,
+  companyId?: string | null
 ): Promise<PaginatedActivityLogs> {
   const { page, limit, entityType, action, userId: filterUserId } = params;
   const skip = (page - 1) * limit;
@@ -47,8 +48,8 @@ export async function getActivityLogs(
   // Build where clause based on role
   const where: Prisma.ActivityLogWhereInput = {};
 
-  // Get viewable user IDs based on role
-  const viewableUserIds = await getViewableUserIds(userId, userRole);
+  // Get viewable user IDs based on role (per-company)
+  const viewableUserIds = await getViewableUserIds(userId, userRole, companyId);
 
   // Apply user filter
   if (filterUserId) {
@@ -123,10 +124,18 @@ export async function getActivityLogs(
  */
 export async function getViewableUserIds(
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
+  companyId?: string | null
 ): Promise<string[]> {
   if (userRole === "ADMIN") {
-    // Admin can see all users
+    // Admin can see all users in the current company
+    if (companyId) {
+      const ucs = await prisma.userCompany.findMany({
+        where: { companyId },
+        select: { userId: true },
+      });
+      return ucs.map((uc) => uc.userId);
+    }
     const users = await prisma.user.findMany({
       select: { id: true },
     });
@@ -134,12 +143,15 @@ export async function getViewableUserIds(
   }
 
   if (userRole === "SUPERVISOR") {
-    // Supervisor can see themselves and their supervisees
-    const supervisees = await prisma.user.findMany({
-      where: { supervisorId: userId },
-      select: { id: true },
-    });
-    return [userId, ...supervisees.map((u) => u.id)];
+    // Supervisor can see themselves and their supervisees (per-company)
+    if (companyId) {
+      const supervisees = await prisma.userCompany.findMany({
+        where: { supervisorId: userId, companyId },
+        select: { userId: true },
+      });
+      return [userId, ...supervisees.map((uc) => uc.userId)];
+    }
+    return [userId];
   }
 
   // Regular user can only see their own logs
@@ -151,9 +163,10 @@ export async function getViewableUserIds(
  */
 export async function getViewableUsers(
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
+  companyId?: string | null
 ): Promise<ViewableUser[]> {
-  const viewableUserIds = await getViewableUserIds(userId, userRole);
+  const viewableUserIds = await getViewableUserIds(userId, userRole, companyId);
 
   const users = await prisma.user.findMany({
     where: { id: { in: viewableUserIds } },
@@ -399,13 +412,23 @@ export interface SuperviseeChangesGroup {
  */
 export async function getSuperviseeChanges(
   supervisorId: string,
-  since: Date | null
+  since: Date | null,
+  companyId?: string | null
 ): Promise<SuperviseeChangesGroup[]> {
-  // Get all supervisees
-  const supervisees = await prisma.user.findMany({
-    where: { supervisorId },
-    select: { id: true, name: true, email: true },
-  });
+  // Get all supervisees (per-company supervisor relationship)
+  let supervisees: { id: string; name: string | null; email: string }[];
+  if (companyId) {
+    const ucs = await prisma.userCompany.findMany({
+      where: { supervisorId, companyId },
+      select: { user: { select: { id: true, name: true, email: true } } },
+    });
+    supervisees = ucs.map((uc) => uc.user);
+  } else {
+    supervisees = await prisma.user.findMany({
+      where: { supervisorId },
+      select: { id: true, name: true, email: true },
+    });
+  }
 
   if (supervisees.length === 0) {
     return [];

@@ -1,5 +1,4 @@
 import { getServerSession } from "next-auth";
-import { UserRole } from "@prisma/client";
 import { authOptions } from "./auth-options";
 
 /**
@@ -18,7 +17,7 @@ export async function getCurrentCompanyId(): Promise<string | null> {
  */
 export async function isSuperAdmin(): Promise<boolean> {
   const session = await getServerSession(authOptions);
-  return session?.user?.role === UserRole.SUPERADMIN;
+  return session?.user?.isSuperAdmin === true;
 }
 
 /**
@@ -53,7 +52,7 @@ export async function canSwitchCompanies(): Promise<boolean> {
   if (!session?.user) return false;
 
   // SUPERADMIN can always switch
-  if (session.user.role === UserRole.SUPERADMIN) return true;
+  if (session.user.isSuperAdmin) return true;
 
   // Users with multiple companies can switch
   return (session.user.companies?.length || 0) > 1;

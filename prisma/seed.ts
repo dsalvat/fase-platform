@@ -55,6 +55,7 @@ async function main() {
       where: { email: superadminEmail },
       data: {
         role: UserRole.SUPERADMIN,
+        isSuperAdmin: true,
         currentCompanyId: null,
       },
     });
@@ -66,6 +67,7 @@ async function main() {
         email: superadminEmail,
         name: 'Daniel Salvat',
         role: UserRole.SUPERADMIN,
+        isSuperAdmin: true,
         status: UserStatus.ACTIVE,
         currentCompanyId: null,
         gamification: {

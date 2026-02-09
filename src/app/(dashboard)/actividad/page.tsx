@@ -22,10 +22,11 @@ export default async function ActividadPage() {
     );
   }
 
-  // Fetch initial data
+  // Fetch initial data (pass companyId for per-company supervisor scope)
+  const companyId = session?.user?.currentCompanyId || null;
   const [initialLogs, viewableUsers] = await Promise.all([
-    getActivityLogs(userId, userRole, { page: 1, limit: 20 }),
-    getViewableUsers(userId, userRole),
+    getActivityLogs(userId, userRole, { page: 1, limit: 20 }, companyId),
+    getViewableUsers(userId, userRole, companyId),
   ]);
 
   return (

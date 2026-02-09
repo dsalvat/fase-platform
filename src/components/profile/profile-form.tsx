@@ -4,13 +4,6 @@ import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Loader2, Check, AlertCircle } from "lucide-react";
 import { updateProfile } from "@/app/actions/profile";
 
@@ -18,16 +11,10 @@ interface ProfileFormProps {
   user: {
     id: string;
     name: string | null;
-    supervisorId: string | null;
   };
-  isSuperAdmin: boolean;
-  potentialSupervisors: { id: string; name: string | null; email: string }[];
-  currentSupervisor: { id: string; name: string | null; email: string } | null;
   translations: {
     name: string;
     namePlaceholder: string;
-    supervisor: string;
-    noSupervisor: string;
     save: string;
     saving: string;
     saved: string;
@@ -37,13 +24,9 @@ interface ProfileFormProps {
 
 export function ProfileForm({
   user,
-  isSuperAdmin,
-  potentialSupervisors,
-  currentSupervisor,
   translations: t,
 }: ProfileFormProps) {
   const [name, setName] = useState(user.name || "");
-  const [supervisorId, setSupervisorId] = useState(user.supervisorId || "none");
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -56,7 +39,6 @@ export function ProfileForm({
     startTransition(async () => {
       const result = await updateProfile({
         name: name || null,
-        supervisorId: isSuperAdmin && supervisorId !== "none" ? supervisorId : null,
       });
 
       if (result.success) {
@@ -82,35 +64,6 @@ export function ProfileForm({
           disabled={isPending}
         />
       </div>
-
-      {/* Supervisor (only for SUPERADMIN) */}
-      {isSuperAdmin && (
-        <div className="space-y-2">
-          <Label htmlFor="supervisor">{t.supervisor}</Label>
-          <Select
-            value={supervisorId}
-            onValueChange={setSupervisorId}
-            disabled={isPending}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t.noSupervisor} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t.noSupervisor}</SelectItem>
-              {potentialSupervisors.map((sup) => (
-                <SelectItem key={sup.id} value={sup.id}>
-                  {sup.name || sup.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {currentSupervisor && supervisorId === currentSupervisor.id && (
-            <p className="text-xs text-gray-500">
-              {currentSupervisor.name || currentSupervisor.email}
-            </p>
-          )}
-        </div>
-      )}
 
       {/* Error message */}
       {status === "error" && errorMessage && (

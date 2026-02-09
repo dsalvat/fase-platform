@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { isSupervisorInCompany } from "@/lib/supervisor-helpers";
 import { BigRockCard } from "./big-rock-card";
 import { isMonthReadOnly } from "@/lib/month-helpers";
 
@@ -27,11 +28,13 @@ export async function BigRockList({ month, userId }: BigRockListProps) {
     }
 
     if (userRole === "SUPERVISOR") {
-      const supervised = await prisma.user.findFirst({
-        where: { id: targetUserId, supervisorId: currentUser.id },
-      });
-
-      if (!supervised) {
+      // Check per-company supervisor relationship
+      const companyId = currentUser.currentCompanyId;
+      if (!companyId) {
+        throw new Error("No tienes permiso para ver Big Rocks de este usuario");
+      }
+      const isSup = await isSupervisorInCompany(currentUser.id, targetUserId, companyId);
+      if (!isSup) {
         throw new Error("No tienes permiso para ver Big Rocks de este usuario");
       }
     }

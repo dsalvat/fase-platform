@@ -82,13 +82,15 @@ export const authOptions: NextAuthOptions = {
           where: { email: token.email },
           select: {
             id: true,
-            role: true,
+            isSuperAdmin: true,
             status: true,
             currentCompanyId: true,
             currentAppId: true,
             onboardingCompletedAt: true,
             companies: {
               select: {
+                companyId: true,
+                role: true,
                 company: {
                   select: {
                     id: true,
@@ -114,7 +116,7 @@ export const authOptions: NextAuthOptions = {
 
         if (dbUser) {
           token.id = dbUser.id;
-          token.role = dbUser.role;
+          token.isSuperAdmin = dbUser.isSuperAdmin;
           token.status = dbUser.status;
           token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
           token.companies = dbUser.companies.map((uc) => uc.company);
@@ -124,6 +126,15 @@ export const authOptions: NextAuthOptions = {
           if (trigger === "signIn" || token.currentCompanyId === undefined) {
             // Usar currentCompanyId de la BD, o la primera empresa del usuario
             token.currentCompanyId = dbUser.currentCompanyId || (dbUser.companies[0]?.company.id ?? null);
+          }
+
+          // Resolve role from UserCompany based on currentCompanyId
+          if (dbUser.isSuperAdmin) {
+            token.role = UserRole.SUPERADMIN;
+          } else {
+            const resolvedCompanyId = (token.currentCompanyId as string | null) || dbUser.currentCompanyId;
+            const currentUc = dbUser.companies.find((uc) => uc.companyId === resolvedCompanyId);
+            token.role = currentUc?.role || UserRole.USER;
           }
 
           // Solo inicializar currentAppId en signIn o si no existe
@@ -141,12 +152,21 @@ export const authOptions: NextAuthOptions = {
 
       // Permitir cambio de empresa para todos los usuarios con múltiples empresas o SUPERADMIN
       if (trigger === "update" && session?.currentCompanyId !== undefined) {
-        const isSuperAdmin = token.role === UserRole.SUPERADMIN;
+        const isSuperAdminUser = token.isSuperAdmin === true;
         const userCompanyIds = (token.companies as { id: string }[])?.map((c) => c.id) || [];
-        const canSwitch = isSuperAdmin || userCompanyIds.includes(session.currentCompanyId as string) || session.currentCompanyId === null;
+        const canSwitch = isSuperAdminUser || userCompanyIds.includes(session.currentCompanyId as string) || session.currentCompanyId === null;
 
         if (canSwitch) {
           token.currentCompanyId = session.currentCompanyId;
+
+          // Re-resolve role for the new company
+          if (!isSuperAdminUser && session.currentCompanyId) {
+            const newUc = await prisma.userCompany.findUnique({
+              where: { userId_companyId: { userId: token.id as string, companyId: session.currentCompanyId as string } },
+              select: { role: true },
+            });
+            token.role = newUc?.role || UserRole.USER;
+          }
 
           // Actualizar currentCompanyId en la BD para persistir la selección
           if (token.id) {
@@ -188,6 +208,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
+        session.user.isSuperAdmin = token.isSuperAdmin as boolean;
         session.user.status = token.status as UserStatus;
         session.user.currentCompanyId = token.currentCompanyId as string | null;
         session.user.companies = (token.companies as { id: string; name: string; logo: string | null }[]) || [];

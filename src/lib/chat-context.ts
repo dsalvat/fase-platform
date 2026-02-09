@@ -46,7 +46,8 @@ export interface ChatContextResult {
  */
 export async function buildChatContext(
   userId: string,
-  userRole: UserRole
+  userRole: UserRole,
+  companyId?: string | null
 ): Promise<ChatContextResult> {
   // Get user's own Big Rocks (last 3 months for context)
   const threeMonthsAgo = getMonthOffset(-3);
@@ -100,8 +101,17 @@ export async function buildChatContext(
   const supervisedContext: SupervisedUserContext[] = [];
 
   if (userRole === UserRole.SUPERVISOR || userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN) {
+    // Get supervisees via per-company relationship
+    const superviseeUcs = companyId
+      ? await prisma.userCompany.findMany({
+          where: { supervisorId: userId, companyId },
+          select: { userId: true },
+        })
+      : [];
+    const superviseeIds = superviseeUcs.map((uc) => uc.userId);
+
     const supervisedUsers = await prisma.user.findMany({
-      where: { supervisorId: userId },
+      where: { id: { in: superviseeIds } },
       select: {
         id: true,
         name: true,

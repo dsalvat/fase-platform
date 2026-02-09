@@ -1,8 +1,11 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
+import { checkSupervisorChainInCompany } from "@/lib/supervisor-helpers";
 import { successResponse, handleApiError, errorResponse } from "@/lib/api-response";
 import { updateUserSchema } from "@/lib/validations/user";
+import { UserRole } from "@prisma/client";
 
 /**
  * GET /api/users/[id]
@@ -16,22 +19,23 @@ export async function GET(
     await requireRole(["ADMIN"]);
 
     const { id } = await params;
+    const companyId = await getCurrentCompanyId();
 
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
-        supervisor: {
+        companies: {
+          where: companyId ? { companyId } : undefined,
           select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        supervisees: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+            role: true,
+            supervisorId: true,
+            supervisor: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         _count: {
@@ -47,7 +51,15 @@ export async function GET(
       return errorResponse("Usuario no encontrado", 404);
     }
 
-    return successResponse(user);
+    // Resolve per-company role and supervisor
+    const currentUc = user.companies[0];
+    const result = {
+      ...user,
+      role: currentUc?.role || "USER",
+      supervisor: currentUc?.supervisor || null,
+    };
+
+    return successResponse(result);
   } catch (error) {
     return handleApiError(error);
   }
@@ -66,6 +78,11 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
+    const companyId = await getCurrentCompanyId();
+
+    if (!companyId) {
+      return errorResponse("No hay empresa seleccionada", 400);
+    }
 
     // Validate request body
     const validationResult = updateUserSchema.safeParse({ ...body, id });
@@ -91,31 +108,48 @@ export async function PATCH(
       }
 
       if (supervisorId !== null) {
-        const supervisor = await prisma.user.findUnique({
-          where: { id: supervisorId },
+        // Verify supervisor exists in this company
+        const supervisorUc = await prisma.userCompany.findUnique({
+          where: { userId_companyId: { userId: supervisorId, companyId } },
         });
 
-        if (!supervisor) {
-          return errorResponse("Supervisor no encontrado", 400);
+        if (!supervisorUc) {
+          return errorResponse("Supervisor no encontrado en esta empresa", 400);
         }
 
-        // Prevent circular supervision
-        const supervisorChain = await checkSupervisorChain(supervisorId, id);
-        if (supervisorChain) {
+        // Prevent circular supervision (per-company)
+        const isCircular = await checkSupervisorChainInCompany(supervisorId, id, companyId);
+        if (isCircular) {
           return errorResponse("Asignacion de supervisor crearia un ciclo", 400);
         }
       }
     }
 
-    // Update user
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        ...(name !== undefined && { name }),
-        ...(role !== undefined && { role }),
-        ...(supervisorId !== undefined && { supervisorId }),
-      },
-      include: {
+    // Update name on User (global field)
+    if (name !== undefined) {
+      await prisma.user.update({
+        where: { id },
+        data: { name },
+      });
+    }
+
+    // Update role and supervisor on UserCompany (per-company fields)
+    const ucData: { role?: UserRole; supervisorId?: string | null } = {};
+    if (role !== undefined) ucData.role = role as UserRole;
+    if (supervisorId !== undefined) ucData.supervisorId = supervisorId;
+
+    if (Object.keys(ucData).length > 0) {
+      await prisma.userCompany.update({
+        where: { userId_companyId: { userId: id, companyId } },
+        data: ucData,
+      });
+    }
+
+    // Return updated user with per-company data
+    const updatedUc = await prisma.userCompany.findUnique({
+      where: { userId_companyId: { userId: id, companyId } },
+      select: {
+        role: true,
         supervisor: {
           select: {
             id: true,
@@ -126,37 +160,16 @@ export async function PATCH(
       },
     });
 
-    return successResponse(updatedUser);
+    const updatedUser = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    return successResponse({
+      ...updatedUser,
+      role: updatedUc?.role || "USER",
+      supervisor: updatedUc?.supervisor || null,
+    });
   } catch (error) {
     return handleApiError(error);
   }
-}
-
-/**
- * Check if assigning a supervisor would create a circular reference
- */
-async function checkSupervisorChain(supervisorId: string, targetUserId: string): Promise<boolean> {
-  let currentId: string | null = supervisorId;
-  const visited = new Set<string>();
-
-  while (currentId) {
-    if (currentId === targetUserId) {
-      return true; // Circular reference detected
-    }
-
-    if (visited.has(currentId)) {
-      break; // Already visited, no need to continue
-    }
-
-    visited.add(currentId);
-
-    const foundUser: { supervisorId: string | null } | null = await prisma.user.findUnique({
-      where: { id: currentId },
-      select: { supervisorId: true },
-    });
-
-    currentId = foundUser?.supervisorId || null;
-  }
-
-  return false;
 }

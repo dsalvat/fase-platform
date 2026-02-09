@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { UserRole, FeedbackTargetType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth-options";
+import { isSupervisorInCompany } from "@/lib/supervisor-helpers";
 
 /**
  * Require authentication - throws error if user is not authenticated
@@ -40,10 +41,7 @@ export async function requireRole(allowedRoles: UserRole[]) {
 
 /**
  * Check if user can access a specific Big Rock
- * @param bigRockId - ID of the Big Rock to check
- * @param userId - ID of the user requesting access
- * @param userRole - Role of the user
- * @returns true if user can access, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
  */
 export async function canAccessBigRock(
   bigRockId: string,
@@ -52,13 +50,9 @@ export async function canAccessBigRock(
 ): Promise<boolean> {
   const bigRock = await prisma.bigRock.findUnique({
     where: { id: bigRockId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          supervisorId: true,
-        },
-      },
+    select: {
+      userId: true,
+      companyId: true,
     },
   });
 
@@ -81,9 +75,10 @@ export async function canAccessBigRock(
     return true;
   }
 
-  // Supervisor can access if they supervise the owner
-  if (userRole === "SUPERVISOR" && bigRock.user.supervisorId === userId) {
-    return true;
+  // Supervisor can access if they supervise the owner in the BigRock's company
+  if (userRole === "SUPERVISOR" && bigRock.companyId) {
+    const isSup = await isSupervisorInCompany(userId, bigRock.userId, bigRock.companyId);
+    if (isSup) return true;
   }
 
   return false;
@@ -102,10 +97,6 @@ export function isMonthReadOnly(month: string): boolean {
 
 /**
  * Check if user can modify a Big Rock (not read-only month and has permission)
- * @param bigRockId - ID of the Big Rock
- * @param userId - ID of the user
- * @param userRole - Role of the user
- * @returns true if can modify, false otherwise
  */
 export async function canModifyBigRock(
   bigRockId: string,
@@ -147,10 +138,7 @@ export async function canModifyBigRock(
 
 /**
  * Check if user can access a specific TAR
- * @param tarId - ID of the TAR to check
- * @param userId - ID of the user requesting access
- * @param userRole - Role of the user
- * @returns true if user can access, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
  */
 export async function canAccessTAR(
   tarId: string,
@@ -161,13 +149,9 @@ export async function canAccessTAR(
     where: { id: tarId },
     include: {
       bigRock: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              supervisorId: true,
-            },
-          },
+        select: {
+          userId: true,
+          companyId: true,
         },
       },
     },
@@ -192,9 +176,10 @@ export async function canAccessTAR(
     return true;
   }
 
-  // Supervisor can access if they supervise the owner
-  if (userRole === "SUPERVISOR" && tar.bigRock.user.supervisorId === userId) {
-    return true;
+  // Supervisor can access if they supervise the owner in the BigRock's company
+  if (userRole === "SUPERVISOR" && tar.bigRock.companyId) {
+    const isSup = await isSupervisorInCompany(userId, tar.bigRock.userId, tar.bigRock.companyId);
+    if (isSup) return true;
   }
 
   return false;
@@ -202,10 +187,6 @@ export async function canAccessTAR(
 
 /**
  * Check if user can modify a TAR (not read-only month and has permission)
- * @param tarId - ID of the TAR
- * @param userId - ID of the user
- * @param userRole - Role of the user
- * @returns true if can modify, false otherwise
  */
 export async function canModifyTAR(
   tarId: string,
@@ -251,10 +232,7 @@ export async function canModifyTAR(
 
 /**
  * Check if user can access a specific Activity
- * @param activityId - ID of the Activity to check
- * @param userId - ID of the user requesting access
- * @param userRole - Role of the user
- * @returns true if user can access, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
  */
 export async function canAccessActivity(
   activityId: string,
@@ -267,13 +245,9 @@ export async function canAccessActivity(
       tar: {
         include: {
           bigRock: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  supervisorId: true,
-                },
-              },
+            select: {
+              userId: true,
+              companyId: true,
             },
           },
         },
@@ -300,9 +274,10 @@ export async function canAccessActivity(
     return true;
   }
 
-  // Supervisor can access if they supervise the owner
-  if (userRole === "SUPERVISOR" && activity.tar.bigRock.user.supervisorId === userId) {
-    return true;
+  // Supervisor can access if they supervise the owner in the BigRock's company
+  if (userRole === "SUPERVISOR" && activity.tar.bigRock.companyId) {
+    const isSup = await isSupervisorInCompany(userId, activity.tar.bigRock.userId, activity.tar.bigRock.companyId);
+    if (isSup) return true;
   }
 
   return false;
@@ -310,10 +285,6 @@ export async function canAccessActivity(
 
 /**
  * Check if user can modify an Activity (not read-only month and has permission)
- * @param activityId - ID of the Activity
- * @param userId - ID of the user
- * @param userRole - Role of the user
- * @returns true if can modify, false otherwise
  */
 export async function canModifyActivity(
   activityId: string,
@@ -363,10 +334,7 @@ export async function canModifyActivity(
 
 /**
  * Check if user can access a specific KeyMeeting
- * @param keyMeetingId - ID of the KeyMeeting to check
- * @param userId - ID of the user requesting access
- * @param userRole - Role of the user
- * @returns true if user can access, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
  */
 export async function canAccessKeyMeeting(
   keyMeetingId: string,
@@ -377,13 +345,9 @@ export async function canAccessKeyMeeting(
     where: { id: keyMeetingId },
     include: {
       bigRock: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              supervisorId: true,
-            },
-          },
+        select: {
+          userId: true,
+          companyId: true,
         },
       },
     },
@@ -408,9 +372,10 @@ export async function canAccessKeyMeeting(
     return true;
   }
 
-  // Supervisor can access if they supervise the owner
-  if (userRole === "SUPERVISOR" && keyMeeting.bigRock.user.supervisorId === userId) {
-    return true;
+  // Supervisor can access if they supervise the owner in the BigRock's company
+  if (userRole === "SUPERVISOR" && keyMeeting.bigRock.companyId) {
+    const isSup = await isSupervisorInCompany(userId, keyMeeting.bigRock.userId, keyMeeting.bigRock.companyId);
+    if (isSup) return true;
   }
 
   return false;
@@ -418,10 +383,6 @@ export async function canAccessKeyMeeting(
 
 /**
  * Check if user can modify a KeyMeeting (not read-only month and has permission)
- * @param keyMeetingId - ID of the KeyMeeting
- * @param userId - ID of the user
- * @param userRole - Role of the user
- * @returns true if can modify, false otherwise
  */
 export async function canModifyKeyMeeting(
   keyMeetingId: string,
@@ -467,27 +428,25 @@ export async function canModifyKeyMeeting(
 
 /**
  * Check if supervisor can view a supervisee's planning for a month
- * Only allowed if the planning has been confirmed by the supervisee
- * @param supervisorId - ID of the supervisor
- * @param superviseeId - ID of the supervisee
- * @param month - Month string in YYYY-MM format
- * @returns true if supervisor can view, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
+ * @param companyId - Optional company ID for scoped check
  */
 export async function canViewSuperviseePlanning(
   supervisorId: string,
   superviseeId: string,
-  month: string
+  month: string,
+  companyId?: string | null
 ): Promise<boolean> {
-  // Verify the supervisor-supervisee relationship
-  const supervisee = await prisma.user.findFirst({
-    where: {
-      id: superviseeId,
-      supervisorId: supervisorId,
-    },
-  });
-
-  if (!supervisee) {
-    return false;
+  // Verify the supervisor-supervisee relationship (per-company)
+  if (companyId) {
+    const isSup = await isSupervisorInCompany(supervisorId, superviseeId, companyId);
+    if (!isSup) return false;
+  } else {
+    // Fallback: check across all companies
+    const uc = await prisma.userCompany.findFirst({
+      where: { userId: superviseeId, supervisorId },
+    });
+    if (!uc) return false;
   }
 
   // Check if the month planning is confirmed
@@ -504,11 +463,7 @@ export async function canViewSuperviseePlanning(
 
 /**
  * Check if user can give feedback to a target (Big Rock or Month Planning)
- * Only supervisors can give feedback to their supervisees
- * @param supervisorId - ID of the supervisor giving feedback
- * @param targetType - Type of feedback target (BIG_ROCK or MONTH_PLANNING)
- * @param targetId - ID of the target (BigRock ID or OpenMonth ID)
- * @returns true if can give feedback, false otherwise
+ * Uses per-company supervisor relationship via UserCompany
  */
 export async function canGiveFeedback(
   supervisorId: string,
@@ -516,16 +471,14 @@ export async function canGiveFeedback(
   targetId: string
 ): Promise<boolean> {
   if (targetType === "BIG_ROCK") {
-    // Get the Big Rock and its owner
+    // Get the Big Rock with companyId
     const bigRock = await prisma.bigRock.findUnique({
       where: { id: targetId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            supervisorId: true,
-          },
-        },
+      select: {
+        userId: true,
+        companyId: true,
+        status: true,
+        month: true,
       },
     });
 
@@ -533,9 +486,21 @@ export async function canGiveFeedback(
       return false;
     }
 
-    // Check if supervisor relationship exists and Big Rock is confirmed (status !== CREADO)
-    if (bigRock.user.supervisorId !== supervisorId || bigRock.status === "CREADO") {
+    // Big Rock must be confirmed (status !== CREADO)
+    if (bigRock.status === "CREADO") {
       return false;
+    }
+
+    // Check supervisor relationship in the BigRock's company
+    if (bigRock.companyId) {
+      const isSup = await isSupervisorInCompany(supervisorId, bigRock.userId, bigRock.companyId);
+      if (!isSup) return false;
+    } else {
+      // No company on BigRock, check any company
+      const uc = await prisma.userCompany.findFirst({
+        where: { userId: bigRock.userId, supervisorId },
+      });
+      if (!uc) return false;
     }
 
     // Check if the month planning is confirmed
@@ -554,13 +519,9 @@ export async function canGiveFeedback(
     // Get the OpenMonth and its owner
     const openMonth = await prisma.openMonth.findUnique({
       where: { id: targetId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            supervisorId: true,
-          },
-        },
+      select: {
+        userId: true,
+        isPlanningConfirmed: true,
       },
     });
 
@@ -568,8 +529,12 @@ export async function canGiveFeedback(
       return false;
     }
 
-    // Check if supervisor relationship exists and planning is confirmed
-    return openMonth.user.supervisorId === supervisorId && openMonth.isPlanningConfirmed;
+    // Check if supervisor relationship exists in any shared company
+    const uc = await prisma.userCompany.findFirst({
+      where: { userId: openMonth.userId, supervisorId },
+    });
+
+    return !!uc && openMonth.isPlanningConfirmed;
   }
 
   return false;

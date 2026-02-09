@@ -10,6 +10,7 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       role: UserRole;
+      isSuperAdmin: boolean;
       status: UserStatus;
       currentCompanyId: string | null; // Empresa actual seleccionada
       companies: { id: string; name: string; logo: string | null }[]; // Empresas del usuario
@@ -34,6 +35,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRole;
+    isSuperAdmin: boolean;
     status: UserStatus;
     currentCompanyId: string | null;
     companies: { id: string; name: string; logo: string | null }[];

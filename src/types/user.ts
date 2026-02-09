@@ -10,14 +10,15 @@ export type UserWithSupervisor = User & {
 /**
  * User for list views
  */
-export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'role' | 'status' | 'createdAt'> & {
+export type UserListItem = Pick<User, 'id' | 'email' | 'name' | 'image' | 'status' | 'createdAt'> & {
+  role: UserRole; // Per-company role from UserCompany
   currentCompanyId: string | null;
-  supervisor: Pick<User, 'id' | 'name' | 'email'> | null;
+  supervisor: Pick<User, 'id' | 'name' | 'email'> | null; // Per-company supervisor from UserCompany
   company: { id: string; name: string; logo: string | null } | null; // First/current company for display
   companies: { companyId: string; company: { id: string; name: string; logo: string | null } }[]; // All companies via UserCompany
   apps?: { appId: string; app: { id: string; code: AppType; name: string } }[]; // All apps via UserApp
   _count: {
-    supervisees: number;
+    supervisees: number; // Per-company supervisee count
   };
 };
 

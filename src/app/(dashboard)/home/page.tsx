@@ -53,30 +53,34 @@ async function getUserBigRocks(userId: string, month: string) {
   });
 }
 
-async function getSuperviseesWithBigRocks(supervisorId: string, month: string) {
-  // Get only direct supervisees
-  const supervisees = await prisma.user.findMany({
-    where: {
-      supervisorId,
-    },
+async function getSuperviseesWithBigRocks(supervisorId: string, month: string, companyId: string | null) {
+  if (!companyId) return [];
+
+  // Get only direct supervisees in the current company (per-company supervisor relationship)
+  const superviseeUcs = await prisma.userCompany.findMany({
+    where: { supervisorId, companyId },
     select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-      bigRocks: {
-        where: { month },
+      user: {
         select: {
           id: true,
-          title: true,
-          status: true,
+          name: true,
+          email: true,
+          image: true,
+          bigRocks: {
+            where: { month },
+            select: {
+              id: true,
+              title: true,
+              status: true,
+            },
+          },
         },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { user: { name: "asc" } },
   });
 
-  return supervisees;
+  return superviseeUcs.map((uc) => uc.user);
 }
 
 async function getAllUsersWithBigRocks(currentUserId: string, month: string) {
@@ -144,10 +148,11 @@ export default async function HomePage() {
   // Get user's Big Rocks
   const myBigRocks = await getUserBigRocks(user.id, currentMonth);
 
-  // Get direct supervisees (for supervisors and admins)
+  // Get direct supervisees (for supervisors and admins) - per-company
+  const companyId = user.currentCompanyId;
   let supervisees: Awaited<ReturnType<typeof getSuperviseesWithBigRocks>> = [];
   if (isSupervisor) {
-    supervisees = await getSuperviseesWithBigRocks(user.id, currentMonth);
+    supervisees = await getSuperviseesWithBigRocks(user.id, currentMonth, companyId);
   }
 
   // Get all company users (only for admins)

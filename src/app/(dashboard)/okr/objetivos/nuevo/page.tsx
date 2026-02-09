@@ -93,13 +93,10 @@ export default async function NewObjectivePage({ searchParams }: NewObjectivePag
     },
   });
 
-  // Also get all company teams if user is admin
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === "ADMIN" || dbUser?.role === "SUPERADMIN";
+  // Check if user is admin (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role;
+  const isAdmin = userRole === "ADMIN" || userRole === "SUPERADMIN";
 
   let availableTeams = userTeams.map((tm) => tm.team);
 

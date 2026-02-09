@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { userQuerySchema } from "@/lib/validations/user";
 import { Prisma } from "@prisma/client";
@@ -14,6 +15,7 @@ export async function GET(request: NextRequest) {
     await requireRole(["ADMIN"]);
 
     const { searchParams } = new URL(request.url);
+    const companyId = await getCurrentCompanyId();
 
     const rawParams = {
       page: searchParams.get("page") || undefined,
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { page, limit, search, role } = validationResult.data;
     const skip = (page - 1) * limit;
 
-    // Build where clause
+    // Build where clause - scope by company if available
     const where: Prisma.UserWhereInput = {};
 
     if (search) {
@@ -40,8 +42,16 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (role) {
-      where.role = role;
+    // Filter by role in UserCompany for the current company
+    if (role && companyId) {
+      where.companies = {
+        some: {
+          companyId,
+          role,
+        },
+      };
+    } else if (companyId) {
+      where.companies = { some: { companyId } };
     }
 
     // Get total count and users in parallel
@@ -54,20 +64,33 @@ export async function GET(request: NextRequest) {
           email: true,
           name: true,
           image: true,
-          role: true,
           createdAt: true,
-          supervisor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          _count: {
-            select: {
-              supervisees: true,
-            },
-          },
+          companies: companyId
+            ? {
+                where: { companyId },
+                select: {
+                  role: true,
+                  supervisor: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              }
+            : {
+                select: {
+                  role: true,
+                  supervisor: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -75,10 +98,21 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
+    // Transform to include per-company role and supervisor
+    const transformedUsers = users.map((user) => {
+      const uc = user.companies[0];
+      return {
+        ...user,
+        role: uc?.role || "USER",
+        supervisor: uc?.supervisor || null,
+        companies: undefined,
+      };
+    });
+
     const totalPages = Math.ceil(total / limit);
 
     return successResponse({
-      users,
+      users: transformedUsers,
       pagination: {
         page,
         limit,

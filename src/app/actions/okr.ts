@@ -59,13 +59,11 @@ export async function activateQuarter(data: {
     return { success: false, error: "No company selected" };
   }
 
-  // Check if user is admin
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
+  // Check if user is admin (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
 
-  if (dbUser?.role !== UserRole.ADMIN && dbUser?.role !== UserRole.SUPERADMIN) {
+  if (userRole !== UserRole.ADMIN && userRole !== UserRole.SUPERADMIN) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -125,13 +123,11 @@ export async function createTeam(data: {
     return { success: false, error: "No company selected" };
   }
 
-  // Check if user is admin
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
+  // Check if user is admin (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
 
-  if (dbUser?.role !== UserRole.ADMIN && dbUser?.role !== UserRole.SUPERADMIN) {
+  if (userRole !== UserRole.ADMIN && userRole !== UserRole.SUPERADMIN) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -176,13 +172,11 @@ export async function updateTeam(
 ) {
   const user = await requireAuth();
 
-  // Check if user is admin
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
+  // Check if user is admin (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
 
-  if (dbUser?.role !== UserRole.ADMIN && dbUser?.role !== UserRole.SUPERADMIN) {
+  if (userRole !== UserRole.ADMIN && userRole !== UserRole.SUPERADMIN) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -205,13 +199,10 @@ export async function updateTeam(
 export async function addTeamMember(teamId: string, userId: string, role: TeamMemberRole = TeamMemberRole.VISUALIZADOR) {
   const user = await requireAuth();
 
-  // Check if user is admin or RESPONSABLE of the team
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // Check if user is admin or RESPONSABLE of the team (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, teamId);
 
   if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
@@ -238,13 +229,10 @@ export async function addTeamMember(teamId: string, userId: string, role: TeamMe
 export async function removeTeamMember(teamId: string, userId: string) {
   const user = await requireAuth();
 
-  // Check if user is admin or RESPONSABLE of the team
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // Check if user is admin or RESPONSABLE of the team (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, teamId);
 
   if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
@@ -288,13 +276,10 @@ export async function removeTeamMember(teamId: string, userId: string) {
 export async function updateTeamMemberRole(teamId: string, userId: string, newRole: TeamMemberRole) {
   const user = await requireAuth();
 
-  // Check if user is admin or RESPONSABLE of the team
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // Check if user is admin or RESPONSABLE of the team (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, teamId);
 
   if (!isAdmin && !canManageTeamMembers(userTeamRole)) {
@@ -344,13 +329,10 @@ export async function createObjective(data: {
 }) {
   const user = await requireAuth();
 
-  // Check if user is admin or RESPONSABLE of the team
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // Check if user is admin or RESPONSABLE of the team (role from session is per-company)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, data.teamId);
 
   if (!isAdmin && !canCreateObjectives(userTeamRole)) {
@@ -401,12 +383,9 @@ export async function updateObjective(
     return { success: false, error: "Objective not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
 
   // RESPONSABLE and EDITOR can edit objectives
@@ -443,12 +422,9 @@ export async function deleteObjective(objectiveId: string) {
     return { success: false, error: "Objective not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
 
   // Only RESPONSABLE can delete objectives
@@ -496,12 +472,9 @@ export async function createKeyResult(data: {
     return { success: false, error: "Objective not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, objective.teamId);
 
   // RESPONSABLE and EDITOR can create key results
@@ -563,12 +536,9 @@ export async function updateKeyResult(
     return { success: false, error: "Key result not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
   // RESPONSABLE and EDITOR can update key results
@@ -610,12 +580,9 @@ export async function deleteKeyResult(keyResultId: string) {
     return { success: false, error: "Key result not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
   // Only RESPONSABLE can delete key results
@@ -696,12 +663,9 @@ export async function createKeyActivity(data: {
     return { success: false, error: "Key result not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
   // RESPONSABLE and EDITOR can create activities
@@ -751,12 +715,9 @@ export async function toggleKeyActivityComplete(activityId: string) {
     return { success: false, error: "Activity not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, activity.keyResult.objective.teamId);
 
   // RESPONSABLE and EDITOR can toggle activities
@@ -803,12 +764,9 @@ export async function deleteKeyActivity(activityId: string) {
     return { success: false, error: "Activity not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, activity.keyResult.objective.teamId);
 
   // Only RESPONSABLE can delete activities
@@ -838,12 +796,9 @@ export async function deleteKeyActivity(activityId: string) {
 export async function getUserTeamPermissions(teamId: string) {
   const user = await requireAuth();
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, teamId);
 
   return {
@@ -914,12 +869,9 @@ export async function createKeyResultUpdate(data: {
     return { success: false, error: "Key result not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
   // RESPONSABLE and EDITOR can create updates
@@ -1006,12 +958,9 @@ export async function getKeyResultUpdates(keyResultId: string) {
     return { success: false, error: "Key result not found", data: [] };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, keyResult.objective.teamId);
 
   // All team members can view updates
@@ -1053,12 +1002,9 @@ export async function deleteKeyResultUpdate(updateId: string) {
     return { success: false, error: "Update not found" };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === UserRole.ADMIN || dbUser?.role === UserRole.SUPERADMIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (user as any).role as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN || userRole === UserRole.SUPERADMIN;
   const userTeamRole = await getTeamMemberRole(user.id, update.keyResult.objective.teamId);
 
   // Only RESPONSABLE can delete updates

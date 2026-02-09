@@ -18,19 +18,19 @@ export default async function ProfilePage() {
   const t = await getTranslations("profile");
   const tCommon = await getTranslations("common");
 
-  // Get full user data
+  // Get full user data with per-company info
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      supervisor: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
       companies: {
         include: {
+          supervisor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
           company: {
             select: {
               id: true,
@@ -47,24 +47,8 @@ export default async function ProfilePage() {
     redirect("/api/auth/signin");
   }
 
-  const isSuperAdmin = user.role === UserRole.SUPERADMIN;
-
-  // Get potential supervisors (only for SUPERADMIN)
-  let potentialSupervisors: { id: string; name: string | null; email: string }[] = [];
-  if (isSuperAdmin) {
-    potentialSupervisors = await prisma.user.findMany({
-      where: {
-        id: { not: user.id },
-        status: "ACTIVE",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-      orderBy: { name: "asc" },
-    });
-  }
+  // Per-company role from session (already resolved in auth-options)
+  const userRole = session.user.role || UserRole.USER;
 
   const roleLabels: Record<UserRole, string> = {
     USER: t("roleUser"),
@@ -107,7 +91,7 @@ export default async function ProfilePage() {
             <Shield className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-xs text-muted-foreground">{t("role")}</p>
-              <p className="font-medium">{roleLabels[user.role]}</p>
+              <p className="font-medium">{roleLabels[userRole]}</p>
             </div>
           </div>
 
@@ -151,16 +135,10 @@ export default async function ProfilePage() {
             user={{
               id: user.id,
               name: user.name,
-              supervisorId: user.supervisorId,
             }}
-            isSuperAdmin={isSuperAdmin}
-            potentialSupervisors={potentialSupervisors}
-            currentSupervisor={user.supervisor}
             translations={{
               name: t("name"),
               namePlaceholder: t("namePlaceholder"),
-              supervisor: t("supervisor"),
-              noSupervisor: t("noSupervisor"),
               save: tCommon("save"),
               saving: tCommon("loading"),
               saved: t("saved"),

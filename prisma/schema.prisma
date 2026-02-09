@@ -197,18 +197,23 @@ model Company {
   @@index([slug])
 }
 
-// Tabla de unión User-Company (M:N)
+// Tabla de unión User-Company (M:N) con rol y supervisor por empresa
 model UserCompany {
-  id        String   @id @default(cuid())
-  userId    String
-  companyId String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id           String    @id @default(cuid())
+  userId       String
+  companyId    String
+  role         UserRole  @default(USER)       // Rol del usuario en esta empresa
+  supervisorId String?                        // Supervisor del usuario en esta empresa
+
+  user       User     @relation("UserCompanyMember", fields: [userId], references: [id], onDelete: Cascade)
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supervisor User?    @relation("UserCompanySupervisor", fields: [supervisorId], references: [id])
+  createdAt  DateTime @default(now())
 
   @@unique([userId, companyId])
   @@index([userId])
   @@index([companyId])
+  @@index([supervisorId])
 }
 
 // ============================================
@@ -254,8 +259,9 @@ model User {
   email         String      @unique
   name          String?
   image         String?
-  role          UserRole    @default(USER)
-  status        UserStatus  @default(ACTIVE)  // Estado del usuario
+  isSuperAdmin  Boolean     @default(false)    // Flag global para SUPERADMIN
+  role          UserRole    @default(USER)      // DEPRECATED: usar UserCompany.role
+  status        UserStatus  @default(ACTIVE)    // Estado del usuario
   language      Language    @default(ES)
 
   // Onboarding tracking
@@ -270,13 +276,14 @@ model User {
   // App actual seleccionada (para multi-app)
   currentAppId String?
 
-  // Relación supervisor (1:1)
+  // DEPRECATED: supervisor global (usar UserCompany.supervisorId)
   supervisorId  String?
   supervisor    User?       @relation("UserSupervisor", fields: [supervisorId], references: [id])
   supervisees   User[]      @relation("UserSupervisor")
 
   // Relaciones
-  companies     UserCompany[]  // Empresas a las que pertenece el usuario
+  companies              UserCompany[]  @relation("UserCompanyMember")
+  supervisingInCompanies UserCompany[]  @relation("UserCompanySupervisor")
   bigRocks      BigRock[]
   gamification  Gamification?
   openMonths    OpenMonth[]

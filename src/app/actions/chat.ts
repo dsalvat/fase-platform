@@ -215,8 +215,8 @@ export async function sendChatMessage(
       },
     });
 
-    // Build context for AI
-    const context = await buildChatContext(userId, userRole);
+    // Build context for AI (pass company for per-company supervisor context)
+    const context = await buildChatContext(userId, userRole, user.currentCompanyId);
     const contextStr = formatContextForPrompt(context);
     const systemPrompt = SYSTEM_PROMPT.replace("{context}", contextStr);
 
@@ -603,7 +603,7 @@ export async function generateSystemNotification(): Promise<SystemNotificationRe
     }
 
     // Get changes since last visit
-    const changesGroups = await getSuperviseeChanges(userId, userData.lastVisitedAt);
+    const changesGroups = await getSuperviseeChanges(userId, userData.lastVisitedAt, user.currentCompanyId);
 
     // Update lastVisitedAt
     await prisma.user.update({

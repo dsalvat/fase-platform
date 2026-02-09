@@ -15,8 +15,8 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userRole = (user as any).role as UserRole;
 
-    // Get viewable users
-    const users = await getViewableUsers(user.id, userRole);
+    // Get viewable users (per-company)
+    const users = await getViewableUsers(user.id, userRole, user.currentCompanyId);
 
     return successResponse(users);
   } catch (error) {

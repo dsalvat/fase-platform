@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAuth, canGiveFeedback } from "@/lib/auth";
+import { getCurrentCompanyId } from "@/lib/company-context";
+import { isSupervisorInCompany } from "@/lib/supervisor-helpers";
 import { feedbackSchema } from "@/lib/validations/feedback";
 import { FeedbackTargetType, UserRole } from "@prisma/client";
 import type { FeedbackWithSupervisor } from "@/types/feedback";
@@ -138,7 +140,7 @@ export async function getBigRockFeedback(
   // Get the Big Rock to verify access
   const bigRock = await prisma.bigRock.findUnique({
     where: { id: bigRockId },
-    select: { userId: true },
+    select: { userId: true, companyId: true },
   });
 
   if (!bigRock) {
@@ -149,17 +151,10 @@ export async function getBigRockFeedback(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userRole = (user as any).role as UserRole;
   if (bigRock.userId !== user.id && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
-    // Check if user is the supervisor
-    const supervisee = await prisma.user.findFirst({
-      where: {
-        id: bigRock.userId,
-        supervisorId: user.id,
-      },
-    });
-
-    if (!supervisee) {
-      return null;
-    }
+    // Check if user is the supervisor (per-company)
+    if (!bigRock.companyId) return null;
+    const isSup = await isSupervisorInCompany(user.id, bigRock.userId, bigRock.companyId);
+    if (!isSup) return null;
   }
 
   const feedback = await prisma.feedback.findFirst({
@@ -194,17 +189,11 @@ export async function getMonthFeedback(
 
   // Only owner or supervisor can see the feedback
   if (userId !== user.id && userRole !== "ADMIN" && userRole !== "SUPERADMIN") {
-    // Check if user is the supervisor
-    const supervisee = await prisma.user.findFirst({
-      where: {
-        id: userId,
-        supervisorId: user.id,
-      },
-    });
-
-    if (!supervisee) {
-      return null;
-    }
+    // Check if user is the supervisor (per-company)
+    const companyId = await getCurrentCompanyId();
+    if (!companyId) return null;
+    const isSup = await isSupervisorInCompany(user.id, userId, companyId);
+    if (!isSup) return null;
   }
 
   // Get the OpenMonth record
