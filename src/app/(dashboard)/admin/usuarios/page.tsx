@@ -154,7 +154,7 @@ async function getAllUsersForSelector(companyId: string | null, isSuperAdmin: bo
       name: true,
       email: true,
       companies: {
-        select: { companyId: true },
+        select: { companyId: true, role: true },
       },
     },
     orderBy: { name: "asc" },
@@ -164,7 +164,7 @@ async function getAllUsersForSelector(companyId: string | null, isSuperAdmin: bo
     id: u.id,
     name: u.name,
     email: u.email,
-    companyIds: u.companies.map((c) => c.companyId),
+    companyRoles: u.companies.map((c) => ({ companyId: c.companyId, role: c.role })),
   }));
 }
 

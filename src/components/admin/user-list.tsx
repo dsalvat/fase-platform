@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { User, Users, ShieldCheck, Crown, Filter, Building2, Target } from "lucide-react";
+import { UserRole } from "@prisma/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -52,7 +53,7 @@ interface UserListTranslations {
 
 interface UserListProps {
   users: UserListItem[];
-  allUsers: { id: string; name: string | null; email: string; companyIds: string[] }[];
+  allUsers: { id: string; name: string | null; email: string; companyRoles: { companyId: string; role: UserRole }[] }[];
   currentUserId: string;
   companies?: Company[];
   apps?: App[];
@@ -161,7 +162,7 @@ export function UserList({
 
 interface UserCardProps {
   user: UserListItem;
-  allUsers: { id: string; name: string | null; email: string; companyIds: string[] }[];
+  allUsers: { id: string; name: string | null; email: string; companyRoles: { companyId: string; role: UserRole }[] }[];
   isCurrentUser: boolean;
   companies: Company[];
   apps: App[];
@@ -183,9 +184,13 @@ function UserCard({
   const statusInfo = statusConfig[user.status];
   const RoleIcon = roleIcons[user.role];
 
-  // Get potential supervisors filtered by company (can't supervise themselves)
+  // Get potential supervisors: users with SUPERVISOR or ADMIN role in this company
   const getSupervisorsForCompany = (companyId: string) =>
-    allUsers.filter((u) => u.id !== user.id && u.companyIds.includes(companyId));
+    allUsers.filter((u) => {
+      if (u.id === user.id) return false;
+      const cr = u.companyRoles.find((c) => c.companyId === companyId);
+      return cr && (cr.role === "SUPERVISOR" || cr.role === "ADMIN");
+    });
 
   return (
     <Card className={cn(
