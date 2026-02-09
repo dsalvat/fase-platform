@@ -139,10 +139,10 @@ async function getApps() {
 }
 
 async function getAllUsersForSelector(companyId: string | null, isSuperAdmin: boolean) {
+  // SUPERADMIN needs all users for per-company supervisor selection
+  // Regular ADMIN only needs users from their current company
   const whereClause = isSuperAdmin
-    ? companyId
-      ? { companies: { some: { companyId } } }
-      : {}
+    ? {}
     : companyId
       ? { companies: { some: { companyId } } }
       : {};
