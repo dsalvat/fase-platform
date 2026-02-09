@@ -7,6 +7,7 @@ import { MonthPlanningStatus } from "@/components/planning";
 import { getMonthPlanningStatus } from "@/app/actions/planning";
 import { requireAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { AIProposalsDialog } from "@/components/big-rocks/ai-proposals-dialog";
 import { Plus } from "lucide-react";
 import { getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
 import { UserRole } from "@prisma/client";
@@ -73,12 +74,15 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         </div>
 
         {!isReadOnly && (
-          <Link href={`/big-rocks/new?month=${displayMonth}`} data-tour="new-big-rock-button">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {t("new")}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <AIProposalsDialog month={displayMonth} />
+            <Link href={`/big-rocks/new?month=${displayMonth}`} data-tour="new-big-rock-button">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                {t("new")}
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
