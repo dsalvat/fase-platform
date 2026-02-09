@@ -17,3 +17,4 @@ export const DAILY_CREDITS = 10;
 export const CREDITS_PER_MESSAGE = 1;
 export const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 export const MAX_TOKENS = 1024;
+export const AI_EVALUATION_MAX_TOKENS = 2048;

@@ -11,6 +11,7 @@ import {
 } from "@/lib/validations/big-rock";
 import { BigRockStatus, FaseCategory } from "@prisma/client";
 import { recordBigRockCreated } from "@/lib/gamification";
+import { evaluateBigRock } from "@/lib/ai-evaluation";
 import {
   logBigRockCreated,
   logBigRockUpdated,
@@ -513,6 +514,13 @@ export async function confirmBigRock(id: string): Promise<{
       await logBigRockUpdated(user.id, id, bigRock.title, { status: "CONFIRMADO" });
     } catch (logError) {
       console.error("Error recording activity log:", logError);
+    }
+
+    // AI evaluation (non-critical, errors don't block confirmation)
+    try {
+      await evaluateBigRock(id);
+    } catch (aiError) {
+      console.error("Error during AI evaluation:", aiError);
     }
 
     // Revalidate relevant paths
