@@ -2,12 +2,14 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getCurrentMonth, formatMonthLabel } from "@/lib/month-helpers";
+import { getCurrentMonth, formatMonthLabel, getCurrentWeek } from "@/lib/month-helpers";
 import { UserRole } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BigRockCard } from "@/components/big-rocks/big-rock-card";
+import { MonthProgressSummary } from "@/components/home/month-progress-summary";
+import { ActiveTarsPanel } from "@/components/home/active-tars-panel";
 import {
   Target,
   Plus,
@@ -19,6 +21,7 @@ import {
   Clock,
   ArrowRight,
   Lock,
+  ClipboardCheck,
 } from "lucide-react";
 
 async function getUserBigRocks(userId: string, month: string) {
@@ -37,10 +40,12 @@ async function getUserBigRocks(userId: string, month: string) {
       tars: {
         select: {
           id: true,
+          description: true,
           status: true,
           progress: true,
         },
       },
+      keyMeetings: true,
       _count: {
         select: {
           keyMeetings: true,
@@ -161,11 +166,137 @@ export default async function HomePage() {
     allUsers = await getAllUsersWithBigRocks(user.id, currentMonth);
   }
 
+  // Check if weekly review reminder should show (Fri/Sat/Sun)
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun, 5=Fri, 6=Sat
+  const isReviewDay = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+  let showReviewReminder = false;
+  if (isReviewDay && companyId) {
+    const currentWeek = getCurrentWeek();
+    const existingReview = await prisma.weeklyReview.findUnique({
+      where: {
+        userId_week_companyId: {
+          userId: user.id,
+          week: currentWeek,
+          companyId,
+        },
+      },
+      select: { id: true },
+    });
+    showReviewReminder = !existingReview;
+  }
+
   // Check if the month planning is confirmed
   const planningConfirmed = await isMonthPlanningConfirmed(user.id, currentMonth);
 
+  // Compute month progress data
+  const allTars = myBigRocks.flatMap((br) =>
+    br.tars.map((tar) => ({
+      ...tar,
+      bigRockId: br.id,
+      bigRockTitle: br.title,
+    }))
+  );
+  const allMeetings = myBigRocks.flatMap((br) => br.keyMeetings);
+  const tarsTotal = allTars.length;
+  const tarsCompleted = allTars.filter((t) => t.status === "COMPLETADA").length;
+  const avgProgress =
+    tarsTotal > 0
+      ? allTars.reduce((sum, t) => sum + (t.progress || 0), 0) / tarsTotal
+      : 0;
+  const pendingTars = allTars
+    .filter((t) => (t.progress || 0) < 100)
+    .sort((a, b) => (a.progress || 0) - (b.progress || 0))
+    .map((t) => ({
+      id: t.id,
+      description: t.description,
+      progress: t.progress || 0,
+      bigRockId: t.bigRockId,
+      bigRockTitle: t.bigRockTitle,
+    }));
+
+  const progressData = {
+    bigRocksTotal: myBigRocks.length,
+    bigRocksConfirmed: myBigRocks.filter((br) => br.status !== "CREADO").length,
+    tarsTotal,
+    tarsCompleted,
+    avgProgress,
+    meetingsTotal: allMeetings.length,
+    meetingsCompleted: allMeetings.filter((m) => m.completed).length,
+    pendingTars,
+  };
+
+  const tProgress = await getTranslations("home.progress");
+  const tActiveTars = await getTranslations("home.activeTars");
+  const tReview = await getTranslations("weeklyReview");
+
+  // Active TARs (not completed, with some progress or pending)
+  const activeTars = allTars
+    .filter((t) => t.status !== "COMPLETADA")
+    .sort((a, b) => (b.progress || 0) - (a.progress || 0))
+    .map((t) => ({
+      id: t.id,
+      description: t.description,
+      progress: t.progress || 0,
+      status: t.status,
+      bigRockId: t.bigRockId,
+      bigRockTitle: t.bigRockTitle,
+    }));
+
   return (
     <div className="space-y-8">
+      {/* Month Progress Summary */}
+      {myBigRocks.length > 0 && (
+        <MonthProgressSummary
+          data={progressData}
+          translations={{
+            overallProgress: tProgress("overallProgress"),
+            bigRocks: tProgress("bigRocks"),
+            tars: tProgress("tars"),
+            meetings: tProgress("meetings"),
+            confirmed: tProgress("confirmed"),
+            completed: tProgress("completed"),
+            pendingTars: tProgress("pendingTars"),
+            viewAll: tProgress("viewAll"),
+            noPendingTars: tProgress("noPendingTars"),
+          }}
+        />
+      )}
+
+      {/* Active TARs Panel */}
+      {activeTars.length > 0 && (
+        <ActiveTarsPanel
+          tars={activeTars}
+          translations={{
+            title: tActiveTars("title"),
+            markComplete: tActiveTars("markComplete"),
+            noActiveTars: tActiveTars("noActiveTars"),
+            collapse: tActiveTars("collapse"),
+            expand: tActiveTars("expand"),
+          }}
+        />
+      )}
+
+      {/* Weekly Review Reminder Banner */}
+      {showReviewReminder && (
+        <Card className="border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800">
+          <CardContent className="py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <ClipboardCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+              <div>
+                <p className="font-medium text-sm">{tReview("reminderTitle")}</p>
+                <p className="text-xs text-muted-foreground">{tReview("reminderDescription")}</p>
+              </div>
+            </div>
+            <Link href="/revision-semanal">
+              <Button size="sm" variant="outline" className="shrink-0">
+                {tReview("reminderButton")}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* My Big Rocks Section */}
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">

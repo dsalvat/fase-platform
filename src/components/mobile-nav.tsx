@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Home, Target, Calendar, BarChart3, Users, Flag, Settings } from "lucide-react";
+import { Menu, Home, Target, Calendar, BarChart3, Users, Flag, Settings, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -24,6 +24,7 @@ interface MobileNavProps {
     home: string;
     bigRocks: string;
     calendar: string;
+    review: string;
     dashboard: string;
     objectives: string;
     teams: string;
@@ -51,6 +52,7 @@ export function MobileNav({
     { href: "/home", label: translations.home, icon: Home },
     { href: "/big-rocks", label: translations.bigRocks, icon: Target },
     { href: "/calendario", label: translations.calendar, icon: Calendar },
+    { href: "/revision-semanal", label: translations.review, icon: ClipboardCheck },
   ];
 
   const okrLinks = [

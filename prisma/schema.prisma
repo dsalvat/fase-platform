@@ -189,10 +189,11 @@ model Company {
   updatedAt   DateTime @updatedAt
 
   // Relaciones
-  userCompanies UserCompany[]
-  bigRocks      BigRock[]
-  teams         Team[]
-  okrQuarters   OKRQuarter[]
+  userCompanies  UserCompany[]
+  bigRocks       BigRock[]
+  teams          Team[]
+  okrQuarters    OKRQuarter[]
+  weeklyReviews  WeeklyReview[]
 
   @@index([slug])
 }
@@ -313,6 +314,7 @@ model User {
   keyResults        OKRKeyResult[]    @relation("OKRKeyResultResponsible")
   okrActivities     OKRKeyActivity[]  @relation("OKRKeyActivityAssignee")
   okrGamification   OKRGamification?
+  weeklyReviews     WeeklyReview[]
 
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -736,4 +738,24 @@ model OKRGamification {
 
   @@index([userId])
   @@index([points])
+}
+
+// Modelo WeeklyReview (Revisión semanal FASE)
+model WeeklyReview {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  week            String   // Formato: "YYYY-Wnn"
+  accomplishments String   // Qué se logró
+  blockers        String   // Qué quedó pendiente y por qué
+  learnings       String   // Aprendizajes / reflexiones
+  nextWeekFocus   String   // Foco para la próxima semana
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, week, companyId])
+  @@index([userId])
+  @@index([companyId])
 }

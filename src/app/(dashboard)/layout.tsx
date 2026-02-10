@@ -198,6 +198,9 @@ export default async function DashboardLayout({
                     <Link href="/calendario">
                       <Button variant="ghost">{t("calendar")}</Button>
                     </Link>
+                    <Link href="/revision-semanal">
+                      <Button variant="ghost">{t("review")}</Button>
+                    </Link>
                   </>
                 )}
 
@@ -275,6 +278,7 @@ export default async function DashboardLayout({
                   home: t("home"),
                   bigRocks: t("bigRocks"),
                   calendar: t("calendar"),
+                  review: t("review"),
                   dashboard: okrNavTranslations.dashboard,
                   objectives: okrNavTranslations.objectives,
                   teams: okrNavTranslations.teams,

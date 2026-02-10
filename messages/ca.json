@@ -44,6 +44,7 @@
     "activity": "Activitat",
     "supervisor": "Supervisats",
     "admin": "Admin",
+    "review": "Revisio",
     "exit": "Sortir",
     "myProfile": "El meu Perfil",
     "signOut": "Sortir"
@@ -93,7 +94,25 @@
     "inProgress": "En progres",
     "more": "mes",
     "noBigRocksYet": "Sense Big Rocks encara",
-    "viewDetails": "Veure detalls"
+    "viewDetails": "Veure detalls",
+    "progress": {
+      "overallProgress": "Progres Global",
+      "bigRocks": "Big Rocks",
+      "tars": "TARs",
+      "meetings": "Reunions",
+      "confirmed": "Confirmats",
+      "completed": "Completades",
+      "pendingTars": "TARs Pendents",
+      "viewAll": "Veure totes",
+      "noPendingTars": "Totes les TARs estan completades"
+    },
+    "activeTars": {
+      "title": "Actualitzar TARs",
+      "markComplete": "Completar",
+      "noActiveTars": "No hi ha TARs actives",
+      "collapse": "Contraure",
+      "expand": "Expandir"
+    }
   },
   "bigRocks": {
     "title": "Big Rocks",
@@ -194,6 +213,32 @@
     "daily": "Diari",
     "today": "Avui",
     "openMonth": "Obrir Mes"
+  },
+  "weeklyReview": {
+    "title": "Revisio Setmanal",
+    "subtitle": "Reflexiona sobre la teva setmana i planifica la seguent",
+    "weekLabel": "Setmana {num}",
+    "currentWeek": "Setmana actual",
+    "reviewCompleted": "Revisio completada",
+    "reviewCompletedDesc": "Ja has completat la revisio d'aquesta setmana",
+    "reviewPending": "Revisio pendent",
+    "reviewPendingDesc": "Completa la teva revisio setmanal per guanyar 40 punts",
+    "accomplishments": "Que has aconseguit aquesta setmana?",
+    "accomplishmentsPlaceholder": "Descriu els assoliments i avancos de la setmana...",
+    "blockers": "Que ha quedat pendent i per que?",
+    "blockersPlaceholder": "Descriu el que no s'ha pogut completar i els obstacles trobats...",
+    "learnings": "Que has apres?",
+    "learningsPlaceholder": "Reflexions i aprenentatges de la setmana...",
+    "nextWeekFocus": "Quin sera el teu focus la propera setmana?",
+    "nextWeekFocusPlaceholder": "Prioritats i objectius per la seguent setmana...",
+    "submit": "Completar Revisio",
+    "update": "Actualitzar Revisio",
+    "success": "Revisio guardada",
+    "required": "Els camps obligatoris son requerits",
+    "completedAt": "Completada el",
+    "reminderTitle": "Es moment de la teva revisio setmanal",
+    "reminderDescription": "Reflexiona sobre la teva setmana i guanya 40 punts",
+    "reminderButton": "Fer revisio"
   },
   "gamification": {
     "title": "Gamificacio",

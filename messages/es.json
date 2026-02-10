@@ -44,6 +44,7 @@
     "activity": "Actividad",
     "supervisor": "Supervisados",
     "admin": "Admin",
+    "review": "Revision",
     "exit": "Salir",
     "myProfile": "Mi Perfil",
     "signOut": "Salir"
@@ -93,7 +94,25 @@
     "inProgress": "En progreso",
     "more": "mas",
     "noBigRocksYet": "Sin Big Rocks todavia",
-    "viewDetails": "Ver detalles"
+    "viewDetails": "Ver detalles",
+    "progress": {
+      "overallProgress": "Progreso Global",
+      "bigRocks": "Big Rocks",
+      "tars": "TARs",
+      "meetings": "Reuniones",
+      "confirmed": "Confirmados",
+      "completed": "Completadas",
+      "pendingTars": "TARs Pendientes",
+      "viewAll": "Ver todas",
+      "noPendingTars": "Todas las TARs estan completadas"
+    },
+    "activeTars": {
+      "title": "Actualizar TARs",
+      "markComplete": "Completar",
+      "noActiveTars": "No hay TARs activas",
+      "collapse": "Contraer",
+      "expand": "Expandir"
+    }
   },
   "bigRocks": {
     "title": "Big Rocks",
@@ -194,6 +213,32 @@
     "daily": "Diario",
     "today": "Hoy",
     "openMonth": "Abrir Mes"
+  },
+  "weeklyReview": {
+    "title": "Revision Semanal",
+    "subtitle": "Reflexiona sobre tu semana y planifica la siguiente",
+    "weekLabel": "Semana {num}",
+    "currentWeek": "Semana actual",
+    "reviewCompleted": "Revision completada",
+    "reviewCompletedDesc": "Ya has completado la revision de esta semana",
+    "reviewPending": "Revision pendiente",
+    "reviewPendingDesc": "Completa tu revision semanal para ganar 40 puntos",
+    "accomplishments": "Que has logrado esta semana?",
+    "accomplishmentsPlaceholder": "Describe los logros y avances de la semana...",
+    "blockers": "Que quedo pendiente y por que?",
+    "blockersPlaceholder": "Describe lo que no se pudo completar y los obstaculos encontrados...",
+    "learnings": "Que has aprendido?",
+    "learningsPlaceholder": "Reflexiones y aprendizajes de la semana...",
+    "nextWeekFocus": "Cual sera tu foco la proxima semana?",
+    "nextWeekFocusPlaceholder": "Prioridades y objetivos para la siguiente semana...",
+    "submit": "Completar Revision",
+    "update": "Actualizar Revision",
+    "success": "Revision guardada",
+    "required": "Los campos obligatorios son requeridos",
+    "completedAt": "Completada el",
+    "reminderTitle": "Es momento de tu revision semanal",
+    "reminderDescription": "Reflexiona sobre tu semana y gana 40 puntos",
+    "reminderButton": "Hacer revision"
   },
   "gamification": {
     "title": "Gamificacion",

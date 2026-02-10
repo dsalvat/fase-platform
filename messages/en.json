@@ -44,6 +44,7 @@
     "activity": "Activity",
     "supervisor": "Supervisees",
     "admin": "Admin",
+    "review": "Review",
     "exit": "Exit",
     "myProfile": "My Profile",
     "signOut": "Sign Out"
@@ -93,7 +94,25 @@
     "inProgress": "In progress",
     "more": "more",
     "noBigRocksYet": "No Big Rocks yet",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "progress": {
+      "overallProgress": "Overall Progress",
+      "bigRocks": "Big Rocks",
+      "tars": "TARs",
+      "meetings": "Meetings",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "pendingTars": "Pending TARs",
+      "viewAll": "View all",
+      "noPendingTars": "All TARs are completed"
+    },
+    "activeTars": {
+      "title": "Update TARs",
+      "markComplete": "Complete",
+      "noActiveTars": "No active TARs",
+      "collapse": "Collapse",
+      "expand": "Expand"
+    }
   },
   "bigRocks": {
     "title": "Big Rocks",
@@ -194,6 +213,32 @@
     "daily": "Daily",
     "today": "Today",
     "openMonth": "Open Month"
+  },
+  "weeklyReview": {
+    "title": "Weekly Review",
+    "subtitle": "Reflect on your week and plan the next one",
+    "weekLabel": "Week {num}",
+    "currentWeek": "Current week",
+    "reviewCompleted": "Review completed",
+    "reviewCompletedDesc": "You have already completed this week's review",
+    "reviewPending": "Review pending",
+    "reviewPendingDesc": "Complete your weekly review to earn 40 points",
+    "accomplishments": "What did you accomplish this week?",
+    "accomplishmentsPlaceholder": "Describe this week's achievements and progress...",
+    "blockers": "What was left pending and why?",
+    "blockersPlaceholder": "Describe what couldn't be completed and obstacles encountered...",
+    "learnings": "What did you learn?",
+    "learningsPlaceholder": "Reflections and learnings from the week...",
+    "nextWeekFocus": "What will be your focus next week?",
+    "nextWeekFocusPlaceholder": "Priorities and objectives for next week...",
+    "submit": "Complete Review",
+    "update": "Update Review",
+    "success": "Review saved",
+    "required": "Required fields must be filled",
+    "completedAt": "Completed on",
+    "reminderTitle": "Time for your weekly review",
+    "reminderDescription": "Reflect on your week and earn 40 points",
+    "reminderButton": "Start review"
   },
   "gamification": {
     "title": "Gamification",
