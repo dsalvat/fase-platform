@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   getAIBigRockProposals,
   createBigRocksFromProposals,
@@ -18,11 +19,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FaseCategoryBadge } from "@/components/big-rocks/fase-category-badge";
-import { Bot, Loader2, Check, ListChecks, AlertCircle, RefreshCw } from "lucide-react";
+import { Bot, Loader2, Check, ListChecks, AlertCircle, RefreshCw, Info } from "lucide-react";
+
+interface MonthOption {
+  value: string;
+  label: string;
+}
 
 interface AIProposalsDialogProps {
-  month: string;
-  monthLabel: string;
+  monthOptions: MonthOption[];
+  defaultMonth: string;
+  hasAIContext: boolean;
   translations: {
     buttonLabel: string;
     confirmTitle: string;
@@ -37,25 +44,39 @@ interface AIProposalsDialogProps {
     selectedCount: string;
     creating: string;
     createDrafts: string;
+    targetMonth: string;
+    contextMissing: string;
+    contextMissingLink: string;
+    contextUpdate: string;
+    contextUpdateLink: string;
   };
 }
 
-export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProposalsDialogProps) {
+export function AIProposalsDialog({
+  monthOptions,
+  defaultMonth,
+  hasAIContext,
+  translations: t,
+}: AIProposalsDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"confirm" | "proposals">("confirm");
+  const [targetMonth, setTargetMonth] = useState(defaultMonth);
   const [proposals, setProposals] = useState<BigRockProposal[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [creating, startCreating] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const selectedMonthLabel =
+    monthOptions.find((m) => m.value === targetMonth)?.label || targetMonth;
+
   const handleOpen = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
       setStep("confirm");
+      setTargetMonth(defaultMonth);
     } else {
-      // Reset state when closing
       setStep("confirm");
       setProposals([]);
       setSelected(new Set());
@@ -74,11 +95,10 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
     setProposals([]);
     setSelected(new Set());
 
-    const result = await getAIBigRockProposals(month);
+    const result = await getAIBigRockProposals(targetMonth);
 
     if (result.success && result.proposals) {
       setProposals(result.proposals);
-      // Select all by default
       setSelected(new Set(result.proposals.map((_, i) => i)));
     } else {
       setError(result.error || "Error desconocido");
@@ -103,7 +123,7 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
     if (selectedProposals.length === 0) return;
 
     startCreating(async () => {
-      const result = await createBigRocksFromProposals(month, selectedProposals);
+      const result = await createBigRocksFromProposals(targetMonth, selectedProposals);
       if (result.success) {
         setOpen(false);
         router.refresh();
@@ -131,9 +151,61 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
                 {t.confirmTitle}
               </DialogTitle>
               <DialogDescription>
-                {t.confirmDescription.replace("{month}", monthLabel)}
+                {t.confirmDescription}
               </DialogDescription>
             </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Month selector */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">{t.targetMonth}</label>
+                <select
+                  value={targetMonth}
+                  onChange={(e) => setTargetMonth(e.target.value)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {monthOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* AI Context status */}
+              {!hasAIContext ? (
+                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                  <div className="text-sm">
+                    <p className="text-amber-800 dark:text-amber-200">
+                      {t.contextMissing}
+                    </p>
+                    <Link
+                      href="/perfil"
+                      className="text-amber-700 dark:text-amber-300 underline hover:no-underline text-xs"
+                    >
+                      {t.contextMissingLink}
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                  <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                  <div className="text-sm">
+                    <p className="text-blue-800 dark:text-blue-200">
+                      {t.contextUpdate}
+                    </p>
+                    <Link
+                      href="/perfil"
+                      className="text-blue-700 dark:text-blue-300 underline hover:no-underline text-xs"
+                    >
+                      {t.contextUpdateLink}
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <DialogFooter className="flex-row gap-2 sm:justify-end">
               <Button variant="outline" onClick={() => setOpen(false)}>
                 {t.cancel}
@@ -155,12 +227,11 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
                 {t.dialogTitle}
               </DialogTitle>
               <DialogDescription>
-                {t.dialogDescription.replace("{month}", monthLabel)}
+                {t.dialogDescription.replace("{month}", selectedMonthLabel)}
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto space-y-3 py-2">
-              {/* Loading state */}
               {loading && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -170,7 +241,6 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
                 </div>
               )}
 
-              {/* Error state */}
               {error && !loading && (
                 <div className="flex flex-col items-center justify-center py-8 gap-3">
                   <AlertCircle className="h-8 w-8 text-red-500" />
@@ -182,7 +252,6 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
                 </div>
               )}
 
-              {/* Proposals list */}
               {!loading && !error && proposals.length > 0 && (
                 <>
                   {proposals.map((proposal, index) => (
@@ -235,11 +304,12 @@ export function AIProposalsDialog({ month, monthLabel, translations: t }: AIProp
               )}
             </div>
 
-            {/* Footer with actions */}
             {!loading && proposals.length > 0 && (
               <DialogFooter className="flex-row gap-2 sm:justify-between">
                 <p className="text-xs text-muted-foreground self-center">
-                  {t.selectedCount.replace("{selected}", String(selected.size)).replace("{total}", String(proposals.length))}
+                  {t.selectedCount
+                    .replace("{selected}", String(selected.size))
+                    .replace("{total}", String(proposals.length))}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button

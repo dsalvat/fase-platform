@@ -9,7 +9,9 @@ import { requireAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { AIProposalsDialog } from "@/components/big-rocks/ai-proposals-dialog";
 import { Plus } from "lucide-react";
-import { getCurrentMonth, isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
+import { getCurrentMonth, getNextMonth, isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
+import { getCurrentCompanyId } from "@/lib/company-context";
+import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
 
 // Force dynamic rendering to avoid stale translations
@@ -45,6 +47,33 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
   // Get planning status for the current month
   const planningStatus = await getMonthPlanningStatus(displayMonth);
 
+  // Compute month options for AI proposals (next 3 months from current)
+  const companyId = await getCurrentCompanyId();
+  const aiMonthOptions = (() => {
+    const options: { value: string; label: string }[] = [];
+    let m = defaultMonth;
+    for (let i = 0; i < 3; i++) {
+      m = getNextMonth(m);
+      options.push({ value: m, label: formatMonthLabel(m) });
+    }
+    // Also include current month if not read-only
+    if (!isMonthReadOnly(defaultMonth)) {
+      options.unshift({ value: defaultMonth, label: formatMonthLabel(defaultMonth) });
+    }
+    return options;
+  })();
+  const aiDefaultMonth = aiMonthOptions[0]?.value || getNextMonth(defaultMonth);
+
+  // Check if user has AI context filled
+  let hasAIContext = false;
+  if (companyId) {
+    const uc = await prisma.userCompany.findUnique({
+      where: { userId_companyId: { userId: user.id, companyId } },
+      select: { contextRole: true, contextResponsibilities: true, contextObjectives: true, contextYearPriorities: true },
+    });
+    hasAIContext = !!(uc?.contextRole || uc?.contextResponsibilities || uc?.contextObjectives || uc?.contextYearPriorities);
+  }
+
   // Translations for the client component
   // For planningConfirmedOn, we pass a placeholder that will be replaced in the client
   const planningTranslations = {
@@ -77,10 +106,11 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
         {!isReadOnly && (
           <div className="flex items-center gap-2">
             <AIProposalsDialog
-              month={displayMonth}
-              monthLabel={formatMonthLabel(displayMonth)}
+              monthOptions={aiMonthOptions}
+              defaultMonth={aiDefaultMonth}
+              hasAIContext={hasAIContext}
               translations={{
-                buttonLabel: tAI("buttonLabel", { month: formatMonthLabel(displayMonth) }),
+                buttonLabel: tAI("buttonLabel"),
                 confirmTitle: tAI("confirmTitle"),
                 confirmDescription: tAI("confirmDescription"),
                 confirmButton: tAI("confirmButton"),
@@ -93,6 +123,11 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
                 selectedCount: tAI("selectedCount"),
                 creating: tAI("creating"),
                 createDrafts: tAI("createDrafts"),
+                targetMonth: tAI("targetMonth"),
+                contextMissing: tAI("contextMissing"),
+                contextMissingLink: tAI("contextMissingLink"),
+                contextUpdate: tAI("contextUpdate"),
+                contextUpdateLink: tAI("contextUpdateLink"),
               }}
             />
             <Link href={`/big-rocks/new?month=${displayMonth}`} data-tour="new-big-rock-button">

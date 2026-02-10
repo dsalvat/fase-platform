@@ -154,7 +154,7 @@
     "selectedPeople": "Selected people",
     "availablePeople": "Available people",
     "aiProposals": {
-      "buttonLabel": "Generate with AI ({month})",
+      "buttonLabel": "Generate with AI",
       "confirmTitle": "Generate AI proposals",
       "confirmDescription": "Big Rock proposals will be generated for {month}. Created Big Rocks will be in draft status so you can review them before confirming.",
       "confirmButton": "Generate proposals",
@@ -165,7 +165,12 @@
       "regenerate": "Regenerate",
       "selectedCount": "{selected} of {total} selected",
       "creating": "Creating...",
-      "createDrafts": "Create {count} draft(s)"
+      "createDrafts": "Create {count} draft(s)",
+      "targetMonth": "Target month",
+      "contextMissing": "You haven't filled in your AI context. Proposals will be generic.",
+      "contextMissingLink": "Go to my profile to fill it in →",
+      "contextUpdate": "Your AI context is configured. You can update it to improve accuracy.",
+      "contextUpdateLink": "Update my context →"
     }
   },
   "tars": {

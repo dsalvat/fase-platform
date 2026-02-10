@@ -154,7 +154,7 @@
     "selectedPeople": "Personas seleccionadas",
     "availablePeople": "Personas disponibles",
     "aiProposals": {
-      "buttonLabel": "Generar con IA ({month})",
+      "buttonLabel": "Generar con IA",
       "confirmTitle": "Generar propuestas con IA",
       "confirmDescription": "Se generaran propuestas de Big Rocks para {month}. Los Big Rocks creados quedaran en estado borrador para que puedas revisarlos antes de confirmarlos.",
       "confirmButton": "Generar propuestas",
@@ -165,7 +165,12 @@
       "regenerate": "Regenerar",
       "selectedCount": "{selected} de {total} seleccionados",
       "creating": "Creando...",
-      "createDrafts": "Crear {count} borrador(es)"
+      "createDrafts": "Crear {count} borrador(es)",
+      "targetMonth": "Mes destino",
+      "contextMissing": "No has rellenado tu contexto para IA. Las propuestas serán genéricas.",
+      "contextMissingLink": "Ir a mi perfil para rellenarlo →",
+      "contextUpdate": "Tu contexto para IA está configurado. Puedes actualizarlo para mejorar la precisión.",
+      "contextUpdateLink": "Actualizar mi contexto →"
     }
   },
   "tars": {

@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { updateTARProgress, updateTARStatus } from "@/app/actions/tars";
 import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -112,7 +111,6 @@ function TarRow({
         />
         <span className="text-xs font-medium w-8 text-right">{progress}%</span>
       </div>
-      <Progress value={progress} className="h-1.5" />
     </div>
   );
 }
