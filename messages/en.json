@@ -152,7 +152,21 @@
     "noKeyPeople": "No key people selected",
     "noKeyMeetings": "No key meetings added",
     "selectedPeople": "Selected people",
-    "availablePeople": "Available people"
+    "availablePeople": "Available people",
+    "aiProposals": {
+      "buttonLabel": "Generate with AI ({month})",
+      "confirmTitle": "Generate AI proposals",
+      "confirmDescription": "Big Rock proposals will be generated for {month}. Created Big Rocks will be in draft status so you can review them before confirming.",
+      "confirmButton": "Generate proposals",
+      "dialogTitle": "AI Big Rock Proposals",
+      "dialogDescription": "Proposals generated for {month}. Select the ones you want to create as drafts.",
+      "generating": "Generating proposals...",
+      "retry": "Retry",
+      "regenerate": "Regenerate",
+      "selectedCount": "{selected} of {total} selected",
+      "creating": "Creating...",
+      "createDrafts": "Create {count} draft(s)"
+    }
   },
   "tars": {
     "title": "TARs",

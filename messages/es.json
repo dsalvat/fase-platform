@@ -152,7 +152,21 @@
     "noKeyPeople": "No hay personas clave seleccionadas",
     "noKeyMeetings": "No hay reuniones clave agregadas",
     "selectedPeople": "Personas seleccionadas",
-    "availablePeople": "Personas disponibles"
+    "availablePeople": "Personas disponibles",
+    "aiProposals": {
+      "buttonLabel": "Generar con IA ({month})",
+      "confirmTitle": "Generar propuestas con IA",
+      "confirmDescription": "Se generaran propuestas de Big Rocks para {month}. Los Big Rocks creados quedaran en estado borrador para que puedas revisarlos antes de confirmarlos.",
+      "confirmButton": "Generar propuestas",
+      "dialogTitle": "Propuestas de Big Rocks con IA",
+      "dialogDescription": "Propuestas generadas para {month}. Selecciona las que quieras crear como borrador.",
+      "generating": "Generando propuestas...",
+      "retry": "Reintentar",
+      "regenerate": "Regenerar",
+      "selectedCount": "{selected} de {total} seleccionados",
+      "creating": "Creando...",
+      "createDrafts": "Crear {count} borrador(es)"
+    }
   },
   "tars": {
     "title": "TARs",

@@ -9,7 +9,7 @@ import { requireAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { AIProposalsDialog } from "@/components/big-rocks/ai-proposals-dialog";
 import { Plus } from "lucide-react";
-import { getCurrentMonth, isMonthReadOnly } from "@/lib/month-helpers";
+import { getCurrentMonth, isMonthReadOnly, formatMonthLabel } from "@/lib/month-helpers";
 import { UserRole } from "@prisma/client";
 
 // Force dynamic rendering to avoid stale translations
@@ -34,6 +34,7 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
   const t = await getTranslations("bigRocks");
   const tCommon = await getTranslations("common");
   const tPlanning = await getTranslations("planning");
+  const tAI = await getTranslations("bigRocks.aiProposals");
 
   // Get user role to check if can unconfirm
   const user = await requireAuth();
@@ -75,7 +76,25 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
 
         {!isReadOnly && (
           <div className="flex items-center gap-2">
-            <AIProposalsDialog month={displayMonth} />
+            <AIProposalsDialog
+              month={displayMonth}
+              monthLabel={formatMonthLabel(displayMonth)}
+              translations={{
+                buttonLabel: tAI("buttonLabel", { month: formatMonthLabel(displayMonth) }),
+                confirmTitle: tAI("confirmTitle"),
+                confirmDescription: tAI("confirmDescription"),
+                confirmButton: tAI("confirmButton"),
+                cancel: tCommon("cancel"),
+                dialogTitle: tAI("dialogTitle"),
+                dialogDescription: tAI("dialogDescription"),
+                generating: tAI("generating"),
+                retry: tAI("retry"),
+                regenerate: tAI("regenerate"),
+                selectedCount: tAI("selectedCount"),
+                creating: tAI("creating"),
+                createDrafts: tAI("createDrafts"),
+              }}
+            />
             <Link href={`/big-rocks/new?month=${displayMonth}`} data-tour="new-big-rock-button">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
