@@ -66,7 +66,19 @@
     "roleUser": "User",
     "roleSupervisor": "Supervisor",
     "roleAdmin": "Administrator",
-    "roleSuperAdmin": "Super Administrator"
+    "roleSuperAdmin": "Super Administrator",
+    "aiContext": {
+      "title": "AI Context",
+      "description": "This information is used to personalize AI recommendations (Big Rocks, evaluations, OKRs)",
+      "role": "Your role / position",
+      "rolePlaceholder": "E.g.: Marketing Director, Operations Manager, Product Manager...",
+      "responsibilities": "Your main responsibilities",
+      "responsibilitiesPlaceholder": "E.g.: Managing a team of 10, marketing budget, digital strategy...",
+      "objectives": "Your general objectives and priorities",
+      "objectivesPlaceholder": "E.g.: Business growth, process improvement, team development...",
+      "yearPriorities": "Your objectives and priorities for this year",
+      "yearPrioritiesPlaceholder": "E.g.: Launch new product in Q2, reduce costs by 15%, internationalization..."
+    }
   },
   "home": {
     "myBigRocks": "My Big Rocks",

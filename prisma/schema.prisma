@@ -210,6 +210,12 @@ model UserCompany {
   supervisor User?    @relation("UserCompanySupervisor", fields: [supervisorId], references: [id])
   createdAt  DateTime @default(now())
 
+  // AI context fields (per-company personal context for AI recommendations)
+  contextRole             String?   // Cargo / rol del usuario
+  contextResponsibilities String?   // Responsabilidades principales
+  contextObjectives       String?   // Objetivos y prioridades generales
+  contextYearPriorities   String?   // Objetivos y prioridades del año en curso
+
   @@unique([userId, companyId])
   @@index([userId])
   @@index([companyId])

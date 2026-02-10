@@ -19,6 +19,11 @@ export async function getAIBigRockProposals(month: string): Promise<{
 }> {
   try {
     const user = await requireAuth();
+    const companyId = await getCurrentCompanyId();
+
+    if (!companyId) {
+      return { success: false, error: "No se ha seleccionado empresa" };
+    }
 
     if (isMonthReadOnly(month)) {
       return {
@@ -27,7 +32,7 @@ export async function getAIBigRockProposals(month: string): Promise<{
       };
     }
 
-    const proposals = await generateBigRockProposals(user.id, month);
+    const proposals = await generateBigRockProposals(user.id, month, companyId);
 
     if (proposals.length === 0) {
       return {

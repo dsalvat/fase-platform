@@ -5,8 +5,9 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Mail, Shield, Building2 } from "lucide-react";
+import { User, Mail, Shield, Building2, Bot } from "lucide-react";
 import { ProfileForm } from "@/components/profile/profile-form";
+import { AIContextForm } from "@/components/profile/ai-context-form";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -49,6 +50,12 @@ export default async function ProfilePage() {
 
   // Per-company role from session (already resolved in auth-options)
   const userRole = session.user.role || UserRole.USER;
+
+  // Get current company's UserCompany data for AI context
+  const currentCompanyId = session.user.currentCompanyId;
+  const currentUC = user.companies.find(
+    (uc) => uc.company.id === currentCompanyId
+  );
 
   const roleLabels: Record<UserRole, string> = {
     USER: t("roleUser"),
@@ -147,6 +154,43 @@ export default async function ProfilePage() {
           />
         </CardContent>
       </Card>
+
+      {/* AI Context Card */}
+      {currentUC && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-purple-600" />
+              <CardTitle>{t("aiContext.title")}</CardTitle>
+            </div>
+            <CardDescription>{t("aiContext.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AIContextForm
+              data={{
+                contextRole: currentUC.contextRole,
+                contextResponsibilities: currentUC.contextResponsibilities,
+                contextObjectives: currentUC.contextObjectives,
+                contextYearPriorities: currentUC.contextYearPriorities,
+              }}
+              translations={{
+                role: t("aiContext.role"),
+                rolePlaceholder: t("aiContext.rolePlaceholder"),
+                responsibilities: t("aiContext.responsibilities"),
+                responsibilitiesPlaceholder: t("aiContext.responsibilitiesPlaceholder"),
+                objectives: t("aiContext.objectives"),
+                objectivesPlaceholder: t("aiContext.objectivesPlaceholder"),
+                yearPriorities: t("aiContext.yearPriorities"),
+                yearPrioritiesPlaceholder: t("aiContext.yearPrioritiesPlaceholder"),
+                save: tCommon("save"),
+                saving: tCommon("loading"),
+                saved: t("saved"),
+                error: tCommon("error"),
+              }}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

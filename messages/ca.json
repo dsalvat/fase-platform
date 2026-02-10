@@ -66,7 +66,19 @@
     "roleUser": "Usuari",
     "roleSupervisor": "Supervisor",
     "roleAdmin": "Administrador",
-    "roleSuperAdmin": "Super Administrador"
+    "roleSuperAdmin": "Super Administrador",
+    "aiContext": {
+      "title": "Context per a IA",
+      "description": "Aquesta informacio s'utilitza per personalitzar les recomanacions de la IA (Big Rocks, avaluacions, OKRs)",
+      "role": "El teu carrec / rol",
+      "rolePlaceholder": "Ex: Director de Marqueting, Responsable d'Operacions, Product Manager...",
+      "responsibilities": "Les teves responsabilitats principals",
+      "responsibilitiesPlaceholder": "Ex: Gestio d'equip de 10 persones, pressupost de marqueting, estrategia digital...",
+      "objectives": "Els teus objectius i prioritats generals",
+      "objectivesPlaceholder": "Ex: Creixement del negoci, millora de processos, desenvolupament de l'equip...",
+      "yearPriorities": "Els teus objectius i prioritats per a aquest any",
+      "yearPrioritiesPlaceholder": "Ex: Llancar nou producte al Q2, reduir costos un 15%, internacionalitzacio..."
+    }
   },
   "home": {
     "myBigRocks": "Els meus Big Rocks",

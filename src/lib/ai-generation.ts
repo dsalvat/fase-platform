@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { anthropic, CLAUDE_MODEL, AI_EVALUATION_MAX_TOKENS } from "@/lib/anthropic";
 import { FaseCategory } from "@prisma/client";
 import { getPreviousMonth } from "@/lib/month-helpers";
+import { getUserAIContext } from "@/lib/ai-context";
 
 export interface BigRockProposal {
   title: string;
@@ -88,7 +89,8 @@ function parseProposalsResponse(text: string): BigRockProposal[] {
  */
 export async function generateBigRockProposals(
   userId: string,
-  month: string
+  month: string,
+  companyId: string
 ): Promise<BigRockProposal[]> {
   // Get previous 3 months
   let prevMonth = month;
@@ -116,6 +118,9 @@ export async function generateBigRockProposals(
     orderBy: { month: "desc" },
   });
 
+  // Fetch user's personal AI context
+  const userContext = await getUserAIContext(userId, companyId);
+
   let historyText: string;
   if (previousBigRocks.length > 0) {
     historyText = previousBigRocks
@@ -128,12 +133,16 @@ export async function generateBigRockProposals(
     historyText = "No hay historial previo. Es el primer mes del usuario.";
   }
 
-  const userMessage = `Genera propuestas de Big Rocks para el mes ${month}.
+  const contextBlock = userContext
+    ? `\n${userContext}\n`
+    : "";
 
+  const userMessage = `Genera propuestas de Big Rocks para el mes ${month}.
+${contextBlock}
 Historial de Big Rocks del usuario (ultimos 3 meses):
 ${historyText}
 
-Basandote en este historial, propone entre 3 y 5 Big Rocks nuevos y relevantes para el proximo mes.`;
+Basandote en este contexto e historial, propone entre 3 y 5 Big Rocks nuevos y relevantes para el proximo mes.`;
 
   const response = await anthropic.messages.create({
     model: CLAUDE_MODEL,

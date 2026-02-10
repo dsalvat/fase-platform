@@ -66,7 +66,19 @@
     "roleUser": "Usuario",
     "roleSupervisor": "Supervisor",
     "roleAdmin": "Administrador",
-    "roleSuperAdmin": "Super Administrador"
+    "roleSuperAdmin": "Super Administrador",
+    "aiContext": {
+      "title": "Contexto para IA",
+      "description": "Esta informacion se usa para personalizar las recomendaciones de la IA (Big Rocks, evaluaciones, OKRs)",
+      "role": "Tu cargo / rol",
+      "rolePlaceholder": "Ej: Director de Marketing, Responsable de Operaciones, Product Manager...",
+      "responsibilities": "Tus responsabilidades principales",
+      "responsibilitiesPlaceholder": "Ej: Gestion de equipo de 10 personas, presupuesto de marketing, estrategia digital...",
+      "objectives": "Tus objetivos y prioridades generales",
+      "objectivesPlaceholder": "Ej: Crecimiento del negocio, mejora de procesos, desarrollo del equipo...",
+      "yearPriorities": "Tus objetivos y prioridades para este ano",
+      "yearPrioritiesPlaceholder": "Ej: Lanzar nuevo producto en Q2, reducir costes un 15%, internacionalizacion..."
+    }
   },
   "home": {
     "myBigRocks": "Mis Big Rocks",

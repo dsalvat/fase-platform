@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { anthropic, CLAUDE_MODEL, AI_EVALUATION_MAX_TOKENS } from "@/lib/anthropic";
+import { getUserAIContext } from "@/lib/ai-context";
 
 const EVALUATION_SYSTEM_PROMPT = `Eres un evaluador experto en planificacion estrategica y metodologia FASE (objetivos mensuales de alto rendimiento).
 
@@ -96,8 +97,14 @@ export async function evaluateBigRock(bigRockId: string): Promise<void> {
       ? bigRock.keyPeople.map((p) => p.user.name || "Sin nombre").join(", ")
       : "Ninguna";
 
-  const userMessage = `Evalua el siguiente Big Rock:
+  // Fetch user's personal AI context
+  const userContext = bigRock.companyId
+    ? await getUserAIContext(bigRock.userId, bigRock.companyId)
+    : null;
+  const contextBlock = userContext ? `\n${userContext}\n` : "";
 
+  const userMessage = `Evalua el siguiente Big Rock:
+${contextBlock}
 **Titulo**: ${bigRock.title}
 **Descripcion**: ${bigRock.description}
 **Indicador de exito (KPI)**: ${bigRock.indicator}
@@ -175,7 +182,8 @@ IMPORTANTE:
  */
 export async function evaluateMonthPlanning(
   userId: string,
-  month: string
+  month: string,
+  companyId: string
 ): Promise<void> {
   const bigRocks = await prisma.bigRock.findMany({
     where: { userId, month },
@@ -217,8 +225,12 @@ ${tarsText}`;
     })
     .join("\n\n");
 
-  const userMessage = `Evalua la planificacion mensual global del usuario para el mes ${month}.
+  // Fetch user's personal AI context
+  const userContext = await getUserAIContext(userId, companyId);
+  const contextBlock = userContext ? `\n${userContext}\n` : "";
 
+  const userMessage = `Evalua la planificacion mensual global del usuario para el mes ${month}.
+${contextBlock}
 El usuario tiene ${bigRocks.length} Big Rocks este mes:
 
 ${bigRocksText}`;

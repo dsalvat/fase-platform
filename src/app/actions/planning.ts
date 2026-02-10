@@ -492,7 +492,12 @@ export async function generateMonthAIEvaluation(
       };
     }
 
-    await evaluateMonthPlanning(targetUserId, month);
+    const companyId = await getCurrentCompanyId();
+    if (!companyId) {
+      return { success: false, error: "No se ha seleccionado empresa" };
+    }
+
+    await evaluateMonthPlanning(targetUserId, month, companyId);
 
     revalidatePath("/supervisor");
 
