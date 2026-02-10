@@ -84,14 +84,19 @@ export async function updateAIContext(data: {
       };
     }
 
-    await prisma.userCompany.update({
+    await prisma.userCompany.upsert({
       where: {
         userId_companyId: {
           userId: session.user.id,
           companyId,
         },
       },
-      data: validationResult.data,
+      update: validationResult.data,
+      create: {
+        userId: session.user.id,
+        companyId,
+        ...validationResult.data,
+      },
     });
 
     revalidatePath("/perfil");

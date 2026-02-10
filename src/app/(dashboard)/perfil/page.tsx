@@ -53,9 +53,32 @@ export default async function ProfilePage() {
 
   // Get current company's UserCompany data for AI context
   const currentCompanyId = session.user.currentCompanyId;
+  let aiContextData: {
+    contextRole: string | null;
+    contextResponsibilities: string | null;
+    contextObjectives: string | null;
+    contextYearPriorities: string | null;
+  } | null = null;
+
   const currentUC = user.companies.find(
     (uc) => uc.company.id === currentCompanyId
   );
+
+  if (currentUC) {
+    aiContextData = {
+      contextRole: currentUC.contextRole,
+      contextResponsibilities: currentUC.contextResponsibilities,
+      contextObjectives: currentUC.contextObjectives,
+      contextYearPriorities: currentUC.contextYearPriorities,
+    };
+  } else if (currentCompanyId) {
+    // Superadmins may access a company without being in the companies include
+    const directUC = await prisma.userCompany.findUnique({
+      where: { userId_companyId: { userId: user.id, companyId: currentCompanyId } },
+      select: { contextRole: true, contextResponsibilities: true, contextObjectives: true, contextYearPriorities: true },
+    });
+    aiContextData = directUC || { contextRole: null, contextResponsibilities: null, contextObjectives: null, contextYearPriorities: null };
+  }
 
   const roleLabels: Record<UserRole, string> = {
     USER: t("roleUser"),
@@ -156,7 +179,7 @@ export default async function ProfilePage() {
       </Card>
 
       {/* AI Context Card */}
-      {currentUC && (
+      {aiContextData && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -167,12 +190,7 @@ export default async function ProfilePage() {
           </CardHeader>
           <CardContent>
             <AIContextForm
-              data={{
-                contextRole: currentUC.contextRole,
-                contextResponsibilities: currentUC.contextResponsibilities,
-                contextObjectives: currentUC.contextObjectives,
-                contextYearPriorities: currentUC.contextYearPriorities,
-              }}
+              data={aiContextData}
               translations={{
                 role: t("aiContext.role"),
                 rolePlaceholder: t("aiContext.rolePlaceholder"),
