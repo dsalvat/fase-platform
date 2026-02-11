@@ -75,6 +75,10 @@ export async function createBigRocksFromProposals(
 
     const created: { id: string; title: string }[] = [];
 
+    // Parse month to distribute meeting dates across weeks
+    const [yearStr, monthStr] = month.split("-");
+    const monthDate = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+
     for (const proposal of proposals) {
       const bigRock = await prisma.bigRock.create({
         data: {
@@ -89,6 +93,40 @@ export async function createBigRocksFromProposals(
           companyId,
         },
       });
+
+      // Create TARs
+      if (proposal.tars && proposal.tars.length > 0) {
+        for (const tar of proposal.tars) {
+          await prisma.tAR.create({
+            data: {
+              description: tar.description,
+              bigRockId: bigRock.id,
+            },
+          });
+        }
+      }
+
+      // Create Key Meetings with dates distributed across the month
+      if (proposal.meetings && proposal.meetings.length > 0) {
+        for (let i = 0; i < proposal.meetings.length; i++) {
+          const meeting = proposal.meetings[i];
+          // Distribute meetings: week 1, 2, 3 of the month
+          const meetingDay = 7 * (i + 1);
+          const meetingDate = new Date(monthDate);
+          meetingDate.setDate(Math.min(meetingDay, 28));
+
+          await prisma.keyMeeting.create({
+            data: {
+              title: meeting.title,
+              objective: meeting.objective || null,
+              expectedDecision: meeting.expectedDecision || null,
+              date: meetingDate,
+              bigRockId: bigRock.id,
+            },
+          });
+        }
+      }
+
       created.push({ id: bigRock.id, title: bigRock.title });
     }
 

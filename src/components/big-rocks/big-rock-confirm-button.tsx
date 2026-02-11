@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { confirmBigRock } from "@/app/actions/big-rocks";
+import { estimateBigRockEvaluationTokens } from "@/app/actions/ai-estimation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -15,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, Cpu } from "lucide-react";
 
 interface BigRockConfirmButtonProps {
   bigRockId: string;
@@ -30,6 +31,22 @@ export function BigRockConfirmButton({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [tokenEstimate, setTokenEstimate] = useState<{ inputTokens: number; maxOutputTokens: number } | null>(null);
+  const [estimatingTokens, setEstimatingTokens] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setEstimatingTokens(true);
+      estimateBigRockEvaluationTokens(bigRockId).then((res) => {
+        if (res.success && res.estimate) {
+          setTokenEstimate(res.estimate);
+        }
+        setEstimatingTokens(false);
+      });
+    } else {
+      setTokenEstimate(null);
+    }
+  }, [open, bigRockId]);
 
   const handleConfirm = () => {
     setError(null);
@@ -68,6 +85,22 @@ export function BigRockConfirmButton({
                   <li>Solo podrás gestionar TARs, Reuniones Clave y Personas Clave</li>
                   <li>Esta acción no se puede deshacer</li>
                 </ul>
+              </div>
+              {/* Token estimate */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+                <Cpu className="h-3.5 w-3.5 shrink-0" />
+                {estimatingTokens ? (
+                  <span className="flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Estimando consumo de tokens...
+                  </span>
+                ) : tokenEstimate ? (
+                  <span>
+                    Evaluación IA: ~{tokenEstimate.inputTokens.toLocaleString()} tokens entrada + {tokenEstimate.maxOutputTokens.toLocaleString()} tokens salida (máx.)
+                  </span>
+                ) : (
+                  <span>No se pudo estimar el consumo de tokens</span>
+                )}
               </div>
               {error && (
                 <p className="text-red-600 text-sm">{error}</p>

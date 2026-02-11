@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { confirmMonthPlanning, unconfirmMonthPlanning } from "@/app/actions/planning";
+import { estimateMonthEvaluationTokens } from "@/app/actions/ai-estimation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -16,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CheckCircle, Loader2, ShieldCheck, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Loader2, ShieldCheck, Clock, XCircle, Cpu } from "lucide-react";
 import type { MonthPlanningStatus as MonthPlanningStatusType } from "@/types/feedback";
 
 interface MonthPlanningStatusTranslations {
@@ -47,6 +48,22 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [unconfirmOpen, setUnconfirmOpen] = useState(false);
+  const [tokenEstimate, setTokenEstimate] = useState<{ inputTokens: number; maxOutputTokens: number } | null>(null);
+  const [estimatingTokens, setEstimatingTokens] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setEstimatingTokens(true);
+      estimateMonthEvaluationTokens(status.month).then((res) => {
+        if (res.success && res.estimate) {
+          setTokenEstimate(res.estimate);
+        }
+        setEstimatingTokens(false);
+      });
+    } else {
+      setTokenEstimate(null);
+    }
+  }, [open, status.month]);
 
   const progress =
     status.totalBigRocks > 0
@@ -206,6 +223,22 @@ export function MonthPlanningStatus({ status, translations: t, canUnconfirm = fa
               <AlertDialogDescription asChild>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>{t.confirmPlanningDescription}</p>
+                  {/* Token estimate */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+                    <Cpu className="h-3.5 w-3.5 shrink-0" />
+                    {estimatingTokens ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Estimando consumo de tokens...
+                      </span>
+                    ) : tokenEstimate ? (
+                      <span>
+                        Evaluación IA mensual: ~{tokenEstimate.inputTokens.toLocaleString()} tokens entrada + {tokenEstimate.maxOutputTokens.toLocaleString()} tokens salida (máx.)
+                      </span>
+                    ) : (
+                      <span>No se pudo estimar el consumo de tokens</span>
+                    )}
+                  </div>
                   {error && <p className="text-red-600 text-sm">{error}</p>}
                 </div>
               </AlertDialogDescription>

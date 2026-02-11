@@ -59,10 +59,13 @@ function parseEvaluationResponse(text: string): AIEvaluationResult | null {
 }
 
 /**
- * Evaluates a Big Rock using Claude AI and saves the results.
- * Called after confirming a Big Rock (CREADO -> CONFIRMADO).
+ * Builds the prompt messages for evaluating a Big Rock.
+ * Exported so it can be reused for token estimation.
  */
-export async function evaluateBigRock(bigRockId: string): Promise<void> {
+export async function buildBigRockEvaluationMessages(bigRockId: string): Promise<{
+  system: string;
+  userMessage: string;
+} | null> {
   const bigRock = await prisma.bigRock.findUnique({
     where: { id: bigRockId },
     include: {
@@ -72,10 +75,7 @@ export async function evaluateBigRock(bigRockId: string): Promise<void> {
     },
   });
 
-  if (!bigRock) {
-    console.error(`AI evaluation: Big Rock ${bigRockId} not found`);
-    return;
-  }
+  if (!bigRock) return null;
 
   const tarsText =
     bigRock.tars.length > 0
@@ -97,7 +97,6 @@ export async function evaluateBigRock(bigRockId: string): Promise<void> {
       ? bigRock.keyPeople.map((p) => p.user.name || "Sin nombre").join(", ")
       : "Ninguna";
 
-  // Fetch user's personal AI context
   const userContext = bigRock.companyId
     ? await getUserAIContext(bigRock.userId, bigRock.companyId)
     : null;
@@ -116,11 +115,25 @@ ${tarsText}
 ${meetingsText}
 **Personas clave**: ${peopleText}`;
 
+  return { system: EVALUATION_SYSTEM_PROMPT, userMessage };
+}
+
+/**
+ * Evaluates a Big Rock using Claude AI and saves the results.
+ * Called after confirming a Big Rock (CREADO -> CONFIRMADO).
+ */
+export async function evaluateBigRock(bigRockId: string): Promise<void> {
+  const messages = await buildBigRockEvaluationMessages(bigRockId);
+  if (!messages) {
+    console.error(`AI evaluation: Big Rock ${bigRockId} not found`);
+    return;
+  }
+
   const response = await anthropic.messages.create({
     model: CLAUDE_MODEL,
     max_tokens: AI_EVALUATION_MAX_TOKENS,
-    system: EVALUATION_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+    system: messages.system,
+    messages: [{ role: "user", content: messages.userMessage }],
   });
 
   const content = response.content[0];
@@ -177,14 +190,14 @@ IMPORTANTE:
 - Se conciso pero completo (cada campo entre 2-4 frases)`;
 
 /**
- * Evaluates the entire month planning using Claude AI and saves results on OpenMonth.
- * Summarizes all Big Rocks for the given user/month.
+ * Builds the prompt messages for evaluating month planning.
+ * Exported so it can be reused for token estimation.
  */
-export async function evaluateMonthPlanning(
+export async function buildMonthEvaluationMessages(
   userId: string,
   month: string,
   companyId: string
-): Promise<void> {
+): Promise<{ system: string; userMessage: string } | null> {
   const bigRocks = await prisma.bigRock.findMany({
     where: { userId, month },
     include: {
@@ -195,10 +208,7 @@ export async function evaluateMonthPlanning(
     orderBy: { createdAt: "asc" },
   });
 
-  if (bigRocks.length === 0) {
-    console.error(`AI month evaluation: no Big Rocks for user ${userId} month ${month}`);
-    return;
-  }
+  if (bigRocks.length === 0) return null;
 
   const bigRocksText = bigRocks
     .map((br, i) => {
@@ -225,7 +235,6 @@ ${tarsText}`;
     })
     .join("\n\n");
 
-  // Fetch user's personal AI context
   const userContext = await getUserAIContext(userId, companyId);
   const contextBlock = userContext ? `\n${userContext}\n` : "";
 
@@ -235,11 +244,29 @@ El usuario tiene ${bigRocks.length} Big Rocks este mes:
 
 ${bigRocksText}`;
 
+  return { system: MONTH_EVALUATION_SYSTEM_PROMPT, userMessage };
+}
+
+/**
+ * Evaluates the entire month planning using Claude AI and saves results on OpenMonth.
+ * Summarizes all Big Rocks for the given user/month.
+ */
+export async function evaluateMonthPlanning(
+  userId: string,
+  month: string,
+  companyId: string
+): Promise<void> {
+  const messages = await buildMonthEvaluationMessages(userId, month, companyId);
+  if (!messages) {
+    console.error(`AI month evaluation: no Big Rocks for user ${userId} month ${month}`);
+    return;
+  }
+
   const response = await anthropic.messages.create({
     model: CLAUDE_MODEL,
     max_tokens: AI_EVALUATION_MAX_TOKENS,
-    system: MONTH_EVALUATION_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+    system: messages.system,
+    messages: [{ role: "user", content: messages.userMessage }],
   });
 
   const content = response.content[0];

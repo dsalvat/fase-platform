@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FaseCategoryBadge } from "@/components/big-rocks/fase-category-badge";
-import { Bot, Loader2, Check, ListChecks, AlertCircle, RefreshCw, Info } from "lucide-react";
+import { estimateGenerationTokens } from "@/app/actions/ai-estimation";
+import { Bot, Loader2, Check, ListChecks, AlertCircle, RefreshCw, Info, ChevronDown, ChevronUp, CalendarDays, Cpu } from "lucide-react";
 
 interface MonthOption {
   value: string;
@@ -67,6 +68,22 @@ export function AIProposalsDialog({
   const [loading, setLoading] = useState(false);
   const [creating, startCreating] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [tokenEstimate, setTokenEstimate] = useState<{ inputTokens: number; maxOutputTokens: number } | null>(null);
+  const [estimatingTokens, setEstimatingTokens] = useState(false);
+
+  useEffect(() => {
+    if (open && step === "confirm") {
+      setEstimatingTokens(true);
+      setTokenEstimate(null);
+      estimateGenerationTokens(targetMonth).then((res) => {
+        if (res.success && res.estimate) {
+          setTokenEstimate(res.estimate);
+        }
+        setEstimatingTokens(false);
+      });
+    }
+  }, [open, targetMonth, step]);
 
   const selectedMonthLabel =
     monthOptions.find((m) => m.value === targetMonth)?.label || targetMonth;
@@ -94,6 +111,7 @@ export function AIProposalsDialog({
     setError(null);
     setProposals([]);
     setSelected(new Set());
+    setExpandedCards(new Set());
 
     const result = await getAIBigRockProposals(targetMonth);
 
@@ -104,6 +122,19 @@ export function AIProposalsDialog({
       setError(result.error || "Error desconocido");
     }
     setLoading(false);
+  };
+
+  const toggleExpand = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   };
 
   const toggleSelect = (index: number) => {
@@ -204,6 +235,23 @@ export function AIProposalsDialog({
                   </div>
                 </div>
               )}
+
+              {/* Token estimate */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+                <Cpu className="h-3.5 w-3.5 shrink-0" />
+                {estimatingTokens ? (
+                  <span className="flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Estimando consumo de tokens...
+                  </span>
+                ) : tokenEstimate ? (
+                  <span>
+                    Generación IA: ~{tokenEstimate.inputTokens.toLocaleString()} tokens entrada + {tokenEstimate.maxOutputTokens.toLocaleString()} tokens salida (máx.)
+                  </span>
+                ) : (
+                  <span>No se pudo estimar el consumo de tokens</span>
+                )}
+              </div>
             </div>
 
             <DialogFooter className="flex-row gap-2 sm:justify-end">
@@ -294,8 +342,81 @@ export function AIProposalsDialog({
                           </p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                             <span>KPI: {proposal.indicator}</span>
-                            <span>{proposal.numTars} TARs</span>
+                            <span>{proposal.tars?.length || proposal.numTars} TARs</span>
+                            {proposal.meetings?.length > 0 && (
+                              <span>{proposal.meetings.length} Reuniones</span>
+                            )}
                           </div>
+
+                          {/* Expand/collapse details */}
+                          {(proposal.tars?.length > 0 || proposal.meetings?.length > 0) && (
+                            <button
+                              type="button"
+                              onClick={(e) => toggleExpand(index, e)}
+                              className="flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              {expandedCards.has(index) ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3" />
+                                  Ocultar detalle
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3" />
+                                  Ver TARs y reuniones
+                                </>
+                              )}
+                            </button>
+                          )}
+
+                          {expandedCards.has(index) && (
+                            <div className="mt-3 space-y-3 border-t pt-3">
+                              {/* TARs list */}
+                              {proposal.tars?.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-foreground mb-1.5">
+                                    TARs ({proposal.tars.length})
+                                  </p>
+                                  <ul className="space-y-1">
+                                    {proposal.tars.map((tar, tIdx) => (
+                                      <li
+                                        key={tIdx}
+                                        className="text-xs text-muted-foreground flex items-start gap-1.5"
+                                      >
+                                        <span className="text-blue-500 mt-0.5 shrink-0">•</span>
+                                        <span>{tar.description}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* Meetings list */}
+                              {proposal.meetings?.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-foreground mb-1.5">
+                                    Reuniones Clave ({proposal.meetings.length})
+                                  </p>
+                                  <ul className="space-y-1.5">
+                                    {proposal.meetings.map((meeting, mIdx) => (
+                                      <li
+                                        key={mIdx}
+                                        className="text-xs text-muted-foreground flex items-start gap-1.5"
+                                      >
+                                        <CalendarDays className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                                        <div>
+                                          <span className="font-medium text-foreground">{meeting.title}</span>
+                                          {meeting.objective && (
+                                            <span className="text-muted-foreground"> — {meeting.objective}</span>
+                                          )}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </button>
