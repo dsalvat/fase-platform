@@ -30,17 +30,18 @@ export function ActivityCard({
   isReadOnly = false,
   canEdit = true,
 }: ActivityCardProps) {
-  // Activity is editable only if its date is today or in the future
+  // Past activities can still be completed but not edited
   const activityDate = startOfDay(new Date(activity.date));
   const today = startOfDay(new Date());
   const isPastActivity = isBefore(activityDate, today);
-  const isActivityEditable = canEdit && !isReadOnly && !isPastActivity;
+  const canComplete = canEdit && !isReadOnly;
+  const canEditContent = canComplete && !isPastActivity;
   return (
     <Card
       className={cn(
         "transition-all",
         activity.completed && "bg-green-50 border-green-200",
-        (isReadOnly || isPastActivity) && "opacity-75"
+        isReadOnly && "opacity-75"
       )}
     >
       <CardContent className="p-4">
@@ -76,14 +77,16 @@ export function ActivityCard({
             )}
           </div>
 
-          {/* Actions - only for today or future activities */}
-          {isActivityEditable && (
+          {/* Actions: complete toggle always available in current month, edit only for today/future */}
+          {canComplete && (
             <div className="flex items-center gap-1">
-              <Link href={`/big-rocks/${bigRockId}/tars/${tarId}/activities/${activity.id}/edit`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </Link>
+              {canEditContent && (
+                <Link href={`/big-rocks/${bigRockId}/tars/${tarId}/activities/${activity.id}/edit`}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
               <ActivityCompletionToggle
                 activityId={activity.id}
                 initialCompleted={activity.completed}
