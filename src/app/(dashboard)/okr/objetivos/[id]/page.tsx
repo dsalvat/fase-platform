@@ -49,6 +49,17 @@ export default async function ObjectiveDetailPage({ params }: ObjectiveDetailPag
             },
             orderBy: { createdAt: "asc" },
           },
+          updates: {
+            select: {
+              id: true,
+              weekNumber: true,
+              previousValue: true,
+              newValue: true,
+              comment: true,
+              createdAt: true,
+            },
+            orderBy: { weekNumber: "asc" },
+          },
         },
         orderBy: { createdAt: "asc" },
       },
