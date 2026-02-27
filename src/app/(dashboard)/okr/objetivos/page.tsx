@@ -8,6 +8,82 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Target, Plus, ArrowLeft } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ObjectivesList({ objectives, t }: { objectives: any[]; t: any }) {
+  return (
+    <div className="space-y-4">
+      {objectives.map((objective) => (
+        <Link
+          key={objective.id}
+          href={`/okr/objetivos/${objective.id}`}
+          className="block"
+        >
+          <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="outline">{objective.team.name}</Badge>
+                  <Badge
+                    variant={
+                      objective.status === "COMPLETED"
+                        ? "default"
+                        : objective.status === "ACTIVE"
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
+                    {objective.status === "DRAFT"
+                      ? t("statusDraft")
+                      : objective.status === "ACTIVE"
+                      ? t("statusActive")
+                      : objective.status === "COMPLETED"
+                      ? t("statusCompleted")
+                      : t("statusCancelled")}
+                  </Badge>
+                </div>
+                <h3 className="font-medium">{objective.title}</h3>
+                {objective.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                    {objective.description}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground mt-2">
+                  {objective.keyResults.length} {t("keyResults")}
+                </p>
+              </div>
+              <div className="text-right">
+                <p
+                  className={`text-2xl font-bold ${
+                    objective.progress >= 70
+                      ? "text-green-600"
+                      : objective.progress >= 30
+                      ? "text-amber-600"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {Math.round(objective.progress)}%
+                </p>
+                <div className="w-24 h-2 bg-muted rounded-full mt-1">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      objective.progress >= 70
+                        ? "bg-green-500"
+                        : objective.progress >= 30
+                        ? "bg-amber-500"
+                        : "bg-muted-foreground"
+                    }`}
+                    style={{ width: `${objective.progress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default async function ObjectivesPage() {
   const user = await requireAuth();
   const companyId = await getCurrentCompanyId();
@@ -73,97 +149,58 @@ export default async function ObjectivesPage() {
         </Link>
       </div>
 
-      {/* Objectives List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("myObjectives")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {objectives.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{t("noObjectives")}</p>
-              <Link href="/okr/objetivos/nuevo">
-                <Button variant="outline" className="mt-4">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("newObjective")}
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {objectives.map((objective) => (
-                <Link
-                  key={objective.id}
-                  href={`/okr/objetivos/${objective.id}`}
-                  className="block"
-                >
-                  <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline">{objective.team.name}</Badge>
-                          <Badge
-                            variant={
-                              objective.status === "COMPLETED"
-                                ? "default"
-                                : objective.status === "ACTIVE"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {objective.status === "DRAFT"
-                              ? t("statusDraft")
-                              : objective.status === "ACTIVE"
-                              ? t("statusActive")
-                              : objective.status === "COMPLETED"
-                              ? t("statusCompleted")
-                              : t("statusCancelled")}
-                          </Badge>
-                        </div>
-                        <h3 className="font-medium">{objective.title}</h3>
-                        {objective.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                            {objective.description}
-                          </p>
-                        )}
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {objective.keyResults.length} {t("keyResults")}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p
-                          className={`text-2xl font-bold ${
-                            objective.progress >= 70
-                              ? "text-green-600"
-                              : objective.progress >= 30
-                              ? "text-amber-600"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {Math.round(objective.progress)}%
-                        </p>
-                        <div className="w-24 h-2 bg-muted rounded-full mt-1">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              objective.progress >= 70
-                                ? "bg-green-500"
-                                : objective.progress >= 30
-                                ? "bg-amber-500"
-                                : "bg-muted-foreground"
-                            }`}
-                            style={{ width: `${objective.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      {/* Split objectives: mine vs team */}
+      {(() => {
+        const myObjectives = objectives.filter((o) => o.ownerId === user.id);
+        const teamObjectives = objectives.filter((o) => o.ownerId !== user.id);
+
+        return objectives.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-12 text-muted-foreground">
+                <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>{t("noObjectives")}</p>
+                <Link href="/okr/objetivos/nuevo">
+                  <Button variant="outline" className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("newObjective")}
+                  </Button>
                 </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* My Objectives */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("myObjectives")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {myObjectives.length === 0 ? (
+                  <p className="text-center py-6 text-muted-foreground">
+                    No tienes objetivos propios en este trimestre.
+                  </p>
+                ) : (
+                  <ObjectivesList objectives={myObjectives} t={t} />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Team Objectives */}
+            {teamObjectives.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("teamObjectives")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ObjectivesList objectives={teamObjectives} t={t} />
+                </CardContent>
+              </Card>
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }
