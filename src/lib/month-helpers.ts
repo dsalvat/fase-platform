@@ -109,6 +109,28 @@ export function generateMonthOptions(
 }
 
 /**
+ * Generate an array of past month options (most recent first)
+ * @param count - Number of past months to generate (default: 6)
+ * @returns Array of {value, label} objects ordered from most recent to oldest
+ */
+export function generatePastMonthOptions(
+  count = 6
+): Array<{ value: string; label: string }> {
+  const options: Array<{ value: string; label: string }> = [];
+  let month = getCurrentMonth();
+
+  for (let i = 0; i < count; i++) {
+    month = getPreviousMonth(month);
+    options.push({
+      value: month,
+      label: formatMonthLabel(month),
+    });
+  }
+
+  return options;
+}
+
+/**
  * Check if a month is valid format (YYYY-MM)
  * @param month - Month string to validate
  * @returns true if valid format, false otherwise

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { toggleActivityCompletion } from "@/app/actions/activities";
 import { cn } from "@/lib/utils";
-import { Check, Circle } from "lucide-react";
+import { Check, Circle, Loader2 } from "lucide-react";
 
 interface ActivityCompletionToggleProps {
   activityId: string;
@@ -54,7 +54,9 @@ export function ActivityCompletionToggle({
         )}
         title={completed ? "Marcar como pendiente" : "Marcar como completada"}
       >
-        {completed ? (
+        {isPending ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : completed ? (
           <Check className="h-5 w-5" />
         ) : (
           <Circle className="h-5 w-5" />

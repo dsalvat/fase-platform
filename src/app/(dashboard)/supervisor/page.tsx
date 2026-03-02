@@ -32,6 +32,7 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
   const displayMonth = month || defaultMonth;
 
   const t = await getTranslations("supervisor");
+  const tBigRocks = await getTranslations("bigRocks");
 
   // Get supervisees with their planning status
   const supervisees = await getSuperviseesWithPlanningStatus(displayMonth);
@@ -47,7 +48,15 @@ export default async function SupervisorPage({ searchParams }: PageProps) {
       </div>
 
       {/* Month selector */}
-      <MonthSelector defaultMonth={defaultMonth} />
+      <MonthSelector
+        defaultMonth={defaultMonth}
+        translations={{
+          label: tBigRocks("monthSelectorLabel"),
+          pastMonths: tBigRocks("monthSelectorPast"),
+          currentAndFuture: tBigRocks("monthSelectorCurrentFuture"),
+          readOnly: tBigRocks("monthSelectorReadOnly"),
+        }}
+      />
 
       {/* Supervisees list */}
       {supervisees.length === 0 ? (

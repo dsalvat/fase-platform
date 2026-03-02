@@ -142,7 +142,15 @@ export default async function BigRocksPage({ searchParams }: PageProps) {
 
       {/* Month selector and planning status */}
       <div className="flex flex-col gap-4">
-        <MonthSelector defaultMonth={defaultMonth} />
+        <MonthSelector
+          defaultMonth={defaultMonth}
+          translations={{
+            label: t("monthSelectorLabel"),
+            pastMonths: t("monthSelectorPast"),
+            currentAndFuture: t("monthSelectorCurrentFuture"),
+            readOnly: t("monthSelectorReadOnly"),
+          }}
+        />
 
         {/* Planning status - show for current or future months */}
         {!isReadOnly && (
