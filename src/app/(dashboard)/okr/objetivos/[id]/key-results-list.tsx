@@ -29,8 +29,10 @@ import {
   Plus,
   History,
   CalendarClock,
+  Pencil,
 } from "lucide-react";
 import { deleteKeyResult, toggleKeyActivityComplete, createKeyResultUpdate, getKeyResultUpdates } from "@/app/actions/okr";
+import { EditKeyResultDialog } from "./edit-key-result-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -110,6 +112,7 @@ function KeyResultItem({
   const [isPending, startTransition] = useTransition();
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [updates, setUpdates] = useState<KeyResultUpdate[]>(keyResult.updates || []);
   const [newValue, setNewValue] = useState(keyResult.currentValue.toString());
   const [comment, setComment] = useState("");
@@ -199,7 +202,11 @@ function KeyResultItem({
                   <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                     Semana {currentWeekNumber}/12
                   </span>
-                  {currentWeekUpdate ? (
+                  {progress >= 100 ? (
+                    <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      100% completado
+                    </span>
+                  ) : currentWeekUpdate ? (
                     <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                       Al día
                     </span>
@@ -459,6 +466,15 @@ function KeyResultItem({
                 <Button
                   size="sm"
                   variant="ghost"
+                  onClick={() => setShowEditDialog(true)}
+                  disabled={isPending}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Editar
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
                   onClick={handleDelete}
                   disabled={isPending}
@@ -467,6 +483,15 @@ function KeyResultItem({
                   Eliminar
                 </Button>
               </div>
+            )}
+
+            {/* Edit Dialog */}
+            {canEdit && (
+              <EditKeyResultDialog
+                keyResult={keyResult}
+                open={showEditDialog}
+                onOpenChange={setShowEditDialog}
+              />
             )}
           </div>
         </CollapsibleContent>

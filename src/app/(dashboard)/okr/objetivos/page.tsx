@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Target, Plus, ArrowLeft } from "lucide-react";
+import { SortableObjectivesList } from "./sortable-objectives-list";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ObjectivesList({ objectives, t }: { objectives: any[]; t: any }) {
@@ -115,7 +116,7 @@ export default async function ObjectivesPage() {
           owner: { select: { id: true, name: true, image: true } },
           keyResults: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       })
     : [];
 
@@ -182,7 +183,16 @@ export default async function ObjectivesPage() {
                     No tienes objetivos propios en este trimestre.
                   </p>
                 ) : (
-                  <ObjectivesList objectives={myObjectives} t={t} />
+                  <SortableObjectivesList
+                    objectives={myObjectives}
+                    translations={{
+                      statusDraft: t("statusDraft"),
+                      statusActive: t("statusActive"),
+                      statusCompleted: t("statusCompleted"),
+                      statusCancelled: t("statusCancelled"),
+                      keyResults: t("keyResults"),
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>

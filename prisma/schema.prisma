@@ -636,6 +636,7 @@ model OKRObjective {
   indicator   String              // Métrica para medir éxito del objetivo
   status      OKRObjectiveStatus  @default(DRAFT)
   progress    Float               @default(0) // Porcentaje 0-100, calculado de Key Results
+  sortOrder   Int                 @default(0) // Orden personalizado por usuario
 
   // Relaciones
   quarterId   String

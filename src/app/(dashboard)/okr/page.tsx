@@ -85,7 +85,7 @@ export default async function OKRDashboardPage() {
             },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       })
     : [];
 

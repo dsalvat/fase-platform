@@ -340,6 +340,13 @@ export async function createObjective(data: {
   }
 
   try {
+    // Get max sortOrder for user's objectives to place new one at the end
+    const maxSort = await prisma.oKRObjective.aggregate({
+      where: { ownerId: user.id, quarterId: data.quarterId },
+      _max: { sortOrder: true },
+    });
+    const nextSortOrder = (maxSort._max.sortOrder ?? -1) + 1;
+
     const objective = await prisma.oKRObjective.create({
       data: {
         title: data.title,
@@ -350,6 +357,7 @@ export async function createObjective(data: {
         ownerId: user.id,
         status: OKRObjectiveStatus.DRAFT,
         progress: 0,
+        sortOrder: nextSortOrder,
       },
     });
 
@@ -1041,5 +1049,42 @@ export async function deleteKeyResultUpdate(updateId: string) {
   } catch (error) {
     console.error("Error deleting key result update:", error);
     return { success: false, error: "Failed to delete update" };
+  }
+}
+
+// ============================================
+// REORDER OBJECTIVES
+// ============================================
+
+export async function reorderObjectives(orderedIds: string[]) {
+  const user = await requireAuth();
+
+  try {
+    // Verify all objectives belong to the current user
+    const objectives = await prisma.oKRObjective.findMany({
+      where: { id: { in: orderedIds }, ownerId: user.id },
+      select: { id: true },
+    });
+
+    if (objectives.length !== orderedIds.length) {
+      return { success: false, error: "Some objectives were not found or don't belong to you." };
+    }
+
+    // Update sortOrder for each objective in a transaction
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.oKRObjective.update({
+          where: { id },
+          data: { sortOrder: index },
+        })
+      )
+    );
+
+    revalidatePath("/okr");
+    revalidatePath("/okr/objetivos");
+    return { success: true };
+  } catch (error) {
+    console.error("Error reordering objectives:", error);
+    return { success: false, error: "Failed to reorder objectives" };
   }
 }
